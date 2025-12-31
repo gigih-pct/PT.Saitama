@@ -27,7 +27,6 @@
         <!-- User Profile Right -->
         <x-header-profile />
     </header>
-    </header>
 
     <!-- SIDEBAR -->
     <aside class="fixed top-14 left-0 bottom-0 w-64 bg-white border-r border-gray-200 z-40 flex flex-col">

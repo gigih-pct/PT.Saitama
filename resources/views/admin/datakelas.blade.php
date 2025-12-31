@@ -23,52 +23,62 @@
     </div>
 
     <!-- SEARCH & FILTER BAR -->
-    <form method="GET" action="{{ route('admin.datakelas') }}" class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100">
-        <div class="flex flex-col md:flex-row gap-4 items-center">
+    <form method="GET" action="{{ route('admin.datakelas') }}" class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 mb-6">
+        <div class="flex flex-col xl:flex-row gap-4 items-center">
             <!-- Search Input -->
             <div class="relative flex-1 w-full">
                 <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau email siswa..." 
-                       class="w-full bg-[#F8FAFC] border-none rounded-2xl pl-11 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#173A67]/20 transition-all">
+                       class="w-full bg-[#F8FAFC] border-none rounded-2xl pl-11 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#173A67]/20 transition-all placeholder:text-gray-400">
             </div>
 
-            <!-- Status Filter -->
-            <div class="relative w-full md:w-48">
-                <select name="status" onchange="this.form.submit()"
-                        class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
-                    <option value="">Semua Status</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                </select>
-                <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
-            </div>
+            <div class="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
+                <!-- Status Filter -->
+                <div class="relative w-full md:w-40">
+                    <select name="status" onchange="this.form.submit()"
+                            class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                        <option value="">Semua Status</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                </div>
 
-            <!-- Class Filter -->
-            <div class="relative w-full md:w-48">
-                <select name="kelas_id" onchange="this.form.submit()"
-                        class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
-                    <option value="">Semua Kelas</option>
-                    <option value="unassigned" {{ request('kelas_id') == 'unassigned' ? 'selected' : '' }}>Belum Dikelas</option>
-                    @foreach($kelases as $kelas)
-                        <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                            {{ $kelas->nama_kelas }} ({{ $kelas->users_count }}/{{ $kelas->kapasitas }})
-                        </option>
-                    @endforeach
-                </select>
-                <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                <!-- Class Filter -->
+                <div class="relative w-full md:w-48">
+                    <select name="kelas_id" onchange="this.form.submit()"
+                            class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                        <option value="">Semua Kelas</option>
+                        <option value="unassigned" {{ request('kelas_id') == 'unassigned' ? 'selected' : '' }}>Belum Dikelas</option>
+                        @foreach($kelases as $kelas)
+                            <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                {{ $kelas->nama_kelas }} ({{ $kelas->users_count }}/{{ $kelas->kapasitas }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                </div>
+
+                <!-- Per Page Filter -->
+                <div class="relative w-full md:w-28">
+                    <select name="per_page" onchange="this.form.submit()"
+                            class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                        <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20 Item</option>
+                        <option value="30" {{ request('per_page') == 30 ? 'selected' : '' }}>30 Item</option>
+                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 Item</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                </div>
             </div>
 
             <!-- Reset Button -->
-            @if(request()->hasAny(['status', 'kelas_id', 'search']))
+            @if(request()->hasAny(['status', 'kelas_id', 'search', 'per_page']))
             <a href="{{ route('admin.datakelas') }}" 
                class="bg-gray-100 text-gray-600 px-5 py-3 rounded-2xl text-xs font-extrabold flex items-center gap-2 hover:bg-gray-200 transition-all whitespace-nowrap">
                 <i data-lucide="x" class="w-4 h-4"></i>
                 Reset
             </a>
             @endif
-
-            <div class="h-8 w-[1px] bg-gray-100 mx-2 hidden md:block"></div>
-            <span class="text-xs font-bold text-gray-400 whitespace-nowrap hidden md:block">Total: {{ $students->total() }} Siswa</span>
         </div>
     </form>
 
@@ -90,90 +100,187 @@
     </div>
     @endif
 
-    <!-- STUDENT LIST -->
-    <div class="space-y-4">
-        @forelse ($students as $student)
-        <div class="group bg-white rounded-3xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-100 transition-all duration-300">
-            <!-- Left: Info -->
-            <div class="flex items-center gap-5">
-                <div class="w-12 h-12 rounded-2xl bg-[#173A67]/5 flex items-center justify-center text-[#173A67] font-bold text-lg">
-                    {{ strtoupper(substr($student->name, 0, 1)) }}
-                </div>
-                <div>
-                    <h4 class="text-[#173A67] font-extrabold text-base">{{ $student->name }}</h4>
-                    <p class="text-xs text-gray-400 font-bold mt-0.5">{{ $student->email }}</p>
-                </div>
-            </div>
+    <!-- STUDENT LIST TABLE -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Siswa</th>
+                        <th class="px-6 py-4 text-left text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Kontak</th>
+                        <th class="px-6 py-4 text-left text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Kelas</th>
+                        <th class="px-6 py-4 text-center text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-right text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse ($students as $student)
+                    <tr class="group hover:bg-gray-50/50 transition-colors">
+                        <!-- SISWA -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-[#173A67]/10 text-[#173A67] flex items-center justify-center font-bold text-sm">
+                                    {{ strtoupper(substr($student->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <h4 class="text-[#173A67] font-extrabold text-sm">{{ $student->name }}</h4>
+                                </div>
+                            </div>
+                        </td>
 
-            <!-- Center: Class Assignment or Approval -->
-            <div class="flex-1 max-w-xs">
-                @if($student->status == 'approved')
-                    <form action="{{ route('admin.siswa.assign_class', $student->id) }}" method="POST">
-                        @csrf
-                        <div class="relative">
-                            <select name="kelas_id" onchange="this.form.submit()" 
-                                    class="w-full bg-[#F8FAFC] border border-gray-100 rounded-2xl px-5 py-2.5 text-[13px] font-extrabold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/10 focus:border-[#173A67]/20 appearance-none transition-all cursor-pointer">
-                                <option value="" disabled {{ is_null($student->kelas_id) ? 'selected' : '' }}>Pilih Kelas</option>
-                                @foreach($kelases as $kelas)
-                                    <option value="{{ $kelas->id }}" {{ $student->kelas_id == $kelas->id ? 'selected' : '' }}>
-                                        {{ $kelas->nama_kelas }} ({{ $kelas->users_count }}/{{ $kelas->kapasitas }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
-                        </div>
-                    </form>
-                @else
-                    <div class="flex items-center gap-3">
-                        <form action="{{ route('admin.siswa.approve', $student->id) }}" method="POST" class="w-full">
-                            @csrf
-                            <button type="submit" 
-                                    class="w-full bg-[#22C55E] text-white py-2.5 rounded-2xl text-[11px] font-extrabold shadow-sm hover:translate-y-[-2px] hover:shadow-md transition-all active:scale-95 uppercase tracking-widest">
-                                Setujui Siswa
-                            </button>
-                        </form>
-                    </div>
-                @endif
-            </div>
+                        <!-- KONTAK -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-gray-600">{{ $student->email }}</span>
+                                <span class="text-[10px] font-bold text-gray-400 mt-0.5">
+                                    {{ $student->no_wa_pribadi ?? '-' }}
+                                </span>
+                            </div>
+                        </td>
 
-            <!-- Right: Action Buttons -->
-            <div class="flex items-center gap-2 lg:justify-end">
-                <button class="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-[#173A67] hover:text-white transition-all shadow-sm" title="Pesan WhatsApp">
-                    <i data-lucide="message-circle" class="w-4 h-4"></i>
-                </button>
-                <a href="{{ route('admin.siswa.edit', $student->id) }}" 
-                   class="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-[#D85B63] hover:text-white transition-all shadow-sm flex items-center justify-center" 
-                   title="Edit / Detail Siswa">
-                    <i data-lucide="edit" class="w-4 h-4"></i>
-                </a>
-                <form action="{{ route('admin.siswa.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data siswa ini? Ini akan menghapus akun siswa secara permanen.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-[#D85B63] hover:text-white transition-all shadow-sm" title="Hapus Siswa">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                </form>
-                <div class="h-6 w-[1px] bg-gray-100 mx-1"></div>
-                @if($student->status == 'approved')
-                    <button class="bg-[#22C55E]/10 text-[#22C55E] px-4 py-2.5 rounded-xl text-[11px] font-extrabold hover:bg-[#22C55E] hover:text-white transition-all uppercase">
-                        Aktif
-                    </button>
-                @else
-                    <button class="bg-yellow-100/50 text-yellow-600 px-4 py-2.5 rounded-xl text-[11px] font-extrabold cursor-default uppercase">
-                        Pending
-                    </button>
-                @endif
-            </div>
+                        <!-- KELAS -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($student->status == 'approved')
+                                <form action="{{ route('admin.siswa.assign_class', $student->id) }}" method="POST" class="min-w-[140px]">
+                                    @csrf
+                                    <div class="relative group/select">
+                                        <select name="kelas_id" onchange="this.form.submit()" 
+                                                class="w-full bg-transparent border-transparent rounded-lg py-1.5 pl-2 pr-8 text-xs font-bold text-[#173A67] focus:ring-0 focus:border-transparent cursor-pointer hover:bg-white hover:shadow-sm transition-all">
+                                            <option value="" disabled {{ is_null($student->kelas_id) ? 'selected' : '' }}>Pilih Kelas</option>
+                                            @foreach($kelases as $kelas)
+                                                <option value="{{ $kelas->id }}" {{ $student->kelas_id == $kelas->id ? 'selected' : '' }}>
+                                                    {{ $kelas->nama_kelas }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i data-lucide="chevron-down" class="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none"></i>
+                                    </div>
+                                </form>
+                            @else
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-[10px] font-bold">Menunggu Persetujuan</span>
+                            @endif
+                        </td>
+
+                        <!-- STATUS -->
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            @if($student->status == 'approved')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold bg-green-50 text-green-600 border border-green-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                    AKTIF
+                                </span>
+                            @else
+                                <form action="{{ route('admin.siswa.approve', $student->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1.5 rounded-lg text-[10px] font-extrabold bg-[#173A67] text-white hover:bg-[#1e4a7a] transition-colors shadow-sm shadow-blue-900/10">
+                                        Setujui
+                                    </button>
+                                </form>
+                            @endif
+                        </td>
+
+                        <!-- AKSI -->
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <!-- WhatsApp Popup -->
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" @click.outside="open = false" 
+                                            class="p-2 rounded-lg text-gray-400 hover:text-[#25D366] hover:bg-green-50 transition-colors"
+                                            title="WhatsApp">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    </button>
+
+                                    <!-- Dropdown Menu -->
+                                    <div x-show="open" 
+                                         class="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50 text-left animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+                                         style="display: none;">
+                                        <p class="px-3 py-1.5 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-50 mb-1">Pilih Kontak</p>
+                                        
+                                        <!-- Siswa -->
+                                        @if($student->no_wa_pribadi)
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', str_replace('+', '', (str_starts_with($student->no_wa_pribadi, '0') ? '62' . substr($student->no_wa_pribadi, 1) : $student->no_wa_pribadi))) }}" 
+                                           target="_blank"
+                                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#25D366]/10 hover:text-[#25D366] transition-all group/wa">
+                                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover/wa:bg-white transition-colors">
+                                                <i data-lucide="user" class="w-4 h-4 text-gray-400 group-hover/wa:text-[#25D366]"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-[11px] font-bold text-gray-700">Siswa</span>
+                                                <span class="text-[9px] font-bold text-gray-400">{{ $student->no_wa_pribadi }}</span>
+                                            </div>
+                                        </a>
+                                        @else
+                                        <div class="flex items-center gap-3 px-3 py-2.5 opacity-50 cursor-not-allowed grayscale">
+                                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                                                <i data-lucide="user" class="w-4 h-4 text-gray-300"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-[11px] font-bold text-gray-400">Siswa</span>
+                                                <span class="text-[9px] font-bold text-gray-300">Belum ada nomor</span>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <!-- Orang Tua -->
+                                        @if($student->wa_orang_tua)
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', str_replace('+', '', (str_starts_with($student->wa_orang_tua, '0') ? '62' . substr($student->wa_orang_tua, 1) : $student->wa_orang_tua))) }}" 
+                                           target="_blank"
+                                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#25D366]/10 hover:text-[#25D366] transition-all group/wa">
+                                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover/wa:bg-white transition-colors">
+                                                <i data-lucide="users" class="w-4 h-4 text-gray-400 group-hover/wa:text-[#25D366]"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-[11px] font-bold text-gray-700">Orang Tua</span>
+                                                <span class="text-[9px] font-bold text-gray-400">{{ $student->wa_orang_tua }}</span>
+                                            </div>
+                                        </a>
+                                        @else
+                                        <div class="flex items-center gap-3 px-3 py-2.5 opacity-50 cursor-not-allowed grayscale">
+                                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                                                <i data-lucide="users" class="w-4 h-4 text-gray-300"></i>
+                                            </div>
+                                            <div class="flex flex-col">
+                                                <span class="text-[11px] font-bold text-gray-400">Orang Tua</span>
+                                                <span class="text-[9px] font-bold text-gray-300">Belum ada nomor</span>
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <a href="{{ route('admin.siswa.edit', $student->id) }}" 
+                                   class="p-2 rounded-lg text-gray-400 hover:text-[#173A67] hover:bg-blue-50 transition-colors"
+                                   title="Edit Siswa">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </a>
+                                <form action="{{ route('admin.siswa.destroy', $student->id) }}" method="POST" 
+                                      onsubmit="return confirm('Hapus data siswa ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                            title="Hapus Siswa">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                    <i data-lucide="search-x" class="w-8 h-8 text-gray-300"></i>
+                                </div>
+                                <h5 class="text-gray-500 font-bold mb-1">Data tidak ditemukan</h5>
+                                <p class="text-xs text-gray-400">Coba ubah filter pencarian Anda.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        @empty
-        <div class="bg-white rounded-3xl p-12 text-center shadow-sm border border-dashed border-gray-200">
-            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="users" class="w-8 h-8 text-gray-300"></i>
-            </div>
-            <h5 class="text-gray-500 font-bold">Belum ada siswa yang disetujui.</h5>
-            <p class="text-xs text-gray-400 mt-1">Cek pengajuan siswa baru untuk menambah daftar ini.</p>
-        </div>
-        @endforelse
     </div>
 
     <!-- PAGINATION -->

@@ -1,14 +1,14 @@
 @extends('layouts.header_dashboard_admin')
 
 @section('content')
-<div class="flex flex-col h-[calc(100vh-6rem)] space-y-6">
+<div class="flex flex-col space-y-6 pb-6">
     
-    <!-- TOP SECTION (Row 1) - Fixed Height -->
-    <div class="grid grid-cols-12 gap-6 h-[280px] shrink-0">
+    <!-- TOP SECTION (Row 1) -->
+    <div class="grid grid-cols-12 gap-6">
         
         <!-- PROFILE CARD (Left - 3 Columns) -->
-        <div class="col-span-12 lg:col-span-4 h-full">
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 h-full relative overflow-hidden flex flex-col items-center text-center justify-center group">
+        <div class="col-span-12 lg:col-span-4">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col items-center text-center justify-center group h-full min-h-[280px]">
                 <!-- Background Decoration -->
                 <div class="absolute top-0 left-0 w-full h-24 bg-[#173A67]"></div>
                 
@@ -35,7 +35,7 @@
         </div>
 
         <!-- STATS OVERVIEW (Right - 8 Columns) -->
-        <div class="col-span-12 lg:col-span-8 h-full">
+        <div class="col-span-12 lg:col-span-8">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
                 
                 <!-- Stat 1 -->
@@ -117,21 +117,10 @@
 
             <!-- Chart Container -->
             <div id="trendChart" class="flex-1 w-full min-h-0"></div>
-            
-            <!-- DEBUG: Temporary data check -->
-            @if(app()->environment('local'))
-            <div class="hidden">
-                JSON Data Check: {{ json_encode(array_slice($trend_data, -5)) }}
-            </div>
-            @endif
         </div>
     </div>
 
     <script>
-        document.addEventListener('alpine:init', () => {
-             console.log('Alpine initialized');
-        });
-
         function registrationTrendData() {
             return {
                 allData: @json($trend_data), 
@@ -139,14 +128,6 @@
                 chart: null,
 
                 init() {
-                    console.log('Component Init', this.allData);
-                    if (!this.allData || this.allData.length === 0) {
-                        console.error('No data found!');
-                    }
-                    if (typeof ApexCharts === 'undefined') {
-                        console.error('ApexCharts is not defined! Check app.js imports.');
-                    }
-
                     this.$nextTick(() => {
                         this.renderChart();
                     });
@@ -178,8 +159,9 @@
                             data: data.map(d => d.count)
                         }],
                         chart: {
-                            type: 'area', // Area chart looks nice for trends
+                            type: 'area', 
                             height: '100%',
+                            parentHeightOffset: 0, // Fix for scrollbar/overflow issues
                             fontFamily: 'Nunito, sans-serif',
                             toolbar: { show: false },
                             animations: {
@@ -279,15 +261,16 @@
             }
         }
     </script>
-    <div class="grid grid-cols-12 gap-6 flex-1 min-h-0">
+    <!-- BOTTOM SECTION (Row 3) -->
+    <div class="grid grid-cols-12 gap-6">
         
         <!-- LATEST PENDAFTARAN -->
-        <div class="col-span-12 lg:col-span-6 h-full">
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
+        <div class="col-span-12 lg:col-span-6">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
                 <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between shrink-0">
                     <h3 class="text-[#173A67] font-extrabold text-sm flex items-center gap-2">
                         <i data-lucide="file-text" class="w-4 h-4 text-red-500"></i>
-                        Pendaftaran Terbaru
+                        Pengajuan Berkas Pendaftaran
                     </h3>
                     <a href="{{ route('admin.berkaspendaftaran') }}" class="text-[10px] font-bold text-gray-400 hover:text-[#173A67] uppercase tracking-wider">Lihat Semua</a>
                 </div>
@@ -321,12 +304,12 @@
         </div>
 
         <!-- LATEST SELEKSI -->
-        <div class="col-span-12 lg:col-span-6 h-full">
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
+        <div class="col-span-12 lg:col-span-6">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
                 <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between shrink-0">
                     <h3 class="text-[#173A67] font-extrabold text-sm flex items-center gap-2">
                         <i data-lucide="clipboard-check" class="w-4 h-4 text-purple-500"></i>
-                        Seleksi Terbaru
+                        Pengajuan Berkas Seleksi
                     </h3>
                     <a href="{{ route('admin.berkasseleksi') }}" class="text-[10px] font-bold text-gray-400 hover:text-[#173A67] uppercase tracking-wider">Lihat Semua</a>
                 </div>

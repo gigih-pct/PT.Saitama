@@ -53,10 +53,18 @@ class StudentSeeder extends Seeder
         ];
 
         foreach ($fixedStudents as $student) {
-            User::updateOrCreate(
+            $user = User::updateOrCreate(
                 ['email' => $student['email']],
                 $student
             );
+            // Randomize created_at for these specific test users too if needed, or keep them recent. 
+            // Let's randomize all students significantly to show data.
         }
+
+        // Randomize timestamps for all students
+        User::where('role', 'siswa')->each(function ($user) {
+            $user->created_at = now()->subDays(rand(0, 365));
+            $user->save();
+        });
     }
 }

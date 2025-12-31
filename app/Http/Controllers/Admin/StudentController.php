@@ -19,6 +19,15 @@ class StudentController extends Controller
             ->whereIn('status', ['approved', 'pending'])
             ->with('kelas');
 
+        // Search Filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -33,10 +42,16 @@ class StudentController extends Controller
             }
         }
 
+        $perPage = $request->input('per_page', 20); // Default 20
+        $allowedPerPage = [20, 30, 100];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 20;
+        }
+
         $students = $query->orderBy('status', 'desc')
             ->orderBy('name')
-            ->paginate(50)
-            ->appends($request->except('page'));
+            ->paginate($perPage)
+            ->appends($request->all()); // Appends all current query params
             
         $kelases = Kelas::withCount('users')->get();
 
@@ -174,7 +189,7 @@ class StudentController extends Controller
             'wa_orang_tua' => $request->wa_orang_tua,
         ]);
 
-        return back()->with('success', 'Data siswa ' . $user->name . ' berhasil diperbarui.');
+        return redirect()->route('admin.datakelas')->with('success', 'Data siswa ' . $user->name . ' berhasil diperbarui.');
     }
 
     /**
