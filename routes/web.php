@@ -560,8 +560,10 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     // Admin protected routes
     use App\Http\Controllers\Admin\StudentController;
     use App\Http\Controllers\Admin\KelasController;
+    use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
     Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::put('/profile', [AdminDashboardController::class, 'updateProfile'])->name('profile.update');
         
         // Kelas Management
         Route::resource('kelas', KelasController::class);
@@ -569,8 +571,6 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
         Route::get('/data-kelas', [StudentController::class, 'index'])->name('datakelas');
         Route::get('/siswa/create', [StudentController::class, 'create'])->name('siswa.create');
         Route::post('/siswa/store', [StudentController::class, 'store'])->name('siswa.store');
-        Route::get('/berkas-pendaftaran', fn () => view('admin.berkaspendaftaran'))->name('berkaspendaftaran');
-        Route::get('/berkas-seleksi', fn () => view('admin.berkasseleksi'))->name('berkasseleksi');
         Route::get('/pengajuan-siswa', [StudentController::class, 'submissions'])->name('pengajuansiswa');
         Route::post('/siswa/{id}/approve', [StudentController::class, 'approve'])->name('siswa.approve');
         Route::post('/siswa/{id}/assign-class', [StudentController::class, 'assignClass'])->name('siswa.assign_class');
@@ -580,7 +580,8 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
         Route::get('/detail-pemberkasan', fn () => view('admin.detailpemberkasan'))->name('detailpemberkasan');
         
         // Berkas Management
-        Route::get('/berkas-pendaftaran', [\App\Http\Controllers\Admin\BerkasController::class, 'index'])->name('berkaspendaftaran');
+        Route::get('/berkas-pendaftaran', [\App\Http\Controllers\Admin\BerkasController::class, 'pendaftaran'])->name('berkaspendaftaran');
+        Route::get('/berkas-seleksi', [\App\Http\Controllers\Admin\BerkasController::class, 'seleksi'])->name('berkasseleksi');
         Route::post('/berkas/{id}/approve', [\App\Http\Controllers\Admin\BerkasController::class, 'approve'])->name('berkas.approve');
         Route::post('/berkas/{id}/reject', [\App\Http\Controllers\Admin\BerkasController::class, 'reject'])->name('berkas.reject');
         Route::get('/berkas/download/{id}', [\App\Http\Controllers\Admin\BerkasController::class, 'download'])->name('berkas.download');

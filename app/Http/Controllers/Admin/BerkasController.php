@@ -13,10 +13,29 @@ class BerkasController extends Controller
     /**
      * Display a listing of submitted berkas.
      */
-    public function index(Request $request)
+    /**
+     * Display pendaftaran documents.
+     */
+    public function pendaftaran(Request $request)
+    {
+        return $this->getBerkas($request, 'pendaftaran', 'admin.berkaspendaftaran');
+    }
+
+    /**
+     * Display seleksi documents.
+     */
+    public function seleksi(Request $request)
+    {
+        return $this->getBerkas($request, 'seleksi', 'admin.berkasseleksi');
+    }
+
+    /**
+     * Common logic for fetching berkas.
+     */
+    private function getBerkas(Request $request, $type, $view)
     {
         $query = Berkas::with(['user'])
-            ->where('jenis_berkas', 'pendaftaran');
+            ->where('jenis_berkas', $type);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -28,9 +47,9 @@ class BerkasController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        // Filter by document type
+        // Filter by document name (optional extra filter)
         if ($request->filled('nama_berkas')) {
-            $query->where('nama_berkas', $request->nama_berkas);
+            $query->where('nama_berkas', 'like', '%' . $request->nama_berkas . '%');
         }
 
         $berkas = $query->orderBy('uploaded_at', 'desc')
@@ -39,7 +58,15 @@ class BerkasController extends Controller
 
         $users = \App\Models\User::where('role', 'siswa')->get();
 
-        return view('admin.berkaspendaftaran', compact('berkas', 'users'));
+        return view($view, compact('berkas', 'users'));
+    }
+
+    /**
+     * Display a listing (Generic fallback or redirect).
+     */
+    public function index(Request $request)
+    {
+        return redirect()->route('admin.berkaspendaftaran');
     }
 
     /**
