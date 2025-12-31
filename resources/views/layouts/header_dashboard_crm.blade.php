@@ -11,7 +11,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-[#F3F4F6]">
+<body class="bg-gray-50">
 
     <!-- HEADER -->
     <header class="fixed top-0 left-0 w-full h-16 bg-[#173A67] flex items-center justify-between px-6 z-50 shadow-sm text-white">
@@ -27,7 +27,6 @@
         <!-- User Profile -->
         <x-header-profile />
     </header>
-    </header>
 
     <!-- WRAPPER -->
     <div class="flex pt-16 min-h-screen">
@@ -42,5 +41,6 @@
 
     </div>
 
+    @stack('scripts')
 </body>
 </html>

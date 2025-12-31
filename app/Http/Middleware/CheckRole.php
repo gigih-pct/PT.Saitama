@@ -14,9 +14,10 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        $user = Auth::user();
+        // Try to get user from default guard, then admin guard
+        $user = Auth::user() ?: Auth::guard('admin')->user();
+
         if (!$user) {
-            // if not logged in, deny
             abort(403);
         }
 
