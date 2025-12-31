@@ -25,22 +25,8 @@
         </div>
 
         <!-- User Profile -->
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-                <span class="font-medium text-sm">{{ Auth::user()->name ?? 'Keuangan' }}</span>
-                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
-                    {{ substr(Auth::user()->name ?? 'K', 0, 1) }}
-                </div>
-            </div>
-            
-            <!-- Logout Button -->
-            <form method="POST" action="{{ route('keuangan.logout') }}" class="flex items-center border-l border-white/20 pl-4 h-6">
-                @csrf
-                <button type="submit" class="text-white hover:text-red-300 transition-colors" title="Logout">
-                    <i data-lucide="log-out" class="w-4 h-4"></i>
-                </button>
-            </form>
-        </div>
+        <x-header-profile />
+    </header>
     </header>
 
     <!-- WRAPPER -->
