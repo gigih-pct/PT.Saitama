@@ -169,7 +169,9 @@
             </div>
 
             <!-- Chart Container -->
-            <div id="trendChart" class="flex-1 w-full min-h-0"></div>
+            <div class="flex-1 w-full min-h-0 relative">
+                <canvas id="trendChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -178,7 +180,6 @@
             return {
                 allData: @json($trend_data), 
                 range: '1Y', 
-                chart: null,
 
                 init() {
                     this.$nextTick(() => {
@@ -198,117 +199,122 @@
                         '1Y': 365
                     };
                     const limit = daysMap[this.range] || 365;
-                    
-                    // Slice from end (latest dates)
                     return this.allData.slice(-limit);
                 },
 
                 renderChart() {
-                    const data = this.getFilteredData();
-                    
-                    const options = {
-                        series: [{
-                            name: 'Siswa Baru',
-                            data: data.map(d => d.count)
-                        }],
-                        chart: {
-                            type: 'area', 
-                            height: '100%',
-                            parentHeightOffset: 0, // Fix for scrollbar/overflow issues
-                            fontFamily: 'Nunito, sans-serif',
-                            toolbar: { show: false },
-                            animations: {
-                                enabled: true,
-                                easing: 'easeinout',
-                                speed: 800
-                            }
-                        },
-                        colors: ['#173A67'],
-                        fill: {
-                            type: 'gradient',
-                            gradient: {
-                                shadeIntensity: 1,
-                                opacityFrom: 0.7,
-                                opacityTo: 0.1, // Fade out at bottom
-                                stops: [0, 90, 100]
-                            }
-                        },
-                        stroke: {
-                            curve: 'smooth',
-                            width: 3
-                        },
-                        dataLabels: {
-                            enabled: false
-                        },
-                        xaxis: {
-                            type: 'datetime',
-                            categories: data.map(d => d.date),
-                            tooltip: { enabled: false },
-                            axisBorder: { show: false },
-                            axisTicks: { show: false },
-                            labels: {
-                                style: {
-                                    fontSize: '11px',
-                                    fontWeight: 700,
-                                    colors: '#9CA3AF'
-                                },
-                                datetimeFormatter: {
-                                    year: 'yyyy',
-                                    month: 'MMM \'yy',
-                                    day: 'dd MMM'
-                                }
-                            }
-                        },
-                        yaxis: {
-                            show: true,
-                            labels: {
-                                style: {
-                                    fontSize: '11px',
-                                    fontWeight: 700,
-                                    colors: '#9CA3AF'
-                                },
-                                formatter: (val) => val.toFixed(0) // No decimals for people count
-                            }
-                        },
-                        grid: {
-                            show: true,
-                            borderColor: '#F3F4F6',
-                            strokeDashArray: 4,
-                            padding: {
-                                top: 10,
-                                right: 10,
-                                bottom: 0,
-                                left: 10
-                            } 
-                        },
-                        tooltip: {
-                            theme: 'light',
-                            x: {
-                                format: 'dd MMM yyyy'
-                            },
-                        }
-                    };
+                    const canvas = document.getElementById('trendChart');
+                    if (!canvas) return;
 
-                    if (window.ApexCharts) {
-                        this.chart = new ApexCharts(document.querySelector("#trendChart"), options);
-                        this.chart.render();
+                    const ctx = canvas.getContext('2d');
+                    const filteredData = this.getFilteredData();
+
+                    // Create Gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, 'rgba(23, 58, 103, 0.2)');
+                    gradient.addColorStop(1, 'rgba(23, 58, 103, 0.0)');
+
+                    // Use canvas._chart to avoid Alpine reactivity loop
+                    if (canvas._chart) {
+                        canvas._chart.destroy();
                     }
+
+                    canvas._chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: filteredData.map(d => {
+                                const date = new Date(d.date);
+                                return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+                            }),
+                            datasets: [{
+                                label: 'Siswa Baru',
+                                data: filteredData.map(d => d.count),
+                                borderColor: '#173A67',
+                                borderWidth: 3,
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 6,
+                                pointHoverBackgroundColor: '#173A67',
+                                pointHoverBorderColor: '#fff',
+                                pointHoverBorderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: '#fff',
+                                    titleColor: '#173A67',
+                                    bodyColor: '#6B7280',
+                                    borderColor: '#F3F4F6',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    boxPadding: 4,
+                                    usePointStyle: true,
+                                    callbacks: {
+                                        title: function(context) {
+                                            const d = filteredData[context[0].dataIndex];
+                                            return new Date(d.date).toLocaleDateString('id-ID', { 
+                                                day: '2-digit', 
+                                                month: 'long', 
+                                                year: 'numeric' 
+                                            });
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: {
+                                        maxRotation: 0,
+                                        autoSkip: true,
+                                        maxTicksLimit: 12,
+                                        font: { size: 10, weight: '700' },
+                                        color: '#9CA3AF'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#F3F4F6',
+                                        drawBorder: false,
+                                        borderDash: [4, 4]
+                                    },
+                                    ticks: {
+                                        stepSize: 1,
+                                        font: { size: 10, weight: '700' },
+                                        color: '#9CA3AF'
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            }
+                        }
+                    });
                 },
 
                 updateChart() {
-                    const data = this.getFilteredData();
-                    if (this.chart) {
-                        this.chart.updateSeries([{
-                            data: data.map(d => d.count)
-                        }]);
-                        // Must also update categories for xaxis if not automatically handled by series update with correct X pairings?
-                        // ApexCharts 'datetime' axis usually handles it better if we provide pairings or update options.
-                        // Let's safe update options.
-                        this.chart.updateOptions({
-                             xaxis: {
-                                categories: data.map(d => d.date)
-                            }
+                    const canvas = document.getElementById('trendChart');
+                    const chart = canvas ? canvas._chart : null;
+                    const filteredData = this.getFilteredData();
+                    
+                    if (chart) {
+                        chart.data.labels = filteredData.map(d => {
+                            const date = new Date(d.date);
+                            return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
                         });
+                        chart.data.datasets[0].data = filteredData.map(d => d.count);
+                        chart.update('none');
                     }
                 }
             }
