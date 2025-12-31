@@ -24,6 +24,8 @@ class User extends Authenticatable
         'role',
         'status',
         'kelas_id',
+        'no_wa_pribadi',
+        'wa_orang_tua',
     ];
 
     /**

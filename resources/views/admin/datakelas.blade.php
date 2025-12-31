@@ -141,9 +141,11 @@
                 <button class="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-[#173A67] hover:text-white transition-all shadow-sm" title="Pesan WhatsApp">
                     <i data-lucide="message-circle" class="w-4 h-4"></i>
                 </button>
-                <button class="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-[#D85B63] hover:text-white transition-all shadow-sm" title="Detail Siswa">
-                    <i data-lucide="eye" class="w-4 h-4"></i>
-                </button>
+                <a href="{{ route('admin.siswa.edit', $student->id) }}" 
+                   class="bg-gray-50 text-gray-400 p-2.5 rounded-xl hover:bg-[#D85B63] hover:text-white transition-all shadow-sm flex items-center justify-center" 
+                   title="Edit / Detail Siswa">
+                    <i data-lucide="edit" class="w-4 h-4"></i>
+                </a>
                 <form action="{{ route('admin.siswa.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data siswa ini? Ini akan menghapus akun siswa secara permanen.')">
                     @csrf
                     @method('DELETE')

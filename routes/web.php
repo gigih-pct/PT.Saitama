@@ -574,6 +574,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
         Route::get('/pengajuan-siswa', [StudentController::class, 'submissions'])->name('pengajuansiswa');
         Route::post('/siswa/{id}/approve', [StudentController::class, 'approve'])->name('siswa.approve');
         Route::post('/siswa/{id}/assign-class', [StudentController::class, 'assignClass'])->name('siswa.assign_class');
+        Route::get('/siswa/{id}/edit', [StudentController::class, 'edit'])->name('siswa.edit');
         Route::put('/siswa/{id}', [StudentController::class, 'update'])->name('siswa.update');
         Route::post('/siswa/{id}/remove-from-class', [StudentController::class, 'removeFromClass'])->name('siswa.remove_from_class');
         Route::delete('/siswa/{id}', [StudentController::class, 'destroy'])->name('siswa.destroy');

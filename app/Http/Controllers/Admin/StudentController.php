@@ -82,7 +82,11 @@ class StudentController extends Controller
      */
     public function create()
     {
-        return view('admin.siswa.create');
+        $pendingStudents = User::where('role', 'siswa')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('admin.siswa.create', compact('pendingStudents'));
     }
 
     /**
@@ -90,10 +94,31 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if selecting from pending list
+        if ($request->filled('pending_id')) {
+            $request->validate([
+                'pending_id' => 'required|exists:users,id',
+                'no_wa_pribadi' => 'nullable|string|max:20',
+                'wa_orang_tua' => 'nullable|string|max:20',
+            ]);
+
+            $user = User::findOrFail($request->pending_id);
+            $user->update([
+                'status' => 'approved',
+                'no_wa_pribadi' => $request->no_wa_pribadi,
+                'wa_orang_tua' => $request->wa_orang_tua,
+            ]);
+
+            return redirect()->route('admin.datakelas')->with('success', 'Siswa dari daftar tunggu telah disetujui.');
+        }
+
+        // Manual registration
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'no_wa_pribadi' => 'nullable|string|max:20',
+            'wa_orang_tua' => 'nullable|string|max:20',
         ]);
 
         User::create([
@@ -102,9 +127,20 @@ class StudentController extends Controller
             'password' => Hash::make($request->password),
             'role' => 'siswa',
             'status' => 'approved',
+            'no_wa_pribadi' => $request->no_wa_pribadi,
+            'wa_orang_tua' => $request->wa_orang_tua,
         ]);
 
         return redirect()->route('admin.datakelas')->with('success', 'Siswa berhasil ditambahkan.');
+    }
+
+    /**
+     * Show the form for editing the specified student.
+     */
+    public function edit($id)
+    {
+        $student = User::findOrFail($id);
+        return view('admin.siswa.edit', compact('student'));
     }
 
     /**
@@ -126,12 +162,16 @@ class StudentController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'no_wa_pribadi' => 'nullable|string|max:20',
+            'wa_orang_tua' => 'nullable|string|max:20',
         ]);
 
         $user = User::findOrFail($id);
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
+            'no_wa_pribadi' => $request->no_wa_pribadi,
+            'wa_orang_tua' => $request->wa_orang_tua,
         ]);
 
         return back()->with('success', 'Data siswa ' . $user->name . ' berhasil diperbarui.');
