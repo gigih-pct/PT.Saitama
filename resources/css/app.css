@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Table scroll helpers: force visible scrollbars similar to spreadsheet UI */
+.table-scroll {
+    width: 100%;
+    overflow: auto; /* allow both axes */
+    overflow-y: scroll; /* ensure vertical scrollbar is always visible */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable both-edges; /* reserve space for scrollbar */
+}
+
+/* Optional horizontal-only container */
+.table-scroll.horizontal {
+    overflow-x: scroll;
+    overflow-y: auto;
+}
+
+/* WebKit scrollbar styling to make the always-visible bar look intentional */
+.table-scroll::-webkit-scrollbar {
+    height: 12px;
+    background: transparent;
+}
+.table-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.24);
+    border-radius: 6px;
+}
+.table-scroll::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.04);
+}
