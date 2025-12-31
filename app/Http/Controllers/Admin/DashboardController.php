@@ -22,7 +22,19 @@ class DashboardController extends Controller
             'berkas_seleksi' => Berkas::where('jenis_berkas', 'seleksi')->where('status', 'pending')->count(),
         ];
 
-        return view('admin.dashboard', compact('stats'));
+        $latest_pendaftaran = Berkas::with('user')
+            ->where('jenis_berkas', 'pendaftaran')
+            ->orderBy('uploaded_at', 'desc')
+            ->take(3)
+            ->get();
+
+        $latest_seleksi = Berkas::with('user')
+            ->where('jenis_berkas', 'seleksi')
+            ->orderBy('uploaded_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return view('admin.dashboard', compact('stats', 'latest_pendaftaran', 'latest_seleksi'));
     }
 
     public function updateProfile(Request $request)
