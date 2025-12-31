@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('no_wa_pribadi')->nullable()->after('status');
-            $table->string('wa_orang_tua')->nullable()->after('no_wa_pribadi');
+            if (!Schema::hasColumn('users', 'no_wa_pribadi')) {
+                $table->string('no_wa_pribadi')->nullable()->after('status');
+            }
+            if (!Schema::hasColumn('users', 'wa_orang_tua')) {
+                $table->string('wa_orang_tua')->nullable()->after('no_wa_pribadi');
+            }
         });
     }
 

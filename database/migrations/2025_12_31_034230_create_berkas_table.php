@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('berkas', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('jenis_berkas', ['pendaftaran', 'seleksi']);
-            $table->string('nama_berkas');
-            $table->string('file_path');
-            $table->text('keterangan')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->timestamp('uploaded_at')->useCurrent();
-            $table->timestamp('reviewed_at')->nullable();
-            $table->foreignId('reviewed_by')->nullable()->constrained('admins')->onDelete('set null');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('berkas')) {
+            Schema::create('berkas', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->enum('jenis_berkas', ['pendaftaran', 'seleksi']);
+                $table->string('nama_berkas');
+                $table->string('file_path');
+                $table->text('keterangan')->nullable();
+                $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+                $table->timestamp('uploaded_at')->useCurrent();
+                $table->timestamp('reviewed_at')->nullable();
+                $table->foreignId('reviewed_by')->nullable()->constrained('admins')->onDelete('set null');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
