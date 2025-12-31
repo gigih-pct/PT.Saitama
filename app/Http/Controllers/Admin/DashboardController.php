@@ -34,7 +34,32 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'latest_pendaftaran', 'latest_seleksi'));
+        // Fetch registration trend (Last 365 days)
+        $endDate = now();
+        $startDate = now()->subDays(365);
+        
+        $registrations = User::where('role', 'siswa')
+            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '<=', $endDate)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->pluck('count', 'date');
+
+        // Fill missing dates with 0
+        $trend_data = [];
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $dateStr = $currentDate->format('Y-m-d');
+            $trend_data[] = [
+                'date' => $dateStr,
+                'count' => $registrations[$dateStr] ?? 0
+            ];
+            $currentDate->addDay();
+        }
+
+        return view('admin.dashboard', compact('stats', 'latest_pendaftaran', 'latest_seleksi', 'trend_data'));
     }
 
     public function updateProfile(Request $request)

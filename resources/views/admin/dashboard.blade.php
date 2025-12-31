@@ -86,7 +86,199 @@
         </div>
     </div>
 
-    <!-- BOTTOM SECTION (Row 2) - Flex Grow to Fill Screen -->
+    <!-- CHART SECTION (Row 2) -->
+    <div class="col-span-12 h-[400px] shrink-0" x-data="registrationTrendData()">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 h-full flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-[#173A67] font-extrabold text-lg">Tren Pendaftaran Siswa</h3>
+                    <p class="text-xs text-gray-400 font-bold">Grafik pertumbuhan jumlah siswa bergabung</p>
+                </div>
+                
+                <!-- Time Range Filter -->
+                <div class="bg-gray-50 rounded-xl p-1 flex">
+                    <button @click="setRange('1M')" 
+                            :class="range === '1M' ? 'bg-white text-[#173A67] shadow-sm' : 'text-gray-400 hover:text-gray-600'"
+                            class="px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all">
+                        1 Bulan
+                    </button>
+                    <button @click="setRange('6M')" 
+                            :class="range === '6M' ? 'bg-white text-[#173A67] shadow-sm' : 'text-gray-400 hover:text-gray-600'"
+                            class="px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all">
+                        6 Bulan
+                    </button>
+                    <button @click="setRange('1Y')" 
+                            :class="range === '1Y' ? 'bg-white text-[#173A67] shadow-sm' : 'text-gray-400 hover:text-gray-600'"
+                            class="px-4 py-1.5 rounded-lg text-[10px] font-extrabold transition-all">
+                        1 Tahun
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div id="trendChart" class="flex-1 w-full min-h-0"></div>
+            
+            <!-- DEBUG: Temporary data check -->
+            @if(app()->environment('local'))
+            <div class="hidden">
+                JSON Data Check: {{ json_encode(array_slice($trend_data, -5)) }}
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+             console.log('Alpine initialized');
+        });
+
+        function registrationTrendData() {
+            return {
+                allData: @json($trend_data), 
+                range: '1Y', 
+                chart: null,
+
+                init() {
+                    console.log('Component Init', this.allData);
+                    if (!this.allData || this.allData.length === 0) {
+                        console.error('No data found!');
+                    }
+                    if (typeof ApexCharts === 'undefined') {
+                        console.error('ApexCharts is not defined! Check app.js imports.');
+                    }
+
+                    this.$nextTick(() => {
+                        this.renderChart();
+                    });
+                },
+
+                setRange(r) {
+                    this.range = r;
+                    this.updateChart();
+                },
+
+                getFilteredData() {
+                    const daysMap = {
+                        '1M': 30,
+                        '6M': 180,
+                        '1Y': 365
+                    };
+                    const limit = daysMap[this.range] || 365;
+                    
+                    // Slice from end (latest dates)
+                    return this.allData.slice(-limit);
+                },
+
+                renderChart() {
+                    const data = this.getFilteredData();
+                    
+                    const options = {
+                        series: [{
+                            name: 'Siswa Baru',
+                            data: data.map(d => d.count)
+                        }],
+                        chart: {
+                            type: 'area', // Area chart looks nice for trends
+                            height: '100%',
+                            fontFamily: 'Nunito, sans-serif',
+                            toolbar: { show: false },
+                            animations: {
+                                enabled: true,
+                                easing: 'easeinout',
+                                speed: 800
+                            }
+                        },
+                        colors: ['#173A67'],
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.7,
+                                opacityTo: 0.1, // Fade out at bottom
+                                stops: [0, 90, 100]
+                            }
+                        },
+                        stroke: {
+                            curve: 'smooth',
+                            width: 3
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        xaxis: {
+                            type: 'datetime',
+                            categories: data.map(d => d.date),
+                            tooltip: { enabled: false },
+                            axisBorder: { show: false },
+                            axisTicks: { show: false },
+                            labels: {
+                                style: {
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    colors: '#9CA3AF'
+                                },
+                                datetimeFormatter: {
+                                    year: 'yyyy',
+                                    month: 'MMM \'yy',
+                                    day: 'dd MMM'
+                                }
+                            }
+                        },
+                        yaxis: {
+                            show: true,
+                            labels: {
+                                style: {
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    colors: '#9CA3AF'
+                                },
+                                formatter: (val) => val.toFixed(0) // No decimals for people count
+                            }
+                        },
+                        grid: {
+                            show: true,
+                            borderColor: '#F3F4F6',
+                            strokeDashArray: 4,
+                            padding: {
+                                top: 10,
+                                right: 10,
+                                bottom: 0,
+                                left: 10
+                            } 
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            x: {
+                                format: 'dd MMM yyyy'
+                            },
+                        }
+                    };
+
+                    if (window.ApexCharts) {
+                        this.chart = new ApexCharts(document.querySelector("#trendChart"), options);
+                        this.chart.render();
+                    }
+                },
+
+                updateChart() {
+                    const data = this.getFilteredData();
+                    if (this.chart) {
+                        this.chart.updateSeries([{
+                            data: data.map(d => d.count)
+                        }]);
+                        // Must also update categories for xaxis if not automatically handled by series update with correct X pairings?
+                        // ApexCharts 'datetime' axis usually handles it better if we provide pairings or update options.
+                        // Let's safe update options.
+                        this.chart.updateOptions({
+                             xaxis: {
+                                categories: data.map(d => d.date)
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    </script>
     <div class="grid grid-cols-12 gap-6 flex-1 min-h-0">
         
         <!-- LATEST PENDAFTARAN -->
