@@ -40,6 +40,19 @@
                         <option value="">Semua Status</option>
                         <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Jepang" {{ request('status') == 'Jepang' ? 'selected' : '' }}>Jepang</option>
+                        <option value="seleksi" {{ request('status') == 'seleksi' ? 'selected' : '' }}>Seleksi</option>
+                        <option value="mau seleksi" {{ request('status') == 'mau seleksi' ? 'selected' : '' }}>Mau Seleksi</option>
+                        <option value="ulang kelas" {{ request('status') == 'ulang kelas' ? 'selected' : '' }}>Ulang Kelas</option>
+                        <option value="BLK" {{ request('status') == 'BLK' ? 'selected' : '' }}>BLK</option>
+                        <option value="proses belajar" {{ request('status') == 'proses belajar' ? 'selected' : '' }}>Proses Belajar</option>
+                        <option value="TG" {{ request('status') == 'TG' ? 'selected' : '' }}>TG</option>
+                        <option value="kerja" {{ request('status') == 'kerja' ? 'selected' : '' }}>Kerja</option>
+                        <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
+                        <option value="cuti" {{ request('status') == 'cuti' ? 'selected' : '' }}>Cuti</option>
+                        <option value="Respon" {{ request('status') == 'Respon' ? 'selected' : '' }}>Respon</option>
+                        <option value="No Respon" {{ request('status') == 'No Respon' ? 'selected' : '' }}>No Respon</option>
+                        <option value="Invalid" {{ request('status') == 'Invalid' ? 'selected' : '' }}>Invalid</option>
                     </select>
                     <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
                 </div>
@@ -140,7 +153,7 @@
 
                         <!-- KELAS -->
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($student->status == 'approved')
+                            @if(in_array($student->status, ['approved', 'Jepang', 'seleksi', 'mau seleksi', 'ulang kelas', 'BLK', 'proses belajar', 'TG', 'kerja', 'cuti']))
                                 <form action="{{ route('admin.siswa.assign_class', $student->id) }}" method="POST" class="min-w-[140px]">
                                     @csrf
                                     <div class="relative group/select">
@@ -163,18 +176,37 @@
 
                         <!-- STATUS -->
                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                            @if($student->status == 'approved')
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold bg-green-50 text-green-600 border border-green-100">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                    AKTIF
-                                </span>
-                            @else
+                            @if($student->status == 'pending')
                                 <form action="{{ route('admin.siswa.approve', $student->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="px-3 py-1.5 rounded-lg text-[10px] font-extrabold bg-[#173A67] text-white hover:bg-[#1e4a7a] transition-colors shadow-sm shadow-blue-900/10">
                                         Setujui
                                     </button>
                                 </form>
+                            @else
+                                @php
+                                    $statusConfig = [
+                                        'approved' => ['bg' => 'bg-green-50', 'text' => 'text-green-600', 'border' => 'border-green-100', 'dot' => 'bg-green-500', 'label' => 'AKTIF'],
+                                        'Jepang' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'border' => 'border-emerald-100', 'dot' => 'bg-emerald-500', 'label' => 'JEPANG'],
+                                        'seleksi' => ['bg' => 'bg-blue-50', 'text' => 'text-[#173A67]', 'border' => 'border-blue-100', 'dot' => 'bg-[#173A67]', 'label' => 'SELEKSI'],
+                                        'mau seleksi' => ['bg' => 'bg-indigo-50', 'text' => 'text-indigo-600', 'border' => 'border-indigo-100', 'dot' => 'bg-indigo-500', 'label' => 'MAU SELEKSI'],
+                                        'ulang kelas' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-600', 'border' => 'border-amber-100', 'dot' => 'bg-amber-500', 'label' => 'ULANG KELAS'],
+                                        'BLK' => ['bg' => 'bg-orange-50', 'text' => 'text-orange-600', 'border' => 'border-orange-100', 'dot' => 'bg-orange-500', 'label' => 'BLK'],
+                                        'proses belajar' => ['bg' => 'bg-cyan-50', 'text' => 'text-cyan-600', 'border' => 'border-cyan-100', 'dot' => 'bg-cyan-500', 'label' => 'BELAJAR'],
+                                        'TG' => ['bg' => 'bg-violet-50', 'text' => 'text-violet-600', 'border' => 'border-violet-100', 'dot' => 'bg-violet-500', 'label' => 'TG'],
+                                        'kerja' => ['bg' => 'bg-sky-50', 'text' => 'text-sky-600', 'border' => 'border-sky-100', 'dot' => 'bg-sky-500', 'label' => 'KERJA'],
+                                        'keluar' => ['bg' => 'bg-rose-50', 'text' => 'text-rose-600', 'border' => 'border-rose-100', 'dot' => 'bg-rose-500', 'label' => 'KELUAR'],
+                                        'cuti' => ['bg' => 'bg-slate-50', 'text' => 'text-slate-600', 'border' => 'border-slate-100', 'dot' => 'bg-slate-500', 'label' => 'CUTI'],
+                                        'Respon' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'border' => 'border-emerald-100', 'dot' => 'bg-emerald-500', 'label' => 'RESPON'],
+                                        'No Respon' => ['bg' => 'bg-rose-50', 'text' => 'text-rose-600', 'border' => 'border-rose-100', 'dot' => 'bg-rose-500', 'label' => 'NO RESPON'],
+                                        'Invalid' => ['bg' => 'bg-gray-50', 'text' => 'text-gray-400', 'border' => 'border-gray-100', 'dot' => 'bg-gray-400', 'label' => 'INVALID'],
+                                    ];
+                                    $cfg = $statusConfig[$student->status] ?? ['bg' => 'bg-gray-50', 'text' => 'text-gray-400', 'border' => 'border-gray-100', 'dot' => 'bg-gray-400', 'label' => strtoupper($student->status)];
+                                @endphp
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-extrabold {{ $cfg['bg'] }} {{ $cfg['text'] }} border {{ $cfg['border'] }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $cfg['dot'] }}"></span>
+                                    {{ $cfg['label'] }}
+                                </span>
                             @endif
                         </td>
 

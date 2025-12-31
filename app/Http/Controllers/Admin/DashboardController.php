@@ -22,6 +22,31 @@ class DashboardController extends Controller
             'berkas_seleksi' => Berkas::where('jenis_berkas', 'seleksi')->where('status', 'pending')->count(),
         ];
 
+        // Advanced Stats for Document Management
+        $doc_pendaftaran = [
+            'pending' => Berkas::where('jenis_berkas', 'pendaftaran')->where('status', 'pending')->count(),
+            'approved' => Berkas::where('jenis_berkas', 'pendaftaran')->where('status', 'approved')->count(),
+            'rejected' => Berkas::where('jenis_berkas', 'pendaftaran')->where('status', 'rejected')->count(),
+        ];
+        $doc_seleksi = [
+            'pending' => Berkas::where('jenis_berkas', 'seleksi')->where('status', 'pending')->count(),
+            'approved' => Berkas::where('jenis_berkas', 'seleksi')->where('status', 'approved')->count(),
+            'rejected' => Berkas::where('jenis_berkas', 'seleksi')->where('status', 'rejected')->count(),
+        ];
+
+        // Mock Attendance Stats (Table not created yet)
+        $attendance_stats = [
+            'percentage' => 92,
+            'points' => 1240,
+            'trend_up' => true,
+            'details' => [
+                ['label' => 'Hadir', 'count' => 1420, 'color' => 'bg-emerald-500'],
+                ['label' => 'Izin', 'count' => 45, 'color' => 'bg-blue-500'],
+                ['label' => 'Sakit', 'count' => 12, 'color' => 'bg-amber-500'],
+                ['label' => 'Alfa', 'count' => 4, 'color' => 'bg-rose-500'],
+            ]
+        ];
+
         $latest_pendaftaran = Berkas::with('user')
             ->where('jenis_berkas', 'pendaftaran')
             ->orderBy('uploaded_at', 'desc')
@@ -59,7 +84,15 @@ class DashboardController extends Controller
             $currentDate->addDay();
         }
 
-        return view('admin.dashboard', compact('stats', 'latest_pendaftaran', 'latest_seleksi', 'trend_data'));
+        return view('admin.dashboard', compact(
+            'stats', 
+            'latest_pendaftaran', 
+            'latest_seleksi', 
+            'trend_data',
+            'doc_pendaftaran',
+            'doc_seleksi',
+            'attendance_stats'
+        ));
     }
 
     public function updateProfile(Request $request)

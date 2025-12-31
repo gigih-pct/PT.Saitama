@@ -7,8 +7,8 @@
     <div class="grid grid-cols-12 gap-6">
         
         <!-- PROFILE CARD (Left - 3 Columns) -->
-        <div class="col-span-12 lg:col-span-4">
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col items-center text-center justify-center group h-full min-h-[280px]">
+        <div class="col-span-12 lg:col-span-3">
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col items-center text-center justify-center group h-full min-h-[320px]">
                 <!-- Background Decoration -->
                 <div class="absolute top-0 left-0 w-full h-24 bg-[#173A67]"></div>
                 
@@ -23,65 +23,118 @@
 
                 <div class="mt-4 z-10">
                     <h2 class="text-xl font-extrabold text-[#173A67]">{{ Auth::guard('admin')->user()->name }}</h2>
-                    <p class="text-xs text-gray-500 font-medium">{{ Auth::guard('admin')->user()->email }}</p>
-                    <span class="inline-block mt-3 bg-blue-50 text-[#173A67] text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">Administrator</span>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{{ Auth::guard('admin')->user()->email }}</p>
+                    <div class="mt-4 flex items-center justify-center gap-2">
+                        <span class="bg-blue-50 text-[#173A67] text-[10px] font-extrabold px-3 py-1.5 rounded-xl uppercase tracking-wider border border-blue-100">Administrator</span>
+                    </div>
                 </div>
 
                 <button onclick="document.getElementById('editProfileModal').classList.remove('hidden')" 
-                        class="absolute top-4 right-4 bg-white/10 backdrop-blur-md text-white p-2 rounded-xl hover:bg-white/20 transition">
+                        class="absolute top-4 right-4 bg-white/10 backdrop-blur-md text-white p-2 rounded-xl hover:bg-white/20 transition group-hover:scale-110">
                     <i data-lucide="pencil" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
 
-        <!-- STATS OVERVIEW (Right - 8 Columns) -->
-        <div class="col-span-12 lg:col-span-8">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-                
-                <!-- Stat 1 -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group">
-                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-[#173A67] flex items-center justify-center mb-4">
-                        <i data-lucide="users" class="w-5 h-5"></i>
+        <!-- STATS OVERVIEW (Middle - 6 Columns) -->
+        <div class="col-span-12 lg:col-span-6">
+            <div class="grid grid-cols-2 gap-4 h-full">
+                <!-- Stat 1: Total Siswa -->
+                <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                        <i data-lucide="users" class="w-24 h-24 text-[#173A67]"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#173A67] flex items-center justify-center mb-4 border border-blue-100">
+                        <i data-lucide="users-2" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Total Siswa</span>
-                        <p class="text-3xl font-extrabold text-[#173A67] mt-1 group-hover:translate-x-1 transition-transform">{{ $stats['total_siswa'] }}</p>
+                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Total Siswa</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <p class="text-4xl font-black text-[#173A67]">{{ $stats['total_siswa'] }}</p>
+                            <span class="text-[10px] text-emerald-500 font-bold">+12%</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Stat 2 -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group">
-                    <div class="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4">
-                        <i data-lucide="school" class="w-5 h-5"></i>
+                <!-- Stat 2: Total Kelas -->
+                <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                        <i data-lucide="school" class="w-24 h-24 text-orange-600"></i>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4 border border-orange-100">
+                        <i data-lucide="building-2" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Total Kelas</span>
-                        <p class="text-3xl font-extrabold text-[#173A67] mt-1 group-hover:translate-x-1 transition-transform">{{ $stats['total_kelas'] }}</p>
+                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Total Kelas</span>
+                        <p class="text-4xl font-black text-[#173A67] mt-1">{{ $stats['total_kelas'] }}</p>
                     </div>
                 </div>
 
-                <!-- Stat 3 -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group">
-                    <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
-                        <i data-lucide="file-warning" class="w-5 h-5"></i>
+                <!-- Stat 3: Berkas Pendaftaran -->
+                <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4 border border-rose-100">
+                        <i data-lucide="file-warning" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Pending Pendaftaran</span>
-                        <p class="text-3xl font-extrabold text-[#173A67] mt-1 group-hover:translate-x-1 transition-transform">{{ $stats['berkas_pendaftaran'] }}</p>
+                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Pending Daftar</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <p class="text-4xl font-black text-[#173A67]">{{ $stats['berkas_pendaftaran'] }}</p>
+                            <div class="flex gap-1">
+                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Stat 4 -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
-                        <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                <!-- Stat 4: Berkas Seleksi -->
+                <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-100">
+                        <i data-lucide="clipboard-list" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Pending Seleksi</span>
-                        <p class="text-3xl font-extrabold text-[#173A67] mt-1 group-hover:translate-x-1 transition-transform">{{ $stats['berkas_seleksi'] }}</p>
+                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Pending Seleksi</span>
+                        <p class="text-4xl font-black text-[#173A67] mt-1">{{ $stats['berkas_seleksi'] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATTENDANCE CARD (Right - 3 Columns) -->
+        <div class="col-span-12 lg:col-span-3">
+            <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 h-full flex flex-col group hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-[#173A67] font-black text-sm tracking-tight uppercase">Presensi Siswa</h3>
+                    <div class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg text-[10px] font-black border border-emerald-100">
+                        {{ $attendance_stats['percentage'] }}%
                     </div>
                 </div>
 
+                <!-- Circular Progress Mock -->
+                <div class="flex-1 flex flex-col items-center justify-center py-4">
+                    <div class="relative w-32 h-32 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="10" fill="transparent" class="text-gray-100" />
+                            <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" stroke-dasharray="364.4" stroke-dashoffset="{{ 364.4 * (1 - $attendance_stats['percentage']/100) }}" class="text-[#173A67] transition-all duration-1000" stroke-linecap="round" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-2xl font-black text-[#173A67]">{{ $attendance_stats['percentage'] }}%</span>
+                            <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Kehadiran</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    @foreach($attendance_stats['details'] as $detail)
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full {{ $detail['color'] }}"></span>
+                        <div class="flex flex-col">
+                            <span class="text-[8px] text-gray-400 font-extrabold uppercase tracking-widest">{{ $detail['label'] }}</span>
+                            <span class="text-xs font-black text-[#173A67]">{{ number_format($detail['count']) }}</span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
@@ -266,37 +319,59 @@
         
         <!-- LATEST PENDAFTARAN -->
         <div class="col-span-12 lg:col-span-6">
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
-                <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between shrink-0">
-                    <h3 class="text-[#173A67] font-extrabold text-sm flex items-center gap-2">
-                        <i data-lucide="file-text" class="w-4 h-4 text-red-500"></i>
-                        Pengajuan Berkas Pendaftaran
-                    </h3>
-                    <a href="{{ route('admin.berkaspendaftaran') }}" class="text-[10px] font-bold text-gray-400 hover:text-[#173A67] uppercase tracking-wider">Lihat Semua</a>
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[480px]">
+                <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between shrink-0">
+                    <div>
+                        <h3 class="text-[#173A67] font-black text-sm flex items-center gap-2 uppercase tracking-tight">
+                            <i data-lucide="file-text" class="w-4 h-4 text-rose-500"></i>
+                            Pemberkasan Pendaftaran
+                        </h3>
+                        <p class="text-[10px] text-gray-400 font-black mt-1 uppercase tracking-widest">Total: {{ $doc_pendaftaran['pending'] }} Pending</p>
+                    </div>
+                    <a href="{{ route('admin.berkaspendaftaran') }}" class="text-[10px] font-black text-blue-500 hover:text-[#173A67] uppercase tracking-[0.2em] transition-colors">Lihat Semua</a>
                 </div>
+
+                <!-- Status Summary Pills -->
+                <div class="px-6 py-4 flex gap-3 shrink-0">
+                    <div class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100 flex-1 text-center">
+                        <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60">Disetujui</p>
+                        <p class="text-lg font-black leading-none">{{ $doc_pendaftaran['approved'] }}</p>
+                    </div>
+                    <div class="bg-amber-50 text-amber-600 px-4 py-2 rounded-2xl border border-amber-100 flex-1 text-center">
+                        <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60">Pending</p>
+                        <p class="text-lg font-black leading-none">{{ $doc_pendaftaran['pending'] }}</p>
+                    </div>
+                    <div class="bg-rose-50 text-rose-600 px-4 py-2 rounded-2xl border border-rose-100 flex-1 text-center">
+                        <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60">Ditolak</p>
+                        <p class="text-lg font-black leading-none">{{ $doc_pendaftaran['rejected'] }}</p>
+                    </div>
+                </div>
+
                 <!-- Scrollable Content -->
-                <div class="p-4 space-y-3 overflow-y-auto flex-1 custom-scrollbar">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
                     @forelse($latest_pendaftaran as $item)
-                    <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-2xl transition group cursor-pointer border border-transparent hover:border-gray-100">
-                        <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold shrink-0">
+                    <div class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-3xl transition group cursor-pointer border border-transparent hover:border-gray-100">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center text-sm font-black shrink-0 group-hover:bg-[#173A67] group-hover:text-white transition-all">
                             {{ substr($item->user->name, 0, 1) }}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-xs font-bold text-[#173A67] truncate">{{ $item->user->name }}</h4>
-                            <p class="text-[10px] text-gray-400 truncate">{{ $item->nama_berkas }}</p>
+                            <h4 class="text-xs font-black text-[#173A67] truncate">{{ $item->user->name }}</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="bg-white text-[9px] font-bold text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 shadow-sm">{{ $item->nama_berkas }}</span>
+                            </div>
                         </div>
                         <div class="text-right shrink-0">
                              @if($item->status == 'pending')
-                                <span class="bg-yellow-50 text-yellow-600 px-2.5 py-1 rounded-lg text-[10px] font-extrabold">Pending</span>
+                                <span class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-[10px] font-black border border-amber-100">Menunggu</span>
                             @else
-                                <span class="bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg text-[10px] font-extrabold">{{ ucfirst($item->status) }}</span>
+                                <span class="bg-gray-50 text-gray-400 px-3 py-1.5 rounded-xl text-[10px] font-black border border-gray-100">{{ ucfirst($item->status) }}</span>
                             @endif
                         </div>
                     </div>
                     @empty
-                    <div class="h-full flex flex-col items-center justify-center text-center opacity-50">
-                        <i data-lucide="inbox" class="w-8 h-8 text-gray-300 mb-2"></i>
-                        <p class="text-xs text-gray-400 font-bold">Belum ada data.</p>
+                    <div class="h-full flex flex-col items-center justify-center text-center opacity-50 py-10">
+                        <i data-lucide="inbox" class="w-12 h-12 text-gray-200 mb-4"></i>
+                        <p class="text-sm text-gray-400 font-black">Belum ada pengajuan baru</p>
                     </div>
                     @endforelse
                 </div>
@@ -305,37 +380,59 @@
 
         <!-- LATEST SELEKSI -->
         <div class="col-span-12 lg:col-span-6">
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
-                <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between shrink-0">
-                    <h3 class="text-[#173A67] font-extrabold text-sm flex items-center gap-2">
-                        <i data-lucide="clipboard-check" class="w-4 h-4 text-purple-500"></i>
-                        Pengajuan Berkas Seleksi
-                    </h3>
-                    <a href="{{ route('admin.berkasseleksi') }}" class="text-[10px] font-bold text-gray-400 hover:text-[#173A67] uppercase tracking-wider">Lihat Semua</a>
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[480px]">
+                <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between shrink-0">
+                    <div>
+                        <h3 class="text-[#173A67] font-black text-sm flex items-center gap-2 uppercase tracking-tight">
+                            <i data-lucide="clipboard-check" class="w-4 h-4 text-purple-500"></i>
+                            Pemberkasan Seleksi
+                        </h3>
+                        <p class="text-[10px] text-gray-400 font-black mt-1 uppercase tracking-widest">Total: {{ $doc_seleksi['pending'] }} Pending</p>
+                    </div>
+                    <a href="{{ route('admin.berkasseleksi') }}" class="text-[10px] font-black text-blue-500 hover:text-[#173A67] uppercase tracking-[0.2em] transition-colors">Lihat Semua</a>
                 </div>
+
+                <!-- Status Summary Pills -->
+                <div class="px-6 py-4 flex gap-3 shrink-0">
+                    <div class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100 flex-1 text-center">
+                        <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60">Disetujui</p>
+                        <p class="text-lg font-black leading-none">{{ $doc_seleksi['approved'] }}</p>
+                    </div>
+                    <div class="bg-amber-50 text-amber-600 px-4 py-2 rounded-2xl border border-amber-100 flex-1 text-center">
+                        <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60">Pending</p>
+                        <p class="text-lg font-black leading-none">{{ $doc_seleksi['pending'] }}</p>
+                    </div>
+                    <div class="bg-rose-50 text-rose-600 px-4 py-2 rounded-2xl border border-rose-100 flex-1 text-center">
+                        <p class="text-[8px] font-black uppercase tracking-widest mb-1 opacity-60">Ditolak</p>
+                        <p class="text-lg font-black leading-none">{{ $doc_seleksi['rejected'] }}</p>
+                    </div>
+                </div>
+
                 <!-- Scrollable Content -->
-                <div class="p-4 space-y-3 overflow-y-auto flex-1 custom-scrollbar">
+                <div class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
                     @forelse($latest_seleksi as $item)
-                    <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-2xl transition group cursor-pointer border border-transparent hover:border-gray-100">
-                        <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold shrink-0">
+                    <div class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-3xl transition group cursor-pointer border border-transparent hover:border-gray-100">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center text-sm font-black shrink-0 group-hover:bg-[#173A67] group-hover:text-white transition-all">
                             {{ substr($item->user->name, 0, 1) }}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-xs font-bold text-[#173A67] truncate">{{ $item->user->name }}</h4>
-                            <p class="text-[10px] text-gray-400 truncate">{{ $item->nama_berkas }}</p>
+                            <h4 class="text-xs font-black text-[#173A67] truncate">{{ $item->user->name }}</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="bg-white text-[9px] font-bold text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 shadow-sm">{{ $item->nama_berkas }}</span>
+                            </div>
                         </div>
                         <div class="text-right shrink-0">
                              @if($item->status == 'pending')
-                                <span class="bg-yellow-50 text-yellow-600 px-2.5 py-1 rounded-lg text-[10px] font-extrabold">Pending</span>
+                                <span class="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-xl text-[10px] font-black border border-amber-100">Menunggu</span>
                             @else
-                                <span class="bg-gray-50 text-gray-400 px-2.5 py-1 rounded-lg text-[10px] font-extrabold">{{ ucfirst($item->status) }}</span>
+                                <span class="bg-gray-50 text-gray-400 px-3 py-1.5 rounded-xl text-[10px] font-black border border-gray-100">{{ ucfirst($item->status) }}</span>
                             @endif
                         </div>
                     </div>
                     @empty
-                    <div class="h-full flex flex-col items-center justify-center text-center opacity-50">
-                        <i data-lucide="inbox" class="w-8 h-8 text-gray-300 mb-2"></i>
-                        <p class="text-xs text-gray-400 font-bold">Belum ada data.</p>
+                    <div class="h-full flex flex-col items-center justify-center text-center opacity-50 py-10">
+                        <i data-lucide="inbox" class="w-12 h-12 text-gray-200 mb-4"></i>
+                        <p class="text-sm text-gray-400 font-black">Belum ada pengajuan baru</p>
                     </div>
                     @endforelse
                 </div>

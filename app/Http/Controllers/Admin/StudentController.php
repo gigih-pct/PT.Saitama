@@ -16,7 +16,6 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $query = User::where('role', 'siswa')
-            ->whereIn('status', ['approved', 'pending'])
             ->with('kelas');
 
         // Search Filter
