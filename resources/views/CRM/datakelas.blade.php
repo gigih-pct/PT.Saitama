@@ -3,36 +3,66 @@
 @section('title', 'Data Kelas')
 
 @section('content')
-<div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+<div class="space-y-6">
     
-    <!-- Header -->
-    <div class="bg-[#102a4e] px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <span class="text-white font-bold text-lg">Data Kelas</span>
-            <span class="bg-[#d95d5d] text-white text-xs font-bold px-3 py-1 rounded-full">Angkatan IV</span>
-        </div>
+    <!-- MAIN CARD -->
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
         
-        <button class="text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-        </button>
-    </div>
-
-    <!-- LIST CONTENT -->
-    <div class="p-6 space-y-3">
-        
-        @for ($i = 0; $i < 5; $i++)
-        <div class="bg-[#f3f4f6] rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-            <div class="w-32 font-bold text-[#102a4e] text-sm">Kelas A2</div>
-            
-            <div class="bg-white px-6 py-1.5 rounded-lg font-bold text-xs text-[#102a4e] flex-1 max-w-sm shadow-sm">
-                Jumlah Siswa: 45
+        <!-- Header Section -->
+        <div class="bg-[#173A67] px-10 py-7 flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <i data-lucide="layers" class="w-6 h-6 text-red-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-extrabold text-2xl tracking-tight">Data Kelas</h1>
+                    <p class="text-white/50 text-[10px] font-extrabold uppercase tracking-[0.2em] mt-0.5">Manajemen Kelas & Kelompok Belajar</p>
+                </div>
+                <span class="bg-[#D85B63] text-white text-[10px] font-extrabold px-4 py-1.5 rounded-full uppercase tracking-widest ml-2">Angkatan IV</span>
             </div>
             
-            <button class="bg-[#d95d5d] hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <button class="w-12 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl flex items-center justify-center transition-all border border-white/10">
+                <i data-lucide="filter" class="w-5 h-5"></i>
             </button>
         </div>
-        @endfor
+
+        <!-- LIST CONTENT -->
+        <div class="p-8 space-y-4 bg-[#F8FAFC]/50">
+            
+            @php
+                $classes = [
+                    ['name' => 'Kelas A1', 'count' => 45],
+                    ['name' => 'Kelas A2', 'count' => 42],
+                    ['name' => 'Kelas A3', 'count' => 38],
+                    ['name' => 'Kelas A4', 'count' => 40],
+                    ['name' => 'Kelas A5', 'count' => 45],
+                ];
+            @endphp
+
+            @foreach($classes as $class)
+            <!-- CLASS ROW -->
+            <div class="bg-white border border-gray-100 rounded-[2rem] px-8 py-5 flex items-center justify-between gap-8 hover:shadow-xl hover:shadow-blue-900/5 transition-all group border-b-4 border-b-transparent hover:border-b-blue-100">
+                <!-- Info -->
+                <div class="flex items-center gap-5 w-60 shrink-0">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#173A67] flex items-center justify-center text-sm font-extrabold shadow-sm group-hover:scale-110 transition-transform">
+                        {{ substr($class['name'], -2) }}
+                    </div>
+                    <div class="font-extrabold text-[#173A67] text-base truncate">{{ $class['name'] }}</div>
+                </div>
+                
+                <!-- Student Count -->
+                <div class="bg-gray-50 px-8 py-3 rounded-2xl font-extrabold text-xs text-[#173A67] flex-1 max-w-sm text-center border border-gray-100 uppercase tracking-widest group-hover:bg-white transition-colors">
+                    Jumlah Siswa: {{ $class['count'] }}
+                </div>
+                
+                <!-- Actions -->
+                <button class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/10 active:scale-90 group-hover:rotate-12">
+                    <i data-lucide="eye" class="w-6 h-6"></i>
+                </button>
+            </div>
+            @endforeach
+
+        </div>
 
     </div>
 

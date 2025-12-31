@@ -3,37 +3,59 @@
 @section('title', 'Testimoni Siswa')
 
 @section('content')
-<div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+<div class="space-y-6">
     
-    <!-- Header -->
-    <div class="bg-[#102a4e] px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <span class="text-white font-bold text-lg">Testimoni Siswa</span>
-            <span class="bg-[#d95d5d] text-white text-xs font-bold px-3 py-1 rounded-full">Kelas A2</span>
-        </div>
+    <!-- MAIN CARD -->
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
         
-        <button class="text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-        </button>
-    </div>
-
-    <!-- LIST CONTENT -->
-    <div class="p-6 space-y-3 min-h-[500px]">
-        
-        <div class="bg-[#f3f4f6] rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-            <div class="font-bold text-[#102a4e] text-sm flex-1">Agung N</div>
+        <!-- Header Section -->
+        <div class="bg-[#173A67] px-10 py-7 flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <i data-lucide="message-square" class="w-6 h-6 text-red-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-extrabold text-2xl tracking-tight">Testimoni Siswa</h1>
+                    <p class="text-white/50 text-[10px] font-extrabold uppercase tracking-[0.2em] mt-0.5">Ulasan & Kesan Pesan Siswa</p>
+                </div>
+                <span class="bg-[#D85B63] text-white text-[10px] font-extrabold px-4 py-1.5 rounded-full uppercase tracking-widest ml-2">Kelas A2</span>
+            </div>
             
-            <button class="bg-[#d95d5d] hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <button class="w-12 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl flex items-center justify-center transition-all border border-white/10">
+                <i data-lucide="filter" class="w-5 h-5"></i>
             </button>
         </div>
 
-        <div class="bg-[#f3f4f6] rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-            <div class="font-bold text-[#102a4e] text-sm flex-1">Andi</div>
+        <!-- LIST CONTENT -->
+        <div class="p-8 space-y-4 bg-[#F8FAFC]/50 min-h-[500px]">
             
-            <button class="bg-[#d95d5d] hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition">
-               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+            @php
+                $testimonies = [
+                    ['name' => 'Agung N'],
+                    ['name' => 'Andi'],
+                    ['name' => 'Sita Permata'],
+                    ['name' => 'Budi Sudarsono'],
+                ];
+            @endphp
+
+            @foreach($testimonies as $testi)
+            <!-- TESTIMONI ROW -->
+            <div class="bg-white border border-gray-100 rounded-[2rem] px-8 py-5 flex items-center justify-between gap-8 hover:shadow-xl hover:shadow-blue-900/5 transition-all group border-b-4 border-b-transparent hover:border-b-blue-100">
+                <!-- Info -->
+                <div class="flex items-center gap-5 flex-1 shrink-0">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#173A67] flex items-center justify-center text-sm font-extrabold shadow-sm group-hover:scale-110 transition-transform">
+                        {{ substr($testi['name'], 0, 1) }}
+                    </div>
+                    <div class="font-extrabold text-[#173A67] text-base truncate">{{ $testi['name'] }}</div>
+                </div>
+                
+                <!-- Actions -->
+                <button class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/10 active:scale-90 group-hover:rotate-12">
+                    <i data-lucide="eye" class="w-6 h-6"></i>
+                </button>
+            </div>
+            @endforeach
+
         </div>
 
     </div>

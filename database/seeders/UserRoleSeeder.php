@@ -10,13 +10,13 @@ class UserRoleSeeder extends Seeder
 {
     public function run(): void
     {
-        $roles = ['siswa','sensei','orang tua','CRM','Keuangan'];
+        $roles = ['siswa', 'sensei', 'orangtua'];
 
-        foreach ($roles as $i => $role) {
+        foreach ($roles as $role) {
             User::updateOrCreate([
                 'email' => "{$role}@example.com",
             ], [
-                'name' => ucfirst(str_replace(' ', '', $role)),
+                'name' => ucfirst($role),
                 'password' => Hash::make('password'),
                 'role' => $role,
             ]);

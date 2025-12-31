@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
+        'follow_up',
         'kelas_id',
         'no_wa_pribadi',
         'wa_orang_tua',

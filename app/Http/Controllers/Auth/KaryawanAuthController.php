@@ -13,33 +13,22 @@ class KaryawanAuthController extends Controller
 {
     public function registerStore(Request $request)
     {
-        $hasRole = Schema::hasColumn('users', 'role');
-
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:admins,email',
             'password' => 'required|string|min:6|confirmed',
         ];
 
-        if ($hasRole) {
-            $rules['role'] = 'required|in:guru,karyawan';
-        }
-
         $data = $request->validate($rules);
 
-        $userData = [
+        $admin = \App\Models\Admin::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-        ];
+            'role' => 'karyawan',
+        ]);
 
-        if ($hasRole) {
-            $userData['role'] = $data['role'];
-        }
-
-        $user = User::create($userData);
-
-        Auth::login($user);
+        Auth::guard('admin')->login($admin);
 
         return redirect('/');
     }
@@ -53,7 +42,7 @@ class KaryawanAuthController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
             return redirect()->intended('/');
         }
@@ -63,7 +52,7 @@ class KaryawanAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('karyawan.login');

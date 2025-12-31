@@ -24,7 +24,7 @@ class SenseiAuthController extends Controller
         ];
 
         if ($hasRole) {
-            $rules['role'] = 'required|in:sensei,karyawan';
+            $rules['role'] = 'required|in:sensei';
         }
 
         $data = $request->validate($rules);

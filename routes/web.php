@@ -532,13 +532,14 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     Route::post('/crm/logout', [CrmAuthController::class, 'logout'])->name('crm.logout');
 
     // CRM protected routes
-    Route::middleware(['auth'])->prefix('crm')->name('crm.')->group(function () {
-        Route::get('/dashboard', fn () => view('CRM.dashboard'))->name('dashboard');
-        Route::get('/kesiswaan', fn () => view('CRM.kesiswaan'))->name('kesiswaan');
-        Route::get('/pengajuan-siswa', fn () => view('CRM.pengajuansiswa'))->name('pengajuansiswa');
-        Route::get('/data-kelas', fn () => view('CRM.datakelas'))->name('datakelas');
-        Route::get('/testimoni-siswa', fn () => view('CRM.testimoni'))->name('testimoni');
-        Route::get('/detail-kesiswaan', fn () => view('CRM.detailkesiswaan'))->name('detailkesiswaan');
+    use App\Http\Controllers\CRM\CRMController;
+    Route::middleware(['auth:admin', 'role:CRM'])->prefix('crm')->name('crm.')->group(function () {
+        Route::get('/dashboard', [CRMController::class, 'dashboard'])->name('dashboard');
+        Route::get('/kesiswaan', [CRMController::class, 'kesiswaan'])->name('kesiswaan');
+        Route::get('/pengajuan-siswa', [CRMController::class, 'pengajuansiswa'])->name('pengajuansiswa');
+        Route::get('/data-kelas', [CRMController::class, 'datakelas'])->name('datakelas');
+        Route::get('/testimoni-siswa', [CRMController::class, 'testimoni'])->name('testimoni');
+        Route::get('/detail-kesiswaan', [CRMController::class, 'detailkesiswaan'])->name('detailkesiswaan');
     });
 
     // Orang Tua auth routes (Siswa / Orang Tua choice)
@@ -561,7 +562,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     use App\Http\Controllers\Admin\StudentController;
     use App\Http\Controllers\Admin\KelasController;
     use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-    Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth:admin', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::put('/profile', [AdminDashboardController::class, 'updateProfile'])->name('profile.update');
         
@@ -591,7 +592,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     // Student protected routes
     Route::middleware(['auth', 'student.approved'])->prefix('siswa')->name('siswa.')->group(function () {
         Route::get('/dashboard', fn () => view('siswa.dashboard'))->name('dashboard');
-        Route::get('/waiting-approval', fn () => view('siswa.waiting-approval'))->name('waiting_approval');
+        Route::get('/waiting-approval', fn () => view('siswa.waiting_approval'))->name('waiting_approval');
         Route::get('/pembelajaran', fn () => view('siswa.pembelajaran'))->name('pembelajaran');
         Route::get('/nilai', fn () => view('siswa.nilai'))->name('nilai');
         Route::get('/jadwal-evaluasi', fn () => view('siswa.jadwal_evaluasi'))->name('jadwal_evaluasi');
@@ -603,7 +604,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     });
 
     // Orang Tua protected routes
-    Route::middleware(['auth'])->prefix('orangtua')->name('orangtua.')->group(function () {
+    Route::middleware(['auth'])->prefix('orangtua')->name('orangtua. group')->group(function () {
         Route::get('/dashboard', fn () => view('orangtua.dashboard'))->name('dashboard');
         Route::get('/berkas', fn () => view('orangtua.pemberkasan'))->name('berkas');
         Route::get('/pembayaran', fn () => view('orangtua.pembayaran'))->name('pembayaran');
@@ -618,7 +619,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     Route::post('/keuangan/logout', [KeuanganAuthController::class, 'logout'])->name('keuangan.logout');
 
     // Keuangan protected routes
-    Route::middleware(['auth'])->prefix('keuangan')->name('keuangan.')->group(function () {
+    Route::middleware(['auth:admin', 'role:Keuangan'])->prefix('keuangan')->name('keuangan.')->group(function () {
         Route::get('/dashboard', fn () => view('keuangan.dashboard'))->name('dashboard');
         Route::get('/pembayaran', fn () => view('keuangan.pembayaran'))->name('pembayaran');
     });
