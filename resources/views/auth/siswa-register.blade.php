@@ -14,19 +14,19 @@
 <body class="min-h-screen flex bg-white overflow-hidden">
 
 <!-- LEFT SECTION (Informasi & Carousel) -->
-<div class="hidden lg:flex w-1/2 bg-[#173A67] text-white flex flex-col justify-between p-12 relative overflow-hidden">
+<div class="hidden lg:flex w-1/2 bg-[#173A67] text-white flex-col justify-between p-12 relative overflow-hidden">
     <!-- Abstract Decoration -->
     <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] -mr-48 -mt-48"></div>
     
     <div class="relative z-10">
         <div class="flex items-center gap-3">
-            <img src="{{ asset('images/logo-besar.png') }}" class="h-30" >
+            <img src="{{ asset('images/logo-besar.png') }}" class="h-30" alt="Logo Besar">
         </div>
 
         <div class="mt-20">
             <p class="text-[11px] font-extrabold text-white/40 uppercase tracking-[0.3em] mb-4">Paling Populer</p>
             
-            <!-- Carousel Container (Placeholder for CRM) -->
+            <!-- Carousel Container -->
             <div class="relative group">
                 <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-3 border border-white/10 shadow-2xl overflow-hidden">
                     <img src="{{ asset('images/sensei-class.jpg') }}" class="w-full h-[400px] object-cover rounded-[2rem]" alt="Saitama Promo">
@@ -56,7 +56,7 @@
                 </p>
             </div>
         </div>
-        <p class="mt-12 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Copyright &copy; 2025 PT Saitama Juara Mendunia</p>
+        <p class="mt-12 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Copyright &copy; {{ date('Y') }} PT Saitama Juara Mendunia</p>
     </div>
 </div>
 
@@ -68,8 +68,8 @@
             <a href="{{ route('login.portal') }}" class="inline-block mb-6">
                 <img src="{{ asset('images/logo-kecil.png') }}" class="h-16 mx-auto" alt="Saitama Logo">
             </a>
-            <h1 class="text-3xl font-extrabold text-[#173A67] tracking-tight mb-2">Pendaftaran Baru</h1>
-            <p class="text-slate-400 text-sm font-medium leading-relaxed">Lengkapi formulir di bawah ini untuk memulai perjalanan suksesmu bersama kami.</p>
+            <h1 class="text-3xl font-extrabold text-[#173A67] tracking-tight mb-2">Pendaftaran Siswa</h1>
+            <p class="text-slate-400 text-sm font-medium leading-relaxed">Lengkapi formulir di bawah ini untuk mendaftarkan akun Siswa baru.</p>
         </div>
 
         @if ($errors->any())
@@ -85,13 +85,14 @@
 
         <form method="POST" action="{{ route('siswa.register.store') }}" class="space-y-5">
             @csrf
+            
             <div class="space-y-2">
                 <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Nama Lengkap</label>
                 <div class="relative group">
                     <i data-lucide="user" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
                     <input name="name" type="text" value="{{ old('name') }}" required 
                            class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
-                           placeholder="Masukkan nama lengkap Anda">
+                           placeholder="Masukkan nama lengkap">
                 </div>
             </div>
 
@@ -126,9 +127,26 @@
                 </div>
             </div>
 
-            <div class="hidden">
-                <input type="radio" name="role" value="siswa" checked>
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Kode Keamanan</label>
+                <div class="flex gap-3">
+                    <div class="relative group flex-1">
+                        <i data-lucide="shield-alert" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="captcha" type="text" required
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-sm font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="Masukkan kode captcha">
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="captcha-img">{!! captcha_img('flat') !!}</span>
+                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                         </button>
+                    </div>
+                </div>
             </div>
+
+            <!-- Role Hidden Input -->
+            <input type="hidden" name="role" value="siswa">
 
             <button type="submit" class="w-full bg-[#173A67] text-white py-5 rounded-[1.5rem] font-extrabold text-[13px] shadow-xl shadow-blue-900/10 hover:translate-y-[-2px] hover:shadow-blue-900/20 active:scale-95 transition-all uppercase tracking-[0.2em] mt-2">
                 DAFTAR SEKARANG
@@ -146,6 +164,47 @@
 
 <script>
     lucide.createIcons();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const reloadBtn = document.querySelector('.btn-reload');
+        const captchaImg = document.querySelector('.captcha-img');
+
+        if (reloadBtn && captchaImg) {
+            reloadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // Visual feedback
+                reloadBtn.classList.add('opacity-50', 'pointer-events-none');
+                
+                // Get URL from data attribute
+                const url = this.getAttribute('data-captcha-url');
+                
+                // Add timestamp to prevent caching
+                const freshUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + new Date().getTime();
+
+                fetch(freshUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('HTTP Error ' + response.status + ': ' + response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        captchaImg.innerHTML = data.captcha;
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    })
+                    .catch(error => {
+                        console.error('Error reloading captcha:', error);
+                        alert('Gagal: ' + error.message);
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    });
+            });
+        }
+    });
 </script>
 </body>
 </html>

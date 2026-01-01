@@ -19,6 +19,7 @@ class OrangtuaAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
+            'captcha' => 'required|captcha',
         ];
 
         if ($hasRole) {
@@ -49,9 +50,12 @@ class OrangtuaAuthController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'captcha' => 'required|captcha',
         ]);
 
         $remember = $request->boolean('remember');
+
+        unset($credentials['captcha']);
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();

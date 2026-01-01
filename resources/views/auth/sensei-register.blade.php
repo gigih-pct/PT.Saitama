@@ -1,86 +1,210 @@
-<!-- resources/views/auth/sensei-register.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrasi Sensei | PT Saitama Juara Dunia</title>
-    @vite(['resources/css/app.css','resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="min-h-screen flex bg-white">
+<body class="min-h-screen flex bg-white overflow-hidden">
 
-<!-- LEFT SECTION -->
-<div class="w-1/2 bg-[#173A67] text-white flex flex-col justify-between p-10">
-    <div>
+<!-- LEFT SECTION (Informasi & Carousel) -->
+<div class="hidden lg:flex w-1/2 bg-[#173A67] text-white flex-col justify-between p-12 relative overflow-hidden">
+    <!-- Abstract Decoration -->
+    <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] -mr-48 -mt-48"></div>
+    
+    <div class="relative z-10">
         <div class="flex items-center gap-3">
-            <img src="{{ asset('images/logo-saitama.png') }}" class="h-10">
-            <div>
-                <p class="font-semibold">PT SAITAMA</p>
-                <p class="text-xs">JUARA MENDUNIA</p>
-            </div>
+            <img src="{{ asset('images/logo-besar.png') }}" class="h-30" alt="Logo Besar">
         </div>
 
-        <p class="text-center mt-10 text-sm">Informasi</p>
-
-        <div class="mt-6 bg-white rounded-2xl overflow-hidden">
-            <img src="{{ asset('images/sensei-class.jpg') }}" class="w-full h-72 object-cover">
+        <div class="mt-20">
+            <p class="text-[11px] font-extrabold text-white/40 uppercase tracking-[0.3em] mb-4">Papan Informasi</p>
+            
+            <!-- Carousel Container -->
+            <div class="relative group">
+                <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-3 border border-white/10 shadow-2xl overflow-hidden">
+                    <img src="{{ asset('images/sensei-class.jpg') }}" class="w-full h-[400px] object-cover rounded-[2rem]" alt="Saitama Info">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#173A67]/80 to-transparent flex flex-col justify-end p-10">
+                        <h4 class="text-xl font-bold mb-2">Portal Sensei Saitama</h4>
+                        <p class="text-xs text-white/70 font-medium">Platform manajemen pembelajaran dan evaluasi siswa.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="text-xs text-gray-300">
-        <p class="font-semibold">Saitama Grup</p>
-        <ul class="mt-2 space-y-1">
-            <li>LPK Saitama</li>
-            <li>Ayaka Josei Center</li>
-        </ul>
-
-        <div class="mt-4">
-            <p class="font-semibold">Kontak Kami:</p>
-            <p class="mt-1">Jl. Pahlawan Jl. Prajenan No.9, Manguan, Mertoyudan,<br>Kabupaten Magelang, Jawa Tengah 56172</p>
+    <div class="relative z-10">
+        <div class="grid grid-cols-2 gap-8 text-[11px]">
+            <div>
+                <p class="font-extrabold text-white/40 uppercase tracking-widest mb-3">Saitama Grup</p>
+                <ul class="space-y-2 font-bold opacity-80">
+                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-3 h-3 text-[#D85B63]"></i> LPK Saitama</li>
+                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-3 h-3 text-[#D85B63]"></i> Ayaka Josei Center</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-extrabold text-white/40 uppercase tracking-widest mb-3">Kontak Kami</p>
+                <p class="font-medium opacity-80 leading-relaxed">
+                    Jl. Pahlawan Jr. Prajenan No.9, Mertoyudan,<br>Kab. Magelang, Jawa Tengah 56172
+                </p>
+            </div>
         </div>
-
-        <p class="mt-6 text-[10px]">Copyright © PT Saitama Juara Mendunia</p>
+        <p class="mt-12 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Copyright &copy; {{ date('Y') }} PT Saitama Juara Mendunia</p>
     </div>
 </div>
 
-<!-- RIGHT SECTION -->
-<div class="w-1/2 flex items-center justify-center">
-    <div class="w-[420px] text-center">
+<!-- RIGHT SECTION (Form) -->
+<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC]">
+    <div class="w-full max-w-[480px]">
+        
+        <div class="text-center mb-10">
+            <a href="{{ route('login.portal') }}" class="inline-block mb-6">
+                <img src="{{ asset('images/logo-kecil.png') }}" class="h-16 mx-auto" alt="Saitama Logo">
+            </a>
+            <h1 class="text-3xl font-extrabold text-[#173A67] tracking-tight mb-2">Pendaftaran Sensei</h1>
+            <p class="text-slate-400 text-sm font-medium leading-relaxed">Lengkapi formulir di bawah ini untuk mendaftarkan akun Sensei baru.</p>
+        </div>
 
-        <img src="{{ asset('images/logo-saitama.png') }}" class="h-16 mx-auto mb-6">
+        @if ($errors->any())
+            <div class="mb-8 bg-red-50 border-l-4 border-[#D85B63] p-5 rounded-2xl text-red-700 animate-in fade-in duration-300">
+                <p class="text-xs font-extrabold uppercase tracking-widest mb-2">Terjadi Kesalahan</p>
+                <ul class="text-xs font-bold space-y-1 opacity-80">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <form method="POST" action="{{ route('sensei.register.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('sensei.register.store') }}" class="space-y-5">
             @csrf
-            @if ($errors->any())
-                <div class="mb-4 text-left text-sm text-red-600">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                <div class="relative group">
+                    <i data-lucide="user" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                    <input name="name" type="text" value="{{ old('name') }}" required 
+                           class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                           placeholder="Masukkan nama lengkap">
                 </div>
-            @endif
-            <input name="name" type="text" value="{{ old('name') }}" placeholder="Nama" required class="w-full bg-[#0396D6] text-white placeholder-white px-5 py-3 rounded-full focus:outline-none">
-            <input name="email" type="email" value="{{ old('email') }}" placeholder="Email" required class="w-full bg-[#0396D6] text-white placeholder-white px-5 py-3 rounded-full focus:outline-none">
-            <div class="flex gap-3">
-                <input name="password" type="password" placeholder="Password" required class="w-1/2 bg-[#0396D6] text-white placeholder-white px-5 py-3 rounded-full focus:outline-none">
-                <input name="password_confirmation" type="password" placeholder="Konfirmasi Password" required class="w-1/2 bg-[#0396D6] text-white placeholder-white px-5 py-3 rounded-full focus:outline-none">
             </div>
-            <div class="flex justify-center gap-8 mb-6">
-                <label class="flex items-center gap-2">
-                    <input type="radio" name="role" value="sensei" {{ old('role', 'sensei') == 'sensei' ? 'checked' : '' }} class="accent-red-500">
-                    <span>Sensei</span>
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="radio" name="role" value="karyawan" {{ old('role') == 'karyawan' ? 'checked' : '' }} class="accent-red-500">
-                    <span>Karyawan</span>
-                </label>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Alamat Email</label>
+                <div class="relative group">
+                    <i data-lucide="mail" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                    <input name="email" type="email" value="{{ old('email') }}" required 
+                           class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                           placeholder="nama@email.com">
+                </div>
             </div>
-            <button type="submit" class="mt-4 bg-[#D85B63] hover:bg-[#c44f56] text-white px-10 py-2 rounded-full">Daftar</button>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Password</label>
+                    <div class="relative group">
+                        <i data-lucide="lock" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="password" type="password" required 
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="••••••••">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Konfirmasi</label>
+                    <div class="relative group">
+                        <i data-lucide="shield-check" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="password_confirmation" type="password" required 
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="••••••••">
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Kode Keamanan</label>
+                <div class="flex gap-3">
+                    <div class="relative group flex-1">
+                        <i data-lucide="shield-alert" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="captcha" type="text" required
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-sm font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="Masukkan kode captcha">
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="captcha-img">{!! captcha_img('flat') !!}</span>
+                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Selection -->
+            <input type="hidden" name="role" value="sensei">
+
+            <button type="submit" class="w-full bg-[#173A67] text-white py-5 rounded-[1.5rem] font-extrabold text-[13px] shadow-xl shadow-blue-900/10 hover:translate-y-[-2px] hover:shadow-blue-900/20 active:scale-95 transition-all uppercase tracking-[0.2em] mt-2">
+                DAFTAR SEKARANG
+            </button>
         </form>
 
-        <p class="mt-6 text-sm">Sudah punya akun? <a href="/login" class="text-blue-600 font-semibold">Login</a></p>
-
+        <div class="mt-12 pt-8 border-t border-gray-100 text-center">
+            <p class="text-[13px] font-bold text-slate-400 tracking-tight">
+                Sudah punya akun? 
+                <a href="{{ route('sensei.login') }}" class="text-[#D85B63] font-extrabold hover:underline ml-1">Masuk Disini</a>
+            </p>
+        </div>
     </div>
 </div>
 
+<script>
+    lucide.createIcons();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const reloadBtn = document.querySelector('.btn-reload');
+        const captchaImg = document.querySelector('.captcha-img');
+
+        if (reloadBtn && captchaImg) {
+            reloadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // Visual feedback
+                reloadBtn.classList.add('opacity-50', 'pointer-events-none');
+                
+                // Get URL from data attribute
+                const url = this.getAttribute('data-captcha-url');
+                
+                // Add timestamp to prevent caching
+                const freshUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + new Date().getTime();
+
+                fetch(freshUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('HTTP Error ' + response.status + ': ' + response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        captchaImg.innerHTML = data.captcha;
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    })
+                    .catch(error => {
+                        console.error('Error reloading captcha:', error);
+                        alert('Gagal: ' + error.message);
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    });
+            });
+        }
+    });
+</script>
 </body>
 </html>

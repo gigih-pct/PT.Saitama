@@ -20,18 +20,18 @@
     
     <div class="relative z-10">
         <div class="flex items-center gap-3">
-            <img src="{{ asset('images/logo-besar.png') }}" class="h-30" >
+            <img src="{{ asset('images/logo-besar.png') }}" class="h-30" alt="Logo Besar">
         </div>
 
         <div class="mt-20">
             <p class="text-[11px] font-extrabold text-white/40 uppercase tracking-[0.3em] mb-4">Papan Informasi</p>
             
-            <!-- Carousel Container (Placeholder for CRM) -->
+            <!-- Carousel Container -->
             <div class="relative group">
                 <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-3 border border-white/10 shadow-2xl overflow-hidden">
                     <img src="{{ asset('images/sensei-class.jpg') }}" class="w-full h-[400px] object-cover rounded-[2rem]" alt="Saitama Info">
                     
-                    <!-- Carousel Indicators (Visual only) -->
+                    <!-- Carousel Indicators -->
                     <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
                         <div class="w-8 h-1.5 bg-white rounded-full"></div>
                         <div class="w-2 h-1.5 bg-white/30 rounded-full"></div>
@@ -58,7 +58,7 @@
                 </p>
             </div>
         </div>
-        <p class="mt-12 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Copyright &copy; 2025 PT Saitama Juara Mendunia</p>
+        <p class="mt-12 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Copyright &copy; {{ date('Y') }} PT Saitama Juara Mendunia</p>
     </div>
 </div>
 
@@ -87,11 +87,12 @@
 
         <form method="POST" action="{{ route('siswa.login.post') }}" class="space-y-6">
             @csrf
+            
             <div class="space-y-2">
                 <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Email Anda</label>
                 <div class="relative group">
                     <i data-lucide="mail" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
-                    <input name="email" type="email" value="{{ old('email') }}" required auto-complete="off"
+                    <input name="email" type="email" value="{{ old('email') }}" required autocomplete="off"
                            class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
                            placeholder="nama@email.com">
                 </div>
@@ -107,6 +108,24 @@
                     <input name="password" type="password" required 
                            class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
                            placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Kode Keamanan</label>
+                <div class="flex gap-3">
+                    <div class="relative group flex-1">
+                        <i data-lucide="shield-alert" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="captcha" type="text" required
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-sm font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="Masukkan kode captcha">
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="captcha-img">{!! captcha_img('flat') !!}</span>
+                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                         </button>
+                    </div>
                 </div>
             </div>
 
@@ -131,6 +150,47 @@
 
 <script>
     lucide.createIcons();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const reloadBtn = document.querySelector('.btn-reload');
+        const captchaImg = document.querySelector('.captcha-img');
+
+        if (reloadBtn && captchaImg) {
+            reloadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // Visual feedback
+                reloadBtn.classList.add('opacity-50', 'pointer-events-none');
+                
+                // Get URL from data attribute
+                const url = this.getAttribute('data-captcha-url');
+                
+                // Add timestamp to prevent caching
+                const freshUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + new Date().getTime();
+
+                fetch(freshUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('HTTP Error ' + response.status + ': ' + response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        captchaImg.innerHTML = data.captcha;
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    })
+                    .catch(error => {
+                        console.error('Error reloading captcha:', error);
+                        alert('Gagal: ' + error.message);
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    });
+            });
+        }
+    });
 </script>
 </body>
 </html>

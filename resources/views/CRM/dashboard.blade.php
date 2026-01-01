@@ -71,26 +71,91 @@
     <!-- STUDENT LIST SECTION -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         
-        <!-- Header -->
-        <div class="bg-[#173A67] px-8 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="users" class="w-5 h-5 text-red-500"></i>
-                    <h3 class="text-white font-extrabold text-lg tracking-tight">Daftar Siswa</h3>
+        <!-- Enhanced Header -->
+        <div class="bg-white px-8 py-6">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-[#1a1a1a] font-bold text-xl mb-0.5">Daftar Siswa</h3>
+                    <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wide">Manajemen Data Siswa & Kelas</p>
                 </div>
-                <button @click="showClassModal = true" class="bg-[#D85B63] hover:bg-[#c44f56] text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all" x-text="selectedClass"></button>
+                
+                <div class="flex items-center gap-3">
+                    <button class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export
+                    </button>
+                </div>
             </div>
             
-            <div class="flex items-center gap-6">
-                <!-- Search -->
-                <div class="relative group">
-                    <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
-                    <input type="text" x-model="searchSiswa" placeholder="Cari siswa..." class="bg-gray-50/10 border border-white/10 text-white placeholder-white/50 pl-11 pr-5 py-2 rounded-xl text-xs font-bold focus:outline-none focus:bg-white focus:text-[#173A67] focus:border-white w-64 transition-all">
+            <div class="flex items-center gap-3">
+                <!-- Search Bar -->
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" x-model="searchSiswa" placeholder="Cari nama atau email siswa..." class="w-full bg-[#F8FAFC] border-none rounded-2xl pl-11 pr-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[#173A67]/20 transition-all placeholder:text-gray-400">
                 </div>
-                <!-- Filter Icon -->
-                <button class="text-white/70 hover:text-white transition-colors">
-                    <i data-lucide="filter" class="w-5 h-5"></i>
-                </button>
+                
+                <!-- Filter Dropdowns -->
+                <div class="relative min-w-[140px]">
+                    <select x-model="selectedStatus" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                        <option value="">Semua Status</option>
+                        <option value="Jepang">Jepang</option>
+                        <option value="seleksi">Seleksi</option>
+                        <option value="mau seleksi">Mau Seleksi</option>
+                        <option value="ulang kelas">Ulang Kelas</option>
+                        <option value="BLK">BLK</option>
+                        <option value="proses belajar">Proses Belajar</option>
+                        <option value="TG">TG</option>
+                        <option value="kerja">Kerja</option>
+                        <option value="keluar">Keluar</option>
+                        <option value="cuti">Cuti</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                </div>
+                
+                <div class="relative min-w-[140px]">
+                    <select x-model="selectedClass" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                        <option value="">Semua Kelas</option>
+                        <option value="A1">Kelas A1</option>
+                        <option value="A2">Kelas A2</option>
+                        <option value="A3">Kelas A3</option>
+                        <option value="B1">Kelas B1</option>
+                        <option value="B2">Kelas B2</option>
+                        <option value="B3">Kelas B3</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                </div>
+                
+                <div class="relative min-w-[100px]">
+                    <select x-model="perPage" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                        <option value="20">20 Item</option>
+                        <option value="50">50 Item</option>
+                        <option value="100">100 Item</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE HEADER -->
+        <div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+            <div class="flex items-center justify-between gap-6">
+                <div class="w-48 shrink-0">
+                    <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Siswa</span>
+                </div>
+                <div class="w-32">
+                    <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Angkatan</span>
+                </div>
+                <div class="flex-1">
+                    <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Kontak</span>
+                </div>
+                <div class="w-40">
+                    <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Follow Up</span>
+                </div>
+                <div class="w-64">
+                    <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Status</span>
+                </div>
+                <div class="w-12 text-right">
+                    <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Aksi</span>
+                </div>
             </div>
         </div>
 
@@ -330,7 +395,9 @@
             contactTitle: '', 
             contactNumbers: [],
             showClassModal: false,
-            selectedClass: 'Semua Kelas',
+            selectedClass: '',
+            selectedStatus: '',
+            perPage: 20,
             showBatchModal: false,
             showStatusModal: false,
             showFUModal: false,
@@ -360,16 +427,23 @@
             students: @js($students),
             searchSiswa: '',
             filteredStudents() {
-                return this.students.filter(s => {
+                let filtered = this.students.filter(s => {
                     const matchesSearch = !this.searchSiswa || 
                         s.name.toLowerCase().includes(this.searchSiswa.toLowerCase()) ||
+                        (s.email && s.email.toLowerCase().includes(this.searchSiswa.toLowerCase())) ||
                         s.angkatan.toLowerCase().includes(this.searchSiswa.toLowerCase());
                     
-                    const matchesClass = this.selectedClass === 'Semua Kelas' || 
+                    const matchesClass = !this.selectedClass || 
                         s.angkatan === this.selectedClass;
                     
-                    return matchesSearch && matchesClass;
+                    const matchesStatus = !this.selectedStatus || 
+                        s.class === this.selectedStatus;
+                    
+                    return matchesSearch && matchesClass && matchesStatus;
                 });
+                
+                // Limit by perPage
+                return filtered.slice(0, parseInt(this.perPage));
             },
             openBatchModal(index) {
                 this.editingStudentIndex = index;

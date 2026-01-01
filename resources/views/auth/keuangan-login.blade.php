@@ -1,55 +1,83 @@
-<!-- resources/views/auth/keuangan-login.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Keuangan | PT Saitama Juara Dunia</title>
-    @vite(['resources/css/app.css','resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="min-h-screen flex bg-white">
+<body class="min-h-screen flex bg-white overflow-hidden">
 
-<!-- LEFT SECTION -->
-<div class="w-1/2 bg-[#173A67] text-white flex flex-col justify-between p-10">
-    <div>
+<!-- LEFT SECTION (Informasi & Carousel) -->
+<div class="hidden lg:flex w-1/2 bg-[#173A67] text-white flex-col justify-between p-12 relative overflow-hidden">
+    <!-- Abstract Decoration -->
+    <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] -mr-48 -mt-48"></div>
+    
+    <div class="relative z-10">
         <div class="flex items-center gap-3">
-            <img src="{{ asset('images/logo-saitama.png') }}" class="h-10">
-            <div>
-                <p class="font-semibold">PT SAITAMA</p>
-                <p class="text-xs">JUARA MENDUNIA</p>
-            </div>
+            <img src="{{ asset('images/logo-besar.png') }}" class="h-30" alt="Logo Besar">
         </div>
 
-        <p class="text-center mt-10 text-sm">Informasi</p>
-
-        <div class="mt-6 bg-white rounded-2xl overflow-hidden">
-            <img src="{{ asset('images/sensei-class.jpg') }}" class="w-full h-72 object-cover">
+        <div class="mt-20">
+            <p class="text-[11px] font-extrabold text-white/40 uppercase tracking-[0.3em] mb-4">Papan Informasi</p>
+            
+            <!-- Carousel Container -->
+            <div class="relative group">
+                <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-3 border border-white/10 shadow-2xl overflow-hidden">
+                    <img src="{{ asset('images/sensei-class.jpg') }}" class="w-full h-[400px] object-cover rounded-[2rem]" alt="Saitama Info">
+                    
+                    <!-- Carousel Indicators -->
+                    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
+                        <div class="w-8 h-1.5 bg-white rounded-full"></div>
+                        <div class="w-2 h-1.5 bg-white/30 rounded-full"></div>
+                        <div class="w-2 h-1.5 bg-white/30 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="text-xs text-gray-300">
-        <p class="font-semibold">Saitama Grup</p>
-        <ul class="mt-2 space-y-1">
-            <li>LPK Saitama</li>
-            <li>Ayaka Josei Center</li>
-        </ul>
-
-        <div class="mt-4">
-            <p class="font-semibold">Kontak Kami:</p>
-            <p class="mt-1">Jl. Pahlawan Jl. Prajenan No.9, Manguan, Mertoyudan,<br>Kabupaten Magelang, Jawa Tengah 56172</p>
+    <div class="relative z-10">
+        <div class="grid grid-cols-2 gap-8 text-[11px]">
+            <div>
+                <p class="font-extrabold text-white/40 uppercase tracking-widest mb-3">Saitama Grup</p>
+                <ul class="space-y-2 font-bold opacity-80">
+                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-3 h-3 text-[#D85B63]"></i> LPK Saitama</li>
+                    <li class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-3 h-3 text-[#D85B63]"></i> Ayaka Josei Center</li>
+                </ul>
+            </div>
+            <div>
+                <p class="font-extrabold text-white/40 uppercase tracking-widest mb-3">Kontak Kami</p>
+                <p class="font-medium opacity-80 leading-relaxed">
+                    Jl. Pahlawan Jr. Prajenan No.9, Mertoyudan,<br>Kab. Magelang, Jawa Tengah 56172
+                </p>
+            </div>
         </div>
-
-        <p class="mt-6 text-[10px]">Copyright © PT Saitama Juara Mendunia</p>
+        <p class="mt-12 text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Copyright &copy; {{ date('Y') }} PT Saitama Juara Mendunia</p>
     </div>
 </div>
 
-<!-- RIGHT SECTION -->
-<div class="w-1/2 flex items-center justify-center">
-    <div class="w-[420px] text-center">
-
-        <img src="{{ asset('images/logo-saitama.png') }}" class="h-16 mx-auto mb-6">
+<!-- RIGHT SECTION (Form) -->
+<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC]">
+    <div class="w-full max-w-[440px]">
+        
+        <div class="text-center mb-10">
+            <a href="{{ route('login.portal') }}" class="inline-block mb-6">
+                <img src="{{ asset('images/logo-kecil.png') }}" class="h-16 mx-auto" alt="Saitama Logo">
+            </a>
+            <h1 class="text-3xl font-extrabold text-[#173A67] tracking-tight mb-2">Login Keuangan</h1>
+            <p class="text-slate-400 text-sm font-medium leading-relaxed">Selamat datang di portal Keuangan. Silakan masuk untuk mengelola data finansial.</p>
+        </div>
 
         @if ($errors->any())
-            <div class="mb-4 text-left text-sm text-red-600">
-                <ul class="list-disc list-inside">
+            <div class="mb-8 bg-red-50 border-l-4 border-[#D85B63] p-5 rounded-2xl text-red-700 animate-in fade-in duration-300">
+                <p class="text-xs font-extrabold uppercase tracking-widest mb-2">Terjadi Kesalahan</p>
+                <ul class="text-xs font-bold space-y-1 opacity-80">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -57,42 +85,112 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('keuangan.login.post') }}" class="space-y-4">
+        <form method="POST" action="{{ route('keuangan.login.post') }}" class="space-y-6">
             @csrf
             
             <div class="space-y-2">
-                <p class="font-semibold text-gray-700">Masuk Sebagai:</p>
-                <div class="flex justify-center gap-8 mb-6">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="role" value="guru" {{ old('role', 'guru') == 'guru' ? 'checked' : '' }} class="accent-red-500 w-4 h-4">
-                        <span class="text-sm">Guru</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="role" value="karyawan" {{ old('role') == 'karyawan' ? 'checked' : '' }} class="accent-red-500 w-4 h-4">
-                        <span class="text-sm">Karyawan</span>
-                    </label>
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Email Anda</label>
+                <div class="relative group">
+                    <i data-lucide="mail" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                    <input name="email" type="email" value="{{ old('email') }}" required autocomplete="off"
+                           class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                           placeholder="nama@email.com">
                 </div>
             </div>
 
-            <input name="email" type="email" value="{{ old('email') }}" placeholder="Email" required class="w-full bg-[#0396D6] text-white placeholder-white px-5 py-3 rounded-full focus:outline-none">
-            <input name="password" type="password" placeholder="Password" required class="w-full bg-[#0396D6] text-white placeholder-white px-5 py-3 rounded-full focus:outline-none">
-
-            <div class="flex items-center justify-between text-sm">
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="remember" class="accent-red-500">
-                    <span>Ingat saya</span>
-                </label>
-                <a href="#" class="text-blue-600 font-semibold">Lupa password?</a>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center ml-1">
+                    <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest">Password</label>
+                    <a href="#" class="text-[10px] font-extrabold text-[#D85B63] hover:underline uppercase tracking-widest">Lupa?</a>
+                </div>
+                <div class="relative group">
+                    <i data-lucide="lock" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                    <input name="password" type="password" required 
+                           class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-[13px] font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                           placeholder="••••••••">
+                </div>
             </div>
 
-            <button type="submit" class="mt-4 bg-[#D85B63] hover:bg-[#c44f56] text-white px-10 py-2 rounded-full">Masuk</button>
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Kode Keamanan</label>
+                <div class="flex gap-3">
+                    <div class="relative group flex-1">
+                        <i data-lucide="shield-alert" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="captcha" type="text" required
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-sm font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="Masukkan kode captcha">
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="captcha-img">{!! captcha_img('flat') !!}</span>
+                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 px-1">
+                <input type="checkbox" id="remember" name="remember" class="w-5 h-5 rounded-lg border-gray-200 text-[#173A67] focus:ring-[#173A67]/10 transition-all cursor-pointer">
+                <label for="remember" class="text-xs font-bold text-slate-500 cursor-pointer select-none">Ingat saya di perangkat ini</label>
+            </div>
+
+            <button type="submit" class="w-full bg-[#173A67] text-white py-5 rounded-[1.5rem] font-extrabold text-[13px] shadow-xl shadow-blue-900/10 hover:translate-y-[-2px] hover:shadow-blue-900/20 active:scale-95 transition-all uppercase tracking-[0.2em] mt-2">
+                MASUK SEBAGAI KEUANGAN
+            </button>
         </form>
 
-        <p class="mt-6 text-sm">Belum punya akun? <a href="{{ route('keuangan.register') }}" class="text-blue-600 font-semibold">Daftar</a></p>
-
+        <div class="mt-12 pt-8 border-t border-gray-100 text-center">
+            <p class="text-[13px] font-bold text-slate-400 tracking-tight">
+                Belum punya akun? 
+                <a href="{{ route('keuangan.register') }}" class="text-[#D85B63] font-extrabold hover:underline ml-1">Daftar Sekarang</a>
+            </p>
+        </div>
     </div>
 </div>
 
+<script>
+    lucide.createIcons();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const reloadBtn = document.querySelector('.btn-reload');
+        const captchaImg = document.querySelector('.captcha-img');
+
+        if (reloadBtn && captchaImg) {
+            reloadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // Visual feedback
+                reloadBtn.classList.add('opacity-50', 'pointer-events-none');
+                
+                // Get URL from data attribute
+                const url = this.getAttribute('data-captcha-url');
+                
+                // Add timestamp to prevent caching
+                const freshUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + new Date().getTime();
+
+                fetch(freshUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('HTTP Error ' + response.status + ': ' + response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        captchaImg.innerHTML = data.captcha;
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    })
+                    .catch(error => {
+                        console.error('Error reloading captcha:', error);
+                        alert('Gagal: ' + error.message);
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    });
+            });
+        }
+    });
+</script>
 </body>
 </html>
-

@@ -138,27 +138,14 @@
                     </div>
                     <div class="flex items-center gap-2">
                          <span class="captcha-img">{!! captcha_img('flat') !!}</span>
-                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha">
+                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
                             <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
                          </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Role Selection -->
-            <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                <p class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest mb-3 ml-1 text-center">Mendaftar Sebagai</p>
-                <div class="flex justify-center gap-10">
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="radio" name="role" value="guru" {{ old('role', 'guru') == 'guru' ? 'checked' : '' }} class="w-4 h-4 text-[#D85B63] border-gray-200 focus:ring-[#D85B63]/10">
-                        <span class="text-sm font-bold text-[#173A67] group-hover:text-[#D85B63] transition-colors">Guru</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="radio" name="role" value="karyawan" {{ old('role') == 'karyawan' ? 'checked' : '' }} class="w-4 h-4 text-[#D85B63] border-gray-200 focus:ring-[#D85B63]/10">
-                        <span class="text-sm font-bold text-[#173A67] group-hover:text-[#D85B63] transition-colors">Karyawan</span>
-                    </label>
-                </div>
-            </div>
+
 
             <button type="submit" class="w-full bg-[#173A67] text-white py-5 rounded-[1.5rem] font-extrabold text-[13px] shadow-xl shadow-blue-900/10 hover:translate-y-[-2px] hover:shadow-blue-900/20 active:scale-95 transition-all uppercase tracking-[0.2em] mt-2">
                 DAFTAR SEKARANG
@@ -179,14 +166,43 @@
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript">
-    $(".btn-reload").click(function () {
-        $.ajax({
-            type: 'GET',
-            url: '{{ route('captcha.reload') }}',
-            success: function (data) {
-                $(".captcha-img").html(data.captcha);
-            }
-        });
+    document.addEventListener('DOMContentLoaded', function () {
+        const reloadBtn = document.querySelector('.btn-reload');
+        const captchaImg = document.querySelector('.captcha-img');
+
+        if (reloadBtn && captchaImg) {
+            reloadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // Visual feedback
+                reloadBtn.classList.add('opacity-50', 'pointer-events-none');
+                
+                // Get URL from data attribute
+                const url = this.getAttribute('data-captcha-url');
+                
+                // Add timestamp to prevent caching
+                const freshUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + new Date().getTime();
+
+                fetch(freshUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('HTTP Error ' + response.status + ': ' + response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        captchaImg.innerHTML = data.captcha;
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    })
+                    .catch(error => {
+                        console.error('Error reloading captcha:', error);
+                        alert('Gagal: ' + error.message);
+                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    });
+            });
+        }
     });
 </script>
 </body>

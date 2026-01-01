@@ -21,7 +21,8 @@ Route::post('/logout', function (Request $request) {
 })->name('logout');
 
 // CAPTCHA Reload Route
-Route::get('/captcha/reload', function () {
+// CAPTCHA Reload Route
+Route::get('/refresh-captcha', function () {
     return response()->json(['captcha' => captcha_img('flat')]);
 })->name('captcha.reload');
 
@@ -609,7 +610,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     });
 
     // Orang Tua protected routes
-    Route::middleware(['auth'])->prefix('orangtua')->name('orangtua. group')->group(function () {
+    Route::middleware(['auth'])->prefix('orangtua')->name('orangtua.')->group(function () {
         Route::get('/dashboard', fn () => view('orangtua.dashboard'))->name('dashboard');
         Route::get('/berkas', fn () => view('orangtua.pemberkasan'))->name('berkas');
         Route::get('/pembayaran', fn () => view('orangtua.pembayaran'))->name('pembayaran');

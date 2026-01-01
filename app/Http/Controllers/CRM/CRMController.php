@@ -33,8 +33,10 @@ class CRMController extends Controller
         // Transform students for Alpine.js
         $students = $students->map(function ($student) use ($statusColors) {
             return [
+                'id' => $student->id,
                 'name' => $student->name,
                 'angkatan' => $student->kelas ? $student->kelas->nama_kelas : 'Umum',
+                'kelas_id' => $student->kelas_id,
                 'fuDate' => $student->created_at->format('d/m/Y'),
                 'response' => $student->follow_up ?: 'No Respon',
                 'responseColor' => $statusColors[$student->follow_up] ?? 'bg-gray-50 text-gray-400 border-gray-100',
@@ -77,8 +79,10 @@ class CRMController extends Controller
 
         $students = $students->map(function ($student) use ($statusColors) {
             return [
+                'id' => $student->id,
                 'name' => $student->name,
                 'angkatan' => $student->kelas ? $student->kelas->nama_kelas : 'Umum',
+                'kelas_id' => $student->kelas_id,
                 'fuDate' => $student->created_at->format('d/m/Y'),
                 'status1' => $student->follow_up ?: 'No Respon',
                 'status1Color' => $statusColors[$student->follow_up] ?? 'bg-gray-50 text-gray-400 border-gray-100',
@@ -112,5 +116,81 @@ class CRMController extends Controller
     public function detailkesiswaan()
     {
         return view('CRM.detailkesiswaan');
+    }
+
+    /**
+     * Update student status
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|max:255'
+        ]);
+
+        $student = User::findOrFail($id);
+        $student->status = $request->status;
+        $student->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status berhasil diupdate',
+            'data' => [
+                'id' => $student->id,
+                'status' => $student->status
+            ]
+        ]);
+    }
+
+    /**
+     * Update student follow-up
+     */
+    public function updateFollowUp(Request $request, $id)
+    {
+        $request->validate([
+            'follow_up' => 'required|string|max:255'
+        ]);
+
+        $student = User::findOrFail($id);
+        $student->follow_up = $request->follow_up;
+        $student->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Follow up berhasil diupdate',
+            'data' => [
+                'id' => $student->id,
+                'follow_up' => $student->follow_up
+            ]
+        ]);
+    }
+
+    /**
+     * Update student batch/kelas
+     */
+    public function updateBatch(Request $request, $id)
+    {
+        $request->validate([
+            'angkatan' => 'required|string|max:255'
+        ]);
+
+        $student = User::findOrFail($id);
+        
+        // Find kelas by nama_kelas
+        $kelas = \App\Models\Kelas::where('nama_kelas', $request->angkatan)->first();
+        
+        if ($kelas) {
+            $student->kelas_id = $kelas->id;
+            $student->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Angkatan berhasil diupdate',
+            'data' => [
+                'id' => $student->id,
+                'angkatan' => $request->angkatan,
+                'kelas_id' => $student->kelas_id
+            ]
+        ]);
     }
 }

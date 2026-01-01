@@ -24,7 +24,10 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'captcha' => ['required', 'captcha'],
         ]);
+
+        unset($credentials['captcha']);
 
         if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
@@ -40,6 +43,7 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:admins'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'captcha' => ['required', 'captcha'],
         ]);
 
         $admin = \App\Models\Admin::create([
