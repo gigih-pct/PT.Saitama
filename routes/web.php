@@ -546,6 +546,11 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
         Route::get('/data-kelas', [CRMController::class, 'datakelas'])->name('datakelas');
         Route::get('/testimoni-siswa', [CRMController::class, 'testimoni'])->name('testimoni');
         Route::get('/detail-kesiswaan', [CRMController::class, 'detailkesiswaan'])->name('detailkesiswaan');
+        
+        // Student Update API Routes
+        Route::post('/students/{id}/update-status', [CRMController::class, 'updateStatus'])->name('students.update-status');
+        Route::post('/students/{id}/update-followup', [CRMController::class, 'updateFollowUp'])->name('students.update-followup');
+        Route::post('/students/{id}/update-batch', [CRMController::class, 'updateBatch'])->name('students.update-batch');
     });
 
     // Orang Tua auth routes (Siswa / Orang Tua choice)

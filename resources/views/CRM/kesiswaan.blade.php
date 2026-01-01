@@ -107,7 +107,7 @@
                     </div>
                     
                     <!-- Batch -->
-                    <button @click="openBatchModal(index)" class="bg-gray-50 px-5 py-2.5 rounded-2xl font-extrabold text-[11px] text-gray-400 hover:bg-blue-50 hover:text-[#173A67] transition-all uppercase tracking-widest border border-transparent hover:border-blue-100">
+                    <button @click="openBatchModal(student)" class="bg-gray-50 px-5 py-2.5 rounded-2xl font-extrabold text-[11px] text-gray-400 hover:bg-blue-50 hover:text-[#173A67] transition-all uppercase tracking-widest border border-transparent hover:border-blue-100">
                         <span x-text="student.angkatan"></span>
                     </button>
                     
@@ -129,8 +129,8 @@
                     </div>
 
                     <!-- Statuses -->
-                        <button @click="openFUModal(index)" :class="student.status1Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none shadow-sm border border-transparent'" x-text="student.status1"></button>
-                        <button @click="openStatusModal(index)" :class="student.status2Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.status2"></button>
+                        <button @click="openFUModal(student)" :class="student.status1Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none shadow-sm border border-transparent'" x-text="student.status1"></button>
+                        <button @click="openStatusModal(student)" :class="student.status2Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.status2"></button>
                     
                     <!-- Detail Action -->
                     <a href="{{ route('crm.detailkesiswaan') }}" class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
@@ -376,37 +376,101 @@
                 // Limit by perPage
                 return filtered.slice(0, parseInt(this.perPage));
             },
-            openBatchModal(index) {
-                this.editingStudentIndex = index;
-                this.tempBatch = this.students[index].angkatan;
+            currentStudent: null,
+            openBatchModal(student) {
+                this.currentStudent = student;
+                this.tempBatch = student.angkatan;
                 this.showBatchModal = true;
             },
-            applyBatch() {
-                if (this.editingStudentIndex !== null) {
-                    this.students[this.editingStudentIndex].angkatan = this.tempBatch;
-                    this.showBatchModal = false;
+            async applyBatch() {
+                if (!this.currentStudent) return;
+                
+                // Optimistic Update
+                const oldBatch = this.currentStudent.angkatan;
+                this.currentStudent.angkatan = this.tempBatch;
+                this.showBatchModal = false;
+
+                try {
+                    const response = await fetch(`/crm/students/${this.currentStudent.id}/update-batch`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ angkatan: this.tempBatch })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to update');
+                } catch (error) {
+                    console.error(error);
+                    this.currentStudent.angkatan = oldBatch; // Revert
+                    alert('Gagal mengupdate angkatan');
                 }
             },
-            openStatusModal(index) {
-                this.editingStudentIndex = index;
+            openStatusModal(student) {
+                this.currentStudent = student;
                 this.showStatusModal = true;
             },
-            applyStatus(option) {
-                if (this.editingStudentIndex !== null) {
-                    this.students[this.editingStudentIndex].status2 = option.label;
-                    this.students[this.editingStudentIndex].status2Color = option.color;
-                    this.showStatusModal = false;
+            async applyStatus(option) {
+                if (!this.currentStudent) return;
+
+                const oldStatus = this.currentStudent.status2;
+                const oldColor = this.currentStudent.status2Color;
+
+                // Optimistic Update
+                this.currentStudent.status2 = option.label;
+                this.currentStudent.status2Color = option.color;
+                this.showStatusModal = false;
+
+                try {
+                    const response = await fetch(`/crm/students/${this.currentStudent.id}/update-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ status: option.label })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to update');
+                } catch (error) {
+                    console.error(error);
+                    this.currentStudent.status2 = oldStatus; // Revert
+                    this.currentStudent.status2Color = oldColor;
+                    alert('Gagal mengupdate status');
                 }
             },
-            openFUModal(index) {
-                this.editingStudentIndex = index;
+            openFUModal(student) {
+                this.currentStudent = student;
                 this.showFUModal = true;
             },
-            applyFUStatus(option) {
-                if (this.editingStudentIndex !== null) {
-                    this.students[this.editingStudentIndex].status1 = option.label;
-                    this.students[this.editingStudentIndex].status1Color = option.color;
-                    this.showFUModal = false;
+            async applyFUStatus(option) {
+                if (!this.currentStudent) return;
+
+                const oldResponse = this.currentStudent.status1;
+                const oldColor = this.currentStudent.status1Color;
+
+                // Optimistic Update
+                this.currentStudent.status1 = option.label;
+                this.currentStudent.status1Color = option.color;
+                this.showFUModal = false;
+
+                try {
+                    const response = await fetch(`/crm/students/${this.currentStudent.id}/update-followup`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ follow_up: option.label })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to update');
+                } catch (error) {
+                    console.error(error);
+                    this.currentStudent.status1 = oldResponse; // Revert
+                    this.currentStudent.status1Color = oldColor;
+                    alert('Gagal mengupdate follow up');
                 }
             }
         }));

@@ -171,7 +171,7 @@
                     </div>
                     
                     <!-- Batch -->
-                    <button @click="openBatchModal(index)" class="bg-gray-50 px-4 py-2 rounded-xl font-extrabold text-[10px] text-gray-500 hover:bg-blue-50 hover:text-[#173A67] transition-all uppercase tracking-wider">
+                    <button @click="openBatchModal(student)" class="bg-gray-50 px-4 py-2 rounded-xl font-extrabold text-[10px] text-gray-500 hover:bg-blue-50 hover:text-[#173A67] transition-all uppercase tracking-wider">
                         <span x-text="student.angkatan"></span>
                     </button>
                     
@@ -193,8 +193,8 @@
                     </div>
 
                     <!-- Statuses -->
-                    <button @click="openFUModal(index)" :class="student.responseColor + ' text-[10px] font-extrabold px-6 py-2 rounded-xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.response"></button>
-                    <button @click="openStatusModal(index)" :class="student.classColor + ' text-[10px] font-extrabold px-6 py-2 rounded-xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.class"></button>
+                    <button @click="openFUModal(student)" :class="student.responseColor + ' text-[10px] font-extrabold px-6 py-2 rounded-xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.response"></button>
+                    <button @click="openStatusModal(student)" :class="student.classColor + ' text-[10px] font-extrabold px-6 py-2 rounded-xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.class"></button>
                     
                     <!-- View Action -->
                     <button class="w-10 h-10 rounded-xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
@@ -445,37 +445,101 @@
                 // Limit by perPage
                 return filtered.slice(0, parseInt(this.perPage));
             },
-            openBatchModal(index) {
-                this.editingStudentIndex = index;
-                this.tempBatch = this.students[index].angkatan;
+            currentStudent: null,
+            openBatchModal(student) {
+                this.currentStudent = student;
+                this.tempBatch = student.angkatan;
                 this.showBatchModal = true;
             },
-            applyBatch() {
-                if (this.editingStudentIndex !== null) {
-                    this.students[this.editingStudentIndex].angkatan = this.tempBatch;
-                    this.showBatchModal = false;
+            async applyBatch() {
+                if (!this.currentStudent) return;
+                
+                // Optimistic Update
+                const oldBatch = this.currentStudent.angkatan;
+                this.currentStudent.angkatan = this.tempBatch;
+                this.showBatchModal = false;
+
+                try {
+                    const response = await fetch(`/crm/students/${this.currentStudent.id}/update-batch`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ angkatan: this.tempBatch })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to update');
+                } catch (error) {
+                    console.error(error);
+                    this.currentStudent.angkatan = oldBatch; // Revert
+                    alert('Gagal mengupdate angkatan');
                 }
             },
-            openStatusModal(index) {
-                this.editingStudentIndex = index;
+            openStatusModal(student) {
+                this.currentStudent = student;
                 this.showStatusModal = true;
             },
-            applyStatus(option) {
-                if (this.editingStudentIndex !== null) {
-                    this.students[this.editingStudentIndex].class = option.label;
-                    this.students[this.editingStudentIndex].classColor = option.color;
-                    this.showStatusModal = false;
+            async applyStatus(option) {
+                if (!this.currentStudent) return;
+
+                const oldStatus = this.currentStudent.class;
+                const oldColor = this.currentStudent.classColor;
+
+                // Optimistic Update
+                this.currentStudent.class = option.label;
+                this.currentStudent.classColor = option.color;
+                this.showStatusModal = false;
+
+                try {
+                    const response = await fetch(`/crm/students/${this.currentStudent.id}/update-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ status: option.label })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to update');
+                } catch (error) {
+                    console.error(error);
+                    this.currentStudent.class = oldStatus; // Revert
+                    this.currentStudent.classColor = oldColor;
+                    alert('Gagal mengupdate status');
                 }
             },
-            openFUModal(index) {
-                this.editingStudentIndex = index;
+            openFUModal(student) {
+                this.currentStudent = student;
                 this.showFUModal = true;
             },
-            applyFUStatus(option) {
-                if (this.editingStudentIndex !== null) {
-                    this.students[this.editingStudentIndex].response = option.label;
-                    this.students[this.editingStudentIndex].responseColor = option.color;
-                    this.showFUModal = false;
+            async applyFUStatus(option) {
+                if (!this.currentStudent) return;
+
+                const oldResponse = this.currentStudent.response;
+                const oldColor = this.currentStudent.responseColor;
+
+                // Optimistic Update
+                this.currentStudent.response = option.label;
+                this.currentStudent.responseColor = option.color;
+                this.showFUModal = false;
+
+                try {
+                    const response = await fetch(`/crm/students/${this.currentStudent.id}/update-followup`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ follow_up: option.label })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to update');
+                } catch (error) {
+                    console.error(error);
+                    this.currentStudent.response = oldResponse; // Revert
+                    this.currentStudent.responseColor = oldColor;
+                    alert('Gagal mengupdate follow up');
                 }
             }
         }));
