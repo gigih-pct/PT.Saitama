@@ -126,6 +126,24 @@
                 </div>
             </div>
 
+            <div class="space-y-2">
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Kode Keamanan</label>
+                <div class="flex gap-3">
+                    <div class="relative group flex-1">
+                        <i data-lucide="shield-alert" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
+                        <input name="captcha" type="text" required
+                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-sm font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
+                               placeholder="Masukkan kode captcha">
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="captcha-img">{!! captcha_img('flat') !!}</span>
+                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
+                         </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex items-center gap-3 px-1">
                 <input type="checkbox" id="remember" name="remember" class="w-5 h-5 rounded-lg border-gray-200 text-[#173A67] focus:ring-[#173A67]/10 transition-all cursor-pointer">
                 <label for="remember" class="text-xs font-bold text-slate-500 cursor-pointer select-none">Ingat saya di perangkat ini</label>
@@ -147,6 +165,18 @@
 
 <script>
     lucide.createIcons();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    $(".btn-reload").click(function () {
+        $.ajax({
+            type: 'GET',
+            url: '{{ route('captcha.reload') }}',
+            success: function (data) {
+                $(".captcha-img").html(data.captcha);
+            }
+        });
+    });
 </script>
 </body>
 </html>

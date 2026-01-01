@@ -17,6 +17,7 @@ class CrmAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admins,email',
             'password' => 'required|string|min:6|confirmed',
+            'captcha' => 'required|captcha',
         ];
 
         $data = $request->validate($rules);
@@ -38,9 +39,12 @@ class CrmAuthController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'captcha' => 'required|captcha',
         ]);
 
         $remember = $request->boolean('remember');
+
+        unset($credentials['captcha']);
 
         if (Auth::guard('admin')->attempt($credentials, $remember)) {
             $request->session()->regenerate();

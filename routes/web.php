@@ -20,6 +20,11 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('login');
 })->name('logout');
 
+// CAPTCHA Reload Route
+Route::get('/captcha/reload', function () {
+    return response()->json(['captcha' => captcha_img('flat')]);
+})->name('captcha.reload');
+
 use App\Http\Controllers\Sensei\DashboardController;
 use App\Http\Controllers\Sensei\EvaluasiController;
 

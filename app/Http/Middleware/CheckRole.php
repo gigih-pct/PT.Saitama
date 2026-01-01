@@ -14,14 +14,15 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        // Try to get user from default guard, then admin guard
-        $user = Auth::user() ?: Auth::guard('admin')->user();
+        // Try to get user from admin guard first, then default guard
+        $user = Auth::guard('admin')->user() ?: Auth::user();
 
         if (!$user) {
             abort(403);
         }
 
         $roles = collect($roles)->map(fn($r) => trim($r))->filter()->all();
+        
         if (empty($roles)) {
             return $next($request);
         }
