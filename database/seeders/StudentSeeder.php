@@ -13,69 +13,43 @@ class StudentSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ensure some classes exist
-        $kelasNames = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
-        $kelases = [];
-        
-        foreach ($kelasNames as $name) {
-            $kelases[] = \App\Models\Kelas::firstOrCreate(
-                ['nama_kelas' => $name],
-                ['kapasitas' => 30]
-            );
-        }
+        // Clear existing students to ensure exact counts
+        User::where('role', 'siswa')->delete();
 
+        // Ensure classes exist
+        $kelasNames = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3'];
+        
         $statuses = ['Respon', 'No Respon', 'Invalid', 'Jepang', 'seleksi', 'mau seleksi', 'ulang kelas', 'BLK', 'proses belajar', 'TG', 'kerja', 'keluar', 'cuti'];
         $followUps = ['Respon', 'No Respon', 'Invalid'];
 
-        // Create 50 students
-        User::factory()->count(50)->create([
-            'role' => 'siswa',
-            'status' => function() use ($statuses) {
-                return $statuses[array_rand($statuses)];
-            },
-            'follow_up' => function() use ($followUps) {
-                return $followUps[array_rand($followUps)];
-            },
-            'kelas_id' => function() use ($kelases) {
-                return $kelases[array_rand($kelases)]->id;
-            }
-        ]);
-
-        // Add the specific students from before to ensure they exist for testing
-        $fixedStudents = [
-            [
-                'name' => 'Budi Santoso',
-                'email' => 'budi@siswa.com',
-                'password' => Hash::make('password'),
-                'role' => 'siswa',
-                'status' => 'Jepang',
-                'follow_up' => 'Respon',
-                'kelas_id' => $kelases[0]->id,
-            ],
-            [
-                'name' => 'Siti Aminah',
-                'email' => 'siti@siswa.com',
-                'password' => Hash::make('password'),
-                'role' => 'siswa',
-                'status' => 'seleksi',
-                'follow_up' => 'No Respon',
-                'kelas_id' => $kelases[1]->id,
-            ],
-        ];
-
-        foreach ($fixedStudents as $student) {
-            $user = User::updateOrCreate(
-                ['email' => $student['email']],
-                $student
+        foreach ($kelasNames as $name) {
+            $kelas = \App\Models\Kelas::firstOrCreate(
+                ['nama_kelas' => $name],
+                ['kapasitas' => 30]
             );
-            // Randomize created_at for these specific test users too if needed, or keep them recent. 
-            // Let's randomize all students significantly to show data.
+
+            // Create 30 students for this class
+            User::factory()->count(30)->create([
+                'role' => 'siswa',
+                'kelas_id' => $kelas->id,
+                'status' => function() use ($statuses) {
+                    return $statuses[array_rand($statuses)];
+                },
+                'follow_up' => function() use ($followUps) {
+                    return $followUps[array_rand($followUps)];
+                },
+                'created_at' => function() {
+                    return now()->subDays(rand(0, 365));
+                }
+            ]);
         }
 
-        // Randomize timestamps for all students
-        User::where('role', 'siswa')->each(function ($user) {
-            $user->created_at = now()->subDays(rand(0, 365));
-            $user->save();
-        });
+        // Add specific test users if needed (optional, creating them in addition or as part of the 30)
+        // For now, let's stick to the batch generation as per request.
+        
+        /* 
+        $fixedStudents = [ ... ];
+        foreach ($fixedStudents as $student) { ... }
+        */
     }
 }

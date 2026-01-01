@@ -545,7 +545,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
         Route::get('/pengajuan-siswa', [CRMController::class, 'pengajuansiswa'])->name('pengajuansiswa');
         Route::get('/data-kelas', [CRMController::class, 'datakelas'])->name('datakelas');
         Route::get('/testimoni-siswa', [CRMController::class, 'testimoni'])->name('testimoni');
-        Route::get('/detail-kesiswaan', [CRMController::class, 'detailkesiswaan'])->name('detailkesiswaan');
+        Route::get('/detail-kesiswaan/{id}', [CRMController::class, 'detailkesiswaan'])->name('detailkesiswaan');
         
         // Student Update API Routes
         Route::post('/students/{id}/update-status', [CRMController::class, 'updateStatus'])->name('students.update-status');

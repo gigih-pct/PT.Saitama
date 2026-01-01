@@ -197,9 +197,9 @@
                     <button @click="openStatusModal(student)" :class="student.classColor + ' text-[10px] font-extrabold px-6 py-2 rounded-xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.class"></button>
                     
                     <!-- View Action -->
-                    <button class="w-10 h-10 rounded-xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
+                    <a :href="'/crm/detail-kesiswaan/' + student.id" class="w-10 h-10 rounded-xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
                         <i data-lucide="eye" class="w-5 h-5"></i>
-                    </button>
+                    </a>
                 </div>
             </template>
 

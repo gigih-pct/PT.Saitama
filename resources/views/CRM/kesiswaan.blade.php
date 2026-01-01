@@ -133,7 +133,7 @@
                         <button @click="openStatusModal(student)" :class="student.status2Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.status2"></button>
                     
                     <!-- Detail Action -->
-                    <a href="{{ route('crm.detailkesiswaan') }}" class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
+                    <a :href="'/crm/detail-kesiswaan/' + student.id" class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
                         <i data-lucide="eye" class="w-6 h-6"></i>
                     </a>
                 </div>

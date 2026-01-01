@@ -42,30 +42,30 @@
             <!-- Info -->
             <div class="space-y-4 z-10 flex-1">
                 <div class="space-y-1">
-                    <h2 class="text-[#173A67] font-extrabold text-3xl tracking-tight">Gigih</h2>
+                    <h2 class="text-[#173A67] font-extrabold text-3xl tracking-tight">{{ $student->name }}</h2>
                     <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <i data-lucide="hash" class="w-3.5 h-3.5"></i> 23.12.2865
+                        <i data-lucide="mail" class="w-3.5 h-3.5"></i> {{ $student->email }}
                     </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
-                        <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Tanggal Lahir</p>
-                        <p class="text-[#173A67] font-bold text-sm">18 Mei 2001</p>
+                        <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Tanggal Daftar</p>
+                        <p class="text-[#173A67] font-bold text-sm">{{ $student->created_at->format('d F Y') }}</p>
                     </div>
                     <div class="bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
-                        <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Kesempatan</p>
-                        <p class="text-[#173A67] font-bold text-sm">5 / 5 Sesi</p>
+                        <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Nomor WA</p>
+                        <p class="text-[#173A67] font-bold text-sm">{{ $student->no_wa_pribadi ?? '-' }}</p>
                     </div>
                 </div>
 
                 <div class="flex gap-3 pt-2">
                     <button class="bg-[#D85B63] hover:bg-[#c44f56] text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-red-900/10 text-[11px] transition-all flex items-center gap-3 uppercase tracking-widest active:scale-95">
-                        <span>PLATDA</span>
+                        <span>{{ $student->kelas ? $student->kelas->nama_kelas : 'BELUM DIKELAS' }}</span>
                         <i data-lucide="edit-3" class="w-4 h-4"></i>
                     </button>
                     <button class="bg-white border-2 border-green-100 text-green-600 font-extrabold px-8 py-3.5 rounded-2xl shadow-sm text-[11px] hover:bg-green-500 hover:text-white hover:border-green-500 transition-all uppercase tracking-widest active:scale-95">
-                        Akun Siswa
+                        {{ $student->status ?: 'Pending' }}
                     </button>
                 </div>
             </div>
@@ -85,17 +85,17 @@
 
             <div class="flex gap-4 mb-8">
                 <button class="bg-green-500 hover:bg-green-600 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-xl shadow-green-900/20 flex items-center gap-3 transition-all text-sm active:scale-95">
-                    Respon
+                    {{ $student->follow_up ?: 'No Respon' }}
                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                 </button>
                 <button class="bg-blue-500 hover:bg-blue-600 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-xl shadow-blue-900/20 flex items-center gap-3 transition-all text-sm active:scale-95">
-                    Jepang
+                    {{ $student->status ?: 'Pending' }}
                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                 </button>
             </div>
 
             <div class="bg-white/10 border border-white/10 px-8 py-3.5 rounded-full flex items-center gap-4 transition-all hover:bg-white/20 cursor-pointer group/date shadow-inner">
-                <span class="font-extrabold text-white text-base tracking-wider">12/08/2025</span>
+                <span class="font-extrabold text-white text-base tracking-wider">{{ $student->updated_at->format('d/m/Y') }}</span>
                 <div class="w-8 h-8 bg-[#D85B63] text-white rounded-xl flex items-center justify-center shadow-lg group-hover/date:rotate-12 transition-transform">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                 </div>

@@ -113,9 +113,10 @@ class CRMController extends Controller
         return view('CRM.testimoni');
     }
 
-    public function detailkesiswaan()
+    public function detailkesiswaan($id)
     {
-        return view('CRM.detailkesiswaan');
+        $student = User::with('kelas')->findOrFail($id);
+        return view('CRM.detailkesiswaan', compact('student'));
     }
 
     /**
