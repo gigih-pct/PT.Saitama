@@ -1,513 +1,380 @@
 @extends('layouts.header_dashboard_sensei')
 
-@section('content')
-<div class="grid grid-cols-12 gap-6">
+@section('title', 'Penilaian Wawancara')
 
-    <!-- HEADER FILTER -->
-    <div class="col-span-12">
-        <div class="bg-[#173A67] rounded-full px-6 py-3 flex items-center justify-between text-white">
-            <div class="flex items-center gap-4">
-                <span class="font-semibold">Penilaian Kelas</span>
-                <div class="flex items-center gap-2 ml-2">
-                    <select name="kelas-select" class="bg-white text-black rounded-full px-3 py-1 text-sm border">
-                        <option>A1</option>
-                        <option>A2</option>
-                        <option>A3</option>
+@section('content')
+@php
+    $users = $students ?? [];
+    $activeTab = request('tab', 'materi'); // materi, sikap
+@endphp
+
+<div class="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-sm border border-gray-100 min-h-[85vh] flex flex-col relative overflow-hidden font-sans">
+
+    <!-- HEADER SECTION -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 z-10 relative">
+        <div class="space-y-2">
+            <h1 class="text-[#173A67] font-black text-2xl lg:text-3xl tracking-tight flex items-center gap-3">
+                Penilaian Wawancara
+                <!-- Class Selector -->
+                <div class="relative group inline-block">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="users" class="w-3 h-3 text-white"></i>
+                    </div>
+                    <select onchange="window.location.href='?kelas_id='+this.value" class="pl-8 pr-8 py-1.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-700 transition-all appearance-none uppercase tracking-widest">
+                        @foreach($kelases as $k)
+                            <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>{{ $k->nama_kelas }}</option>
+                        @endforeach
                     </select>
-                    <div class="relative">
-                        <select name="penilaian-select" onchange="if(this.value) window.location.href=this.value" class="bg-green-500 text-white rounded-full px-4 py-1 text-sm border-0">
-                            <option value="{{ route('sensei.penilaian.presensi') }}" {{ Route::currentRouteName() === 'sensei.penilaian.presensi' ? 'selected' : '' }}>Penilaian : Presensi Siswa</option>
-                             <option value="{{ route('sensei.penilaian.bunpou') }}" {{ Route::currentRouteName() === 'sensei.penilaian.bunpou' ? 'selected' : '' }}>Penilaian : Bunpou</option>
-                            <option value="{{ route('sensei.penilaian.kanji') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kanji' ? 'selected' : '' }}>Penilaian : Kanji</option>
-                            <option value="{{ route('sensei.penilaian.kotoba') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kotoba' ? 'selected' : '' }}>Penilaian : Kotoba</option>
-                            <option value="{{ route('sensei.penilaian.fmd') }}" {{ Route::currentRouteName() === 'sensei.penilaian.fmd' ? 'selected' : '' }}>Penilaian : FMD</option>
-                            <option value="{{ route('sensei.penilaian.wawancara') }}" {{ Route::currentRouteName() === 'sensei.penilaian.wawancara' ? 'selected' : '' }}>Penilaian : Wawancara</option>
-                            <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ Route::currentRouteName() === 'sensei.penilaian.nilai-akhir' ? 'selected' : '' }}>Penilaian : Nilai Akhir</option>
-                        </select>
-                        <svg class="w-3 h-3 absolute right-2 top-2 text-white pointer-events-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8l4 4 4-4"/></svg>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                         <i data-lucide="chevron-down" class="w-3 h-3 text-white"></i>
+                    </div>
+                </div>
+            </h1>
+            <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Evaluasi Lisan & Sikap</p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+             <!-- Tab Switcher -->
+             <div class="bg-gray-100 p-1 rounded-2xl flex items-center shadow-inner">
+                 <button type="button" onclick="switchTab('materi')" id="btn-materi" class="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all {{ $activeTab === 'materi' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200' }}">
+                     Materi
+                 </button>
+                 <button type="button" onclick="switchTab('sikap')" id="btn-sikap" class="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all {{ $activeTab === 'sikap' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200' }}">
+                     Sikap
+                 </button>
+             </div>
+
+             <!-- Page Selector -->
+             <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-white"></i>
+                </div>
+                <select onchange="if(this.value) window.location.href=this.value" class="pl-10 pr-10 py-3 rounded-2xl bg-[#173A67] text-white text-sm font-bold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-900 transition-all appearance-none">
+                    <option value="{{ route('sensei.penilaian.presensi') }}" {{ $type === 'presensi' ? 'selected' : '' }}>Presensi</option>
+                    <option value="{{ route('sensei.penilaian.bunpou') }}" {{ $type === 'bunpou' ? 'selected' : '' }}>Bunpou</option>
+                    <option value="{{ route('sensei.penilaian.kanji') }}" {{ $type === 'kanji' ? 'selected' : '' }}>Kanji</option>
+                    <option value="{{ route('sensei.penilaian.kotoba') }}" {{ $type === 'kotoba' ? 'selected' : '' }}>Kotoba</option>
+                    <option value="{{ route('sensei.penilaian.fmd') }}" {{ $type === 'fmd' ? 'selected' : '' }}>FMD</option>
+                    <option value="{{ route('sensei.penilaian.wawancara') }}" {{ $type === 'wawancara' ? 'selected' : '' }}>Wawancara</option>
+                    <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ $type === 'nilai-akhir' ? 'selected' : '' }}>Nilai Akhir</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                     <i data-lucide="chevron-down" class="w-4 h-4 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid grid-cols-12 gap-8 flex-1">
+        
+        <!-- LEFT: TABLE CONTENT -->
+        <div class="col-span-12 lg:col-span-9 flex flex-col gap-6">
+            
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-3xl border border-gray-100 sticky top-0 z-30">
+                <div class="flex items-center gap-3">
+                     <button id="save-btn" class="px-6 py-2.5 bg-[#173A67] text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i> Simpan
+                    </button>
+                    <span id="save-msg" class="text-sm font-bold ml-2"></span>
+                </div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                     <span id="label-active-tab">Penilaian Materi</span>
+                </div>
+            </div>
+
+            <!-- TABLE MATERI -->
+            <div id="content-materi" class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden flex-1 shadow-sm relative z-0 {{ $activeTab === 'materi' ? '' : 'hidden' }}">
+                <div class="wawancara-scroll overflow-auto max-h-[600px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-[#173A67] text-white sticky top-0 z-20">
+                            <tr>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30">No</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Program</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Umum</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Jepang</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Indo</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center bg-blue-800">Jumlah</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center bg-blue-800">Persen</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center bg-blue-800">Ket</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px]">Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            @forelse($users as $idx => $user)
+                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-materi">
+                                <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                    {{ $idx + 1 }}
+                                </td>
+                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
+                                            {{ substr($user->name, 0, 1) }}
+                                        </div>
+                                        <input type="text" class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input" 
+                                               value="{{ $user->name }}" readonly>
+                                    </div>
+                                </td>
+                                @for($j=1; $j<=4; $j++)
+                                <td class="px-2 py-4 text-center">
+                                    <select class="w-16 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold py-2 focus:ring-2 focus:ring-blue-500 text-center materi-select" data-row="{{ $idx }}">
+                                        <option value=""></option>
+                                        <option value="3">3</option>
+                                        <option value="2">2</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                </td>
+                                @endfor
+                                <td class="px-4 py-4 text-center font-black text-[#173A67] bg-blue-50/50">
+                                    <span class="materi-sum" data-row="{{ $idx }}">-</span>
+                                </td>
+                                <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50/50">
+                                    <span class="materi-percent" data-row="{{ $idx }}">-</span>
+                                </td>
+                                <td class="px-4 py-4 text-center text-xs font-bold bg-blue-50/50">
+                                    <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-500 materi-ket" data-row="{{ $idx }}">-</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                     <input type="text" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 text-gray-600 materi-note" placeholder="Tulis catatan...">
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="10" class="p-8 text-center text-gray-400 font-bold">Belum ada data.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABLE SIKAP -->
+            <div id="content-sikap" class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden flex-1 shadow-sm relative z-0 {{ $activeTab === 'sikap' ? '' : 'hidden' }}">
+                <div class="wawancara-scroll overflow-auto max-h-[600px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-[#173A67] text-white sticky top-0 z-20">
+                            <tr>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30">No</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Cara Duduk</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Suara</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Fokus</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center bg-blue-800">Jumlah</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center bg-blue-800">Persen</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center bg-blue-800">Ket</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px]">Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            @forelse($users as $idx => $user)
+                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-sikap">
+                                <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                    {{ $idx + 1 }}
+                                </td>
+                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
+                                            {{ substr($user->name, 0, 1) }}
+                                        </div>
+                                        <input type="text" class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input" 
+                                               value="{{ $user->name }}" readonly>
+                                    </div>
+                                </td>
+                                @for($j=1; $j<=3; $j++)
+                                <td class="px-2 py-4 text-center">
+                                    <select class="w-16 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold py-2 focus:ring-2 focus:ring-blue-500 text-center sikap-select" data-row="{{ $idx }}">
+                                        <option value=""></option>
+                                        <option value="3">3</option>
+                                        <option value="2">2</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                </td>
+                                @endfor
+                                <td class="px-4 py-4 text-center font-black text-[#173A67] bg-blue-50/50">
+                                    <span class="sikap-sum" data-row="{{ $idx }}">-</span>
+                                </td>
+                                <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50/50">
+                                    <span class="sikap-percent" data-row="{{ $idx }}">-</span>
+                                </td>
+                                <td class="px-4 py-4 text-center text-xs font-bold bg-blue-50/50">
+                                    <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-500 sikap-ket" data-row="{{ $idx }}">-</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                     <input type="text" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 text-gray-600 sikap-note" placeholder="Tulis catatan...">
+                                </td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="10" class="p-8 text-center text-gray-400 font-bold">Belum ada data.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: SUMMARY -->
+        <div class="col-span-12 lg:col-span-3 space-y-6">
+            <!-- Guidelines Card -->
+            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> Pedoman Skor
+                </h4>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
+                        <span class="text-xs font-bold text-gray-600">Baik / Menguasai</span>
+                        <span class="text-lg font-black text-green-600">3</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-xl">
+                        <span class="text-xs font-bold text-gray-600">Cukup</span>
+                        <span class="text-lg font-black text-yellow-600">2</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl">
+                        <span class="text-xs font-bold text-gray-600">Kurang</span>
+                        <span class="text-lg font-black text-red-600">1</span>
                     </div>
                 </div>
             </div>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+
+             <div class="bg-[#173A67] rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
+                <h4 class="font-bold mb-4 text-sm uppercase tracking-widest relative z-10">Kriteria Kelulusan</h4>
+                <div class="space-y-3 relative z-10 text-xs font-medium text-blue-100">
+                    <div class="flex justify-between items-center border-b border-blue-800 pb-2">
+                        <span>Sangat Menguasai</span>
+                        <span class="text-green-400 font-bold">90-100%</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-blue-800 pb-2">
+                        <span>Menguasai</span>
+                        <span class="text-blue-400 font-bold">80-89%</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-blue-800 pb-2">
+                        <span>Cukup</span>
+                        <span class="text-yellow-400 font-bold">70-79%</span>
+                    </div>
+                     <div class="flex justify-between items-center text-red-300">
+                        <span>Kurang / Sangat Kurang</span>
+                        <span class="font-bold">< 69%</span>
+                    </div>
+                </div>
+             </div>
         </div>
 
-        <!-- SUB HEADER -->
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <span class="font-semibold text-lg">Penilaian Wawancara : Kelas A2</span>
-            <select id="penilaian-wawancara-select" class="bg-white text-black rounded-full px-3 py-1 text-sm border">
-                <option value="materi">Penilaian (Materi)</option>
-                <option value="sikap">Penilaian (Sikap)</option>
-            </select>
-        </div>
     </div>
-
-    <!-- Main content: table + summary -->
-    <div class="col-span-12 lg:col-span-9">
-        <!-- TAB CONTENT: MATERI -->
-        <div id="content-materi" class="bg-white rounded-xl p-4 shadow-sm transition-all duration-300 ease-in-out">
-            <!-- TOOLBAR -->
-            <div class="mb-4 flex items-center justify-between gap-4 flex-wrap sticky top-0 z-20 bg-white pb-2">
-                <div class="flex items-center gap-2">
-                    <button id="save-materi" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium transition">
-                        💾 Simpan
-                    </button>
-                    <button id="reset-materi" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">
-                        🔄 Reset
-                    </button>
-                    <span id="materi-save-msg" class="ml-3 text-sm font-medium"></span>
-                </div>
-                <div class="text-xs text-gray-500 font-medium">15 Siswa</div>
-            </div>
-
-            <!-- INSTRUCTION -->
-            <div class="mb-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                <p class="text-sm text-gray-700">📝 <strong>Instruksi:</strong> Isi nama siswa dan penilaian materi wawancara. Nilai akan otomatis dihitung berdasarkan kriteria. ✓ Hijau (≥75%), ✗ Merah (<75%)</p>
-            </div>
-
-            <!-- TABLE CONTAINER -->
-            <div class="border rounded-lg overflow-hidden">
-                <div class="overflow-x-scroll overflow-y-auto max-h-[680px] scrollbar-visible" style="scrollbar-width: auto;">
-                    <table class="w-full border-collapse text-sm">
-                        <thead class="bg-blue-600 text-white sticky top-0 z-20">
-                            <tr>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-12">No</th>
-                                <th class="border border-gray-400 px-3 py-2 text-left font-semibold min-w-[300px] sticky left-12 z-10 bg-blue-600">Nama Siswa</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Program</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Umum</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Jepang</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Indo</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-20">Jumlah</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-24">Persen</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-32">Keterangan</th>
-                                <th class="border border-gray-400 px-3 py-2 text-left font-semibold min-w-[250px]">Catatan</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @for($i=1;$i<=15;$i++)
-                            <tr>
-                                <td class="border px-3 py-2 text-center">{{ $i }}</td>
-                                <td class="border px-3 py-2"><input type="text" class="w-full text-sm border rounded px-2 py-1 materi-name" data-row="{{ $i-1 }}" placeholder="Nama Siswa"/></td>
-
-                                @for($j=1;$j<=4;$j++)
-                                <td class="border px-3 py-2 text-center">
-                                    <select class="border rounded px-2 py-1 text-xs materi-select" data-col="{{ $j }}" data-row="{{ $i-1 }}">
-                                        <option value=""></option>
-                                        <option value="3">3</option>
-                                        <option value="2">2</option>
-                                        <option value="1">1</option>
-                                    </select>
-                                </td>
-                                @endfor
-
-                                <td class="border px-3 py-2 text-center"><span class="materi-sum font-semibold" data-row="{{ $i-1 }}"></span></td>
-                                <td class="border px-3 py-2 text-center"><span class="materi-percent font-semibold" data-row="{{ $i-1 }}"></span></td>
-                                <td class="border px-3 py-2 text-center"><span class="materi-keterangan font-semibold text-sm" data-row="{{ $i-1 }}"></span></td>
-                                <td class="border px-3 py-2"><input type="text" class="w-full text-sm border rounded px-2 py-1 materi-note" data-row="{{ $i-1 }}"/></td>
-                            </tr>
-                            @endfor
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- TAB CONTENT: SIKAP -->
-        <div id="content-sikap" class="bg-white rounded-xl p-4 shadow-sm hidden transition-all duration-300 ease-in-out">
-            <!-- TOOLBAR -->
-            <div class="mb-4 flex items-center justify-between gap-4 flex-wrap sticky top-0 z-20 bg-white pb-2">
-                <div class="flex items-center gap-2">
-                    <button id="save-sikap" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium transition">
-                        💾 Simpan
-                    </button>
-                    <button id="reset-sikap" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">
-                        🔄 Reset
-                    </button>
-                    <span id="sikap-save-msg" class="ml-3 text-sm font-medium"></span>
-                </div>
-                <div class="text-xs text-gray-500 font-medium">15 Siswa</div>
-            </div>
-
-            <!-- INSTRUCTION -->
-            <div class="mb-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                <p class="text-sm text-gray-700">📝 <strong>Instruksi:</strong> Isi nama siswa dan penilaian sikap wawancara. Nilai akan otomatis dihitung berdasarkan kriteria. ✓ Hijau (≥75%), ✗ Merah (<75%)</p>
-            </div>
-
-            <!-- TABLE CONTAINER -->
-            <div class="border rounded-lg overflow-hidden">
-                <div class="overflow-x-scroll overflow-y-auto max-h-[680px] scrollbar-visible" style="scrollbar-width: auto;">
-                    <table class="w-full border-collapse text-sm">
-                        <thead class="bg-blue-600 text-white sticky top-0 z-20">
-                            <tr>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-12">No</th>
-                                <th class="border border-gray-400 px-3 py-2 text-left font-semibold min-w-[300px] sticky left-12 z-10 bg-blue-600">Nama Siswa</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Cara Duduk</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Suara</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold">Fokus</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-20">Jumlah</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-24">Persen</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-32">Keterangan</th>
-                                <th class="border border-gray-400 px-3 py-2 text-left font-semibold min-w-[250px]">Catatan</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @for($i=1;$i<=15;$i++)
-                            <tr>
-                                <td class="border px-3 py-2 text-center">{{ $i }}</td>
-                                <td class="border px-3 py-2"><input type="text" class="w-full text-sm border rounded px-2 py-1 sikap-name" data-row="{{ $i-1 }}" placeholder="Nama Siswa"/></td>
-
-                                @for($j=1;$j<=3;$j++)
-                                <td class="border px-3 py-2 text-center">
-                                    <select class="border rounded px-2 py-1 text-xs sikap-select" data-col="{{ $j }}" data-row="{{ $i-1 }}">
-                                        <option value=""></option>
-                                        <option value="3">3</option>
-                                        <option value="2">2</option>
-                                        <option value="1">1</option>
-                                    </select>
-                                </td>
-                                @endfor
-
-                                <td class="border px-3 py-2 text-center"><span class="sikap-sum font-semibold" data-row="{{ $i-1 }}"></span></td>
-                                <td class="border px-3 py-2 text-center"><span class="sikap-percent font-semibold" data-row="{{ $i-1 }}"></span></td>
-                                <td class="border px-3 py-2 text-center"><span class="sikap-keterangan font-semibold text-sm" data-row="{{ $i-1 }}"></span></td>
-                                <td class="border px-3 py-2"><input type="text" class="w-full text-sm border rounded px-2 py-1 sikap-note" data-row="{{ $i-1 }}"/></td>
-                            </tr>
-                            @endfor
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-    </div>
-    
 </div>
-<div class="col-span-12 lg:col-span-3">
-        <div class="bg-white rounded-xl p-4">
-            <h3 class="font-semibold mb-3 text-base">📋 Pedoman Penilaian</h3>
-            <div class="bg-gray-50 rounded p-3 text-xs text-gray-700 space-y-2">
-                <div class="flex justify-between"><span>Kurang</span><span class="font-semibold">1</span></div>
-                <div class="flex justify-between"><span>Cukup</span><span class="font-semibold">2</span></div>
-                <div class="flex justify-between"><span>Baik</span><span class="font-semibold">3</span></div>
-            </div>
-        </div>
 
-        <div class="col-span-12 lg:col-span-3">
-        <div class="bg-white rounded-xl p-4 h-fit sticky" style="top: 280px;">
-            <h3 class="font-semibold mb-3 text-base">📋 Tabel Keterangan</h3>
-            <div class="border rounded-lg overflow-hidden">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-100 border-b">
-                        <tr>
-                            <th class="border border-gray-300 px-3 py-2 text-left font-semibold">Keterangan</th>
-                            <th class="border border-gray-300 px-3 py-2 text-center font-semibold">Hasil</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="border border-gray-300 px-3 py-2">Sangat menguasai</td>
-                            <td class="border border-gray-300 px-3 py-2 text-center font-semibold text-green-600">90%-100%</td>
-                        </tr>
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="border border-gray-300 px-3 py-2">Menguasai</td>
-                            <td class="border border-gray-300 px-3 py-2 text-center font-semibold text-blue-600">80%-89%</td>
-                        </tr>
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="border border-gray-300 px-3 py-2">Cukup</td>
-                            <td class="border border-gray-300 px-3 py-2 text-center font-semibold text-yellow-600">70%-79%</td>
-                        </tr>
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="border border-gray-300 px-3 py-2">Kurang</td>
-                            <td class="border border-gray-300 px-3 py-2 text-center font-semibold text-orange-600">50%-69%</td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="border border-gray-300 px-3 py-2">Sangat kurang</td>
-                            <td class="border border-gray-300 px-3 py-2 text-center font-semibold text-red-600">0%-49%</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 <style>
-/* Custom scrollbar styling */
-.scrollbar-visible::-webkit-scrollbar {
-    height: 12px;
+/* Custom scrollbar styling - Forced Visibility */
+.wawancara-scroll {
+    overflow: auto;
+    scrollbar-width: auto;
+    scrollbar-color: #cbd5e1 #f1f5f9;
 }
-
-.scrollbar-visible::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 6px;
+.wawancara-scroll::-webkit-scrollbar { 
+    height: 16px; width: 16px; 
+    -webkit-appearance: none; display: block;
 }
-
-.scrollbar-visible::-webkit-scrollbar-thumb {
-    background: #3b82f6;
-    border-radius: 6px;
-    border: 2px solid #f3f4f6;
+.wawancara-scroll::-webkit-scrollbar-track { 
+    background-color: #f1f5f9; border-radius: 8px; 
 }
-
-.scrollbar-visible::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
+.wawancara-scroll::-webkit-scrollbar-thumb { 
+    background-color: #94a3b8; border-radius: 8px; border: 4px solid #f1f5f9; 
 }
-
-/* Smooth tab content transitions */
-#content-materi,
-#content-sikap {
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out;
-}
-
-#content-materi.hidden,
-#content-sikap.hidden {
-    display: none;
+.wawancara-scroll::-webkit-scrollbar-thumb:hover { 
+    background-color: #64748b; 
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Tab switching dengan select
-    const selectPenilaian = document.getElementById('penilaian-wawancara-select');
-    const contentMateri = document.getElementById('content-materi');
-    const contentSikap = document.getElementById('content-sikap');
+    let activeMode = '{{ $activeTab }}';
 
-    if(selectPenilaian) {
-        selectPenilaian.addEventListener('change', function() {
-            if(this.value === 'materi') {
-                // Show materi
-                contentSikap.style.opacity = '0';
-                setTimeout(() => {
-                    contentSikap.classList.add('hidden');
-                    contentMateri.classList.remove('hidden');
-                    contentMateri.style.opacity = '0';
-                    // Trigger reflow
-                    void contentMateri.offsetWidth;
-                    contentMateri.style.opacity = '1';
-                }, 150);
-            } else if(this.value === 'sikap') {
-                // Show sikap
-                contentMateri.style.opacity = '0';
-                setTimeout(() => {
-                    contentMateri.classList.add('hidden');
-                    contentSikap.classList.remove('hidden');
-                    contentSikap.style.opacity = '0';
-                    // Trigger reflow
-                    void contentSikap.offsetWidth;
-                    contentSikap.style.opacity = '1';
-                }, 150);
+    function switchTab(mode) {
+        activeMode = mode;
+        
+        // Buttons
+        document.getElementById('btn-materi').className = mode === 'materi' ? 
+            'px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/30' :
+            'px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all text-gray-500 hover:text-gray-700 hover:bg-gray-200';
+        
+        document.getElementById('btn-sikap').className = mode === 'sikap' ? 
+            'px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/30' :
+            'px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all text-gray-500 hover:text-gray-700 hover:bg-gray-200';
+
+        // Content
+        document.getElementById('content-materi').classList.toggle('hidden', mode !== 'materi');
+        document.getElementById('content-sikap').classList.toggle('hidden', mode !== 'sikap');
+        
+        // Label
+        document.getElementById('label-active-tab').textContent = mode === 'materi' ? 'Penilaian Materi' : 'Penilaian Sikap';
+    }
+
+    // Logic perhitungan otomatis
+    function updateRowWawancara(rowIdx, type) {
+        const selector = type === 'materi' ? '.materi-select' : '.sikap-select';
+        const inputs = document.querySelectorAll(`${selector}[data-row="${rowIdx}"]`);
+        let sum = 0;
+        let count = 0;
+        
+        inputs.forEach(inp => {
+            if(inp.value) {
+                sum += parseInt(inp.value);
+                count++;
             }
         });
-    }
 
-    // Safe getter: accepts an element or a primitive and returns a number (0 if missing/invalid)
-    function getVal(el) {
-        if (!el) return 0;
-        const raw = (typeof el === 'object' && 'value' in el) ? el.value : el;
-        const v = Number(raw);
-        return isNaN(v) ? 0 : v;
-    }
+        // Max possible score: Materi (4 items * 3 = 12), Sikap (3 items * 3 = 9)
+        const maxScore = type === 'materi' ? 12 : 9;
+        const percent = Math.round((sum / maxScore) * 100);
 
-    // Helper to calculate keterangan
-    function getKeterangan(percent) {
-        if(percent < 50) return { text: 'SANGAT KURANG', css: 'text-red-600' };
-        if(percent < 70) return { text: 'KURANG', css: 'text-orange-600' };
-        if(percent < 80) return { text: 'CUKUP', css: 'text-yellow-600' };
-        if(percent < 90) return { text: 'MENGUASAI', css: 'text-blue-600' };
-        return { text: 'SANGAT MENGUASAI', css: 'text-green-600' };
-    }
-
-    // MATERI computation
-    const MAX_SUM_MATERI = 12; // 4 fields x max 3 each
-    function computeRowMateri(rowIdx) {
-        const cols = Array.from(document.querySelectorAll('.materi-select[data-row="'+rowIdx+'"]'));
-        if(!cols || cols.length === 0) return { sum: 0, percent: 0 };
-        const vals = cols.map(c => getVal(c));
-        const sum = vals.reduce((a,b) => a+b, 0);
-        const percent = MAX_SUM_MATERI ? Number(((sum / MAX_SUM_MATERI) * 100).toFixed(2)) : 0;
-        
-        const sumEl = document.querySelector('.materi-sum[data-row="'+rowIdx+'"]');
-        const pctEl = document.querySelector('.materi-percent[data-row="'+rowIdx+'"]');
-        const ketEl = document.querySelector('.materi-keterangan[data-row="'+rowIdx+'"]');
-        
-        if(sumEl) sumEl.textContent = sum;
-        if(pctEl) {
-            pctEl.textContent = percent + '%';
-            pctEl.classList.remove('text-green-600','text-red-500');
-            if(percent >= 75) pctEl.classList.add('text-green-600'); else pctEl.classList.add('text-red-500');
+        if(count === 0) {
+             document.querySelector(`.${type}-sum[data-row="${rowIdx}"]`).textContent = '-';
+             document.querySelector(`.${type}-percent[data-row="${rowIdx}"]`).textContent = '-';
+             document.querySelector(`.${type}-ket[data-row="${rowIdx}"]`).textContent = '-';
+             document.querySelector(`.${type}-ket[data-row="${rowIdx}"]`).className = 'px-3 py-1 rounded-full bg-gray-200 text-gray-500 '+type+'-ket';
+             return;
         }
-        if(ketEl) {
-            const ket = getKeterangan(percent);
-            ketEl.textContent = ket.text;
-            ketEl.classList.remove('text-red-600','text-orange-600','text-yellow-600','text-blue-600','text-green-600');
-            ketEl.classList.add(ket.css);
+
+        document.querySelector(`.${type}-sum[data-row="${rowIdx}"]`).textContent = sum;
+        
+        const pctEl = document.querySelector(`.${type}-percent[data-row="${rowIdx}"]`);
+        pctEl.textContent = percent + '%';
+        
+        // Keterangan Style
+        const ketEl = document.querySelector(`.${type}-ket[data-row="${rowIdx}"]`);
+        if(percent >= 90) {
+            ketEl.textContent = 'Sangat Menguasai';
+            ketEl.className = 'px-3 py-1 rounded-full bg-green-100 text-green-700 font-bold '+type+'-ket';
+        } else if(percent >= 80) {
+             ketEl.textContent = 'Menguasai';
+             ketEl.className = 'px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold '+type+'-ket';
+        } else if(percent >= 70) {
+             ketEl.textContent = 'Cukup';
+             ketEl.className = 'px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold '+type+'-ket';
+        } else {
+             ketEl.textContent = 'Kurang';
+             ketEl.className = 'px-3 py-1 rounded-full bg-red-100 text-red-700 font-bold '+type+'-ket';
         }
-        return { sum, percent };
     }
 
-    // SIKAP computation
-    const MAX_SUM_SIKAP = 9; // 3 fields x max 3 each
-    function computeRowSikap(rowIdx) {
-        const cols = Array.from(document.querySelectorAll('.sikap-select[data-row="'+rowIdx+'"]'));
-        if(!cols || cols.length === 0) return { sum: 0, percent: 0 };
-        const vals = cols.map(c => getVal(c));
-        const sum = vals.reduce((a,b) => a+b, 0);
-        const percent = MAX_SUM_SIKAP ? Number(((sum / MAX_SUM_SIKAP) * 100).toFixed(2)) : 0;
-        
-        const sumEl = document.querySelector('.sikap-sum[data-row="'+rowIdx+'"]');
-        const pctEl = document.querySelector('.sikap-percent[data-row="'+rowIdx+'"]');
-        const ketEl = document.querySelector('.sikap-keterangan[data-row="'+rowIdx+'"]');
-        
-        if(sumEl) sumEl.textContent = sum;
-        if(pctEl) {
-            pctEl.textContent = percent + '%';
-            pctEl.classList.remove('text-green-600','text-red-500');
-            if(percent >= 75) pctEl.classList.add('text-green-600'); else pctEl.classList.add('text-red-500');
-        }
-        if(ketEl) {
-            const ket = getKeterangan(percent);
-            ketEl.textContent = ket.text;
-            ketEl.classList.remove('text-red-600','text-orange-600','text-yellow-600','text-blue-600','text-green-600');
-            ketEl.classList.add(ket.css);
-        }
-        return { sum, percent };
-    }
-
-    // Live compute for Materi
-    document.querySelectorAll('.materi-select').forEach(s => {
-        s.addEventListener('change', function () { computeRowMateri(Number(s.dataset.row)); });
-        computeRowMateri(Number(s.dataset.row));
+    // Bind events
+    document.querySelectorAll('select').forEach(sel => {
+        sel.addEventListener('change', function() {
+            const row = this.dataset.row;
+            if(this.classList.contains('materi-select')) updateRowWawancara(row, 'materi');
+            if(this.classList.contains('sikap-select')) updateRowWawancara(row, 'sikap');
+        });
     });
 
-    // Live compute for Sikap
-    document.querySelectorAll('.sikap-select').forEach(s => {
-        s.addEventListener('change', function () { computeRowSikap(Number(s.dataset.row)); });
-        computeRowSikap(Number(s.dataset.row));
+    // Save
+    document.getElementById('save-btn').addEventListener('click', () => {
+        const msg = document.getElementById('save-msg');
+        msg.textContent = 'Menyimpan...'; 
+        msg.className = 'text-gray-400 font-bold ml-2';
+        setTimeout(() => {
+             msg.textContent = 'Tersimpan (Mock)';
+             msg.className = 'text-green-500 font-bold ml-2';
+             setTimeout(() => msg.textContent='', 2000);
+        }, 1000);
     });
 
-    // Save Materi
-    const saveMateriBtn = document.getElementById('save-materi');
-    if(saveMateriBtn) {
-        saveMateriBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const rows = [];
-            document.querySelectorAll('#content-materi tbody tr').forEach((tr, idx) => {
-                const rowIdx = Number(((tr.querySelector('.materi-select') || { dataset: { row: idx } }).dataset || {}).row || idx);
-                const { sum, percent } = computeRowMateri(rowIdx);
-                const name = (tr.querySelector('.materi-name') || {value:''}).value.trim();
-                const program = getVal(tr.querySelector('.materi-select[data-col="1"]'));
-                const umum = getVal(tr.querySelector('.materi-select[data-col="2"]'));
-                const jepang = getVal(tr.querySelector('.materi-select[data-col="3"]'));
-                const indo = getVal(tr.querySelector('.materi-select[data-col="4"]'));
-                const note = (tr.querySelector('.materi-note') || {value:''}).value.trim();
-                if(name || program || umum || jepang || indo || note) {
-                    rows.push({ row: rowIdx, name, program, umum, jepang, indo, sum, percent, note });
-                }
-            });
-
-            if(rows.length === 0) { alert('Tidak ada data untuk disimpan.'); return; }
-
-            const msg = document.getElementById('materi-save-msg');
-            if(msg) msg.textContent = 'Menyimpan...';
-            fetch('{{ route('sensei.penilaian.wawancara.save') }}', {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ type: 'materi', students: rows })
-            }).then(r => r.json()).then(res => {
-                if(res.success) {
-                    alert('Data Materi disimpan. Tersimpan: ' + (res.saved || 0) + ' siswa.');
-                    if(msg) msg.textContent = 'Tersimpan.'; 
-                    setTimeout(() => { if(msg) msg.textContent = ''; }, 1200);
-                } else {
-                    alert('Gagal menyimpan: ' + (res.message || 'server error'));
-                    if(msg) msg.textContent = 'Gagal menyimpan';
-                }
-            }).catch(err => { console.error(err); alert('Gagal menyimpan (network).'); if(msg) msg.textContent = 'Gagal (network)'; });
-        });
-    }
-
-    // Reset Materi
-    const resetMateriBtn = document.getElementById('reset-materi');
-    if(resetMateriBtn) {
-        resetMateriBtn.addEventListener('click', function () {
-            if(!confirm('Reset data Materi tersimpan?')) return;
-            fetch('{{ route('sensei.penilaian.wawancara.reset') }}', {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ type: 'materi' })
-            }).then(r => r.json()).then(res => {
-                if(res.success) {
-                    document.querySelectorAll('#content-materi .materi-name').forEach(n => n.value = '');
-                    document.querySelectorAll('#content-materi .materi-select').forEach(s => { s.value = ''; computeRowMateri(Number(s.dataset.row)); });
-                    document.querySelectorAll('#content-materi .materi-note').forEach(n => n.value = '');
-                    window.location.reload();
-                }
-            });
-        });
-    }
-
-    // Save Sikap
-    const saveSikapBtn = document.getElementById('save-sikap');
-    if(saveSikapBtn) {
-        saveSikapBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const rows = [];
-            document.querySelectorAll('#content-sikap tbody tr').forEach((tr, idx) => {
-                const rowIdx = Number(((tr.querySelector('.sikap-select') || { dataset: { row: idx } }).dataset || {}).row || idx);
-                const { sum, percent } = computeRowSikap(rowIdx);
-                const name = (tr.querySelector('.sikap-name') || {value:''}).value.trim();
-                const cara_duduk = getVal(tr.querySelector('.sikap-select[data-col="1"]'));
-                const suara = getVal(tr.querySelector('.sikap-select[data-col="2"]'));
-                const fokus = getVal(tr.querySelector('.sikap-select[data-col="3"]'));
-                const note = (tr.querySelector('.sikap-note') || {value:''}).value.trim();
-                if(name || cara_duduk || suara || fokus || note) {
-                    rows.push({ row: rowIdx, name, cara_duduk, suara, fokus, sum, percent, note });
-                }
-            });
-
-            if(rows.length === 0) { alert('Tidak ada data untuk disimpan.'); return; }
-
-            const msg = document.getElementById('sikap-save-msg');
-            if(msg) msg.textContent = 'Menyimpan...';
-            fetch('{{ route('sensei.penilaian.wawancara.save') }}', {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ type: 'sikap', students: rows })
-            }).then(r => r.json()).then(res => {
-                if(res.success) {
-                    alert('Data Sikap disimpan. Tersimpan: ' + (res.saved || 0) + ' siswa.');
-                    if(msg) msg.textContent = 'Tersimpan.'; 
-                    setTimeout(() => { if(msg) msg.textContent = ''; }, 1200);
-                } else {
-                    alert('Gagal menyimpan: ' + (res.message || 'server error'));
-                    if(msg) msg.textContent = 'Gagal menyimpan';
-                }
-            }).catch(err => { console.error(err); alert('Gagal menyimpan (network).'); if(msg) msg.textContent = 'Gagal (network)'; });
-        });
-    }
-
-    // Reset Sikap
-    const resetSikapBtn = document.getElementById('reset-sikap');
-    if(resetSikapBtn) {
-        resetSikapBtn.addEventListener('click', function () {
-            if(!confirm('Reset data Sikap tersimpan?')) return;
-            fetch('{{ route('sensei.penilaian.wawancara.reset') }}', {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ type: 'sikap' })
-            }).then(r => r.json()).then(res => {
-                if(res.success) {
-                    document.querySelectorAll('#content-sikap .sikap-name').forEach(n => n.value = '');
-                    document.querySelectorAll('#content-sikap .sikap-select').forEach(s => { s.value = ''; computeRowSikap(Number(s.dataset.row)); });
-                    document.querySelectorAll('#content-sikap .sikap-note').forEach(n => n.value = '');
-                    window.location.reload();
-                }
-            });
-        });
-    }
-});
 </script>
 @endsection

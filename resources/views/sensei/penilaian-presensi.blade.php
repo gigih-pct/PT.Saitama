@@ -1,622 +1,572 @@
 @extends('layouts.header_dashboard_sensei')
 
-@section('content')
-<div class="grid grid-cols-12 gap-6">
+@section('title', 'Penilaian Presensi')
 
-    <!-- HEADER FILTER -->
-    <div class="col-span-12">
-        <div class="bg-[#173A67] rounded-full px-6 py-3 flex items-center justify-between text-white">
-            <div class="flex items-center gap-4">
-                <span class="font-semibold">Penilaian Kelas</span>
-                <div class="flex items-center gap-2 ml-2">
-                    <select name="kelas-select" class="bg-white text-black rounded-full px-3 py-1 text-sm border">
-                        <option>A1</option>
-                        <option>A2</option>
-                        <option>A3</option>
+@section('content')
+@php
+    $users = $students ?? [];
+    $rows = $savedScores ?? [];
+    $days = $days ?? range(1, 30);
+    $daysCount = $daysCount ?? count($days);
+    $counts = $summary ?? ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0];
+    
+    $totalStudents = count($users);
+    $totalH = $counts['H'] ?? 0;
+    $totalEntries = $totalStudents * $daysCount;
+    $percent = ($totalEntries > 0) ? round(($totalH / $totalEntries) * 100, 2) : 0;
+
+    $monthNames = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+        7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ];
+@endphp
+
+<div class="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-sm border border-gray-100 min-h-[85vh] flex flex-col relative overflow-hidden font-sans">
+
+    <!-- HEADER SECTION -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 z-10 relative">
+        <div class="space-y-2">
+            <h1 class="text-[#173A67] font-black text-2xl lg:text-3xl tracking-tight flex items-center gap-3">
+                Penilaian Presensi
+                <!-- Class Selector -->
+                <div class="relative group inline-block">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="users" class="w-3 h-3 text-white"></i>
+                    </div>
+                    <select onchange="window.location.href='?kelas_id='+this.value" class="pl-8 pr-8 py-1.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-700 transition-all appearance-none uppercase tracking-widest">
+                        @foreach($kelases as $k)
+                            <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>{{ $k->nama_kelas }}</option>
+                        @endforeach
                     </select>
-                    <div class="relative">
-                        <select name="penilaian-select" onchange="if(this.value) window.location.href=this.value" class="bg-green-500 text-white rounded-full px-4 py-1 text-sm border-0">
-                            <option value="{{ route('sensei.penilaian.presensi') }}" {{ Route::currentRouteName() === 'sensei.penilaian.presensi' ? 'selected' : '' }}>Penilaian : Presensi Siswa</option>
-                            <option value="{{ route('sensei.penilaian.bunpou') }}" {{ Route::currentRouteName() === 'sensei.penilaian.bunpou' ? 'selected' : '' }}>Penilaian : Bunpou</option>
-                            <option value="{{ route('sensei.penilaian.kanji') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kanji' ? 'selected' : '' }}>Penilaian : Kanji</option>
-                            <option value="{{ route('sensei.penilaian.kotoba') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kotoba' ? 'selected' : '' }}>Penilaian : Kotoba</option>
-                            <option value="{{ route('sensei.penilaian.fmd') }}" {{ Route::currentRouteName() === 'sensei.penilaian.fmd' ? 'selected' : '' }}>Penilaian : FMD</option>
-                            <option value="{{ route('sensei.penilaian.wawancara') }}" {{ Route::currentRouteName() === 'sensei.penilaian.wawancara' ? 'selected' : '' }}>Penilaian : Wawancara</option>
-                            <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ Route::currentRouteName() === 'sensei.penilaian.nilai-akhir' ? 'selected' : '' }}>Penilaian : Nilai Akhir</option>
-                        </select>
-                        <svg class="w-3 h-3 absolute right-2 top-2 text-white pointer-events-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8l4 4 4-4"/></svg>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                         <i data-lucide="chevron-down" class="w-3 h-3 text-white"></i>
                     </div>
                 </div>
-                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                    <span>Bulan : Agustus</span>
-                    <svg class="w-3 h-3" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8l4 4 4-4"/></svg>
-                </span>
-            </div>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+            </h1>
+            <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Pencatatan kehadiran siswa (Hadir/Sakit/Izin/Alfa)</p>
         </div>
 
-        <!-- SUB HEADER -->
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-semibold">Penilaian Presensi : Kelas A2</span>
+        <div class="flex items-center gap-3 flex-wrap">
+            <div class="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-2xl border border-blue-100">
+                <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+                <select id="month-select" class="bg-transparent border-none p-0 text-xs font-extrabold text-blue-600 ring-0 focus:ring-0 cursor-pointer appearance-none uppercase tracking-widest">
+                    @foreach($monthNames as $mIdx => $mName)
+                        <option value="{{ $mIdx }}" {{ $month == $mIdx ? 'selected' : '' }}>{{ $mName }}</option>
+                    @endforeach
+                </select>
+                <select id="year-select" class="bg-transparent border-none p-0 text-xs font-extrabold text-blue-600 ring-0 focus:ring-0 cursor-pointer appearance-none uppercase tracking-widest ml-1">
+                    @foreach(range(date('Y') - 2, date('Y') + 2) as $y)
+                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
+                </select>
             </div>
-        </div>
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-semibold">Bulan : Agustus</span>
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-white"></i>
+                </div>
+                <select onchange="if(this.value) window.location.href=this.value" class="pl-10 pr-10 py-3 rounded-2xl bg-[#173A67] text-white text-sm font-bold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-900 transition-all appearance-none">
+                    <option value="{{ route('sensei.penilaian.presensi') }}" {{ $type === 'presensi' ? 'selected' : '' }}>Presensi</option>
+                    <option value="{{ route('sensei.penilaian.bunpou') }}" {{ $type === 'bunpou' ? 'selected' : '' }}>Bunpou</option>
+                    <option value="{{ route('sensei.penilaian.kanji') }}" {{ $type === 'kanji' ? 'selected' : '' }}>Kanji</option>
+                    <option value="{{ route('sensei.penilaian.kotoba') }}" {{ $type === 'kotoba' ? 'selected' : '' }}>Kotoba</option>
+                    <option value="{{ route('sensei.penilaian.fmd') }}" {{ $type === 'fmd' ? 'selected' : '' }}>FMD</option>
+                    <option value="{{ route('sensei.penilaian.wawancara') }}" {{ $type === 'wawancara' ? 'selected' : '' }}>Wawancara</option>
+                    <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ $type === 'nilai-akhir' ? 'selected' : '' }}>Nilai Akhir</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                     <i data-lucide="chevron-down" class="w-4 h-4 text-white"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- INSTRUCTION BOX -->
-
-<div class="col-span-12 lg:col-span-9">
-        <div class="bg-white rounded-xl p-4 shadow-sm">
-            <!-- TOOLBAR -->
-            <div class="mb-4 flex items-center justify-between gap-4 flex-wrap sticky top-0 z-20 bg-white pb-2">
-                <div class="flex items-center gap-2">
-                    <button id="save-presensi" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium transition">
-                        💾 Simpan
+    <div class="grid grid-cols-12 gap-8 flex-1">
+        <!-- LEFT: TABLE -->
+        <div class="col-span-12 lg:col-span-9 flex flex-col gap-6">
+            
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-3xl border border-gray-100 sticky top-0 z-30">
+                <div class="flex items-center gap-3">
+                     <button id="save-presensi" class="px-6 py-2.5 bg-[#173A67] text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i> Simpan
                     </button>
-                    <button id="reset-presensi" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">
-                        🔄 Reset
+                    <button id="reset-presensi" class="px-6 py-2.5 bg-white text-red-500 border-2 border-red-100 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
                     </button>
-                    <span id="presensi-save-msg" class="ml-3 text-sm font-medium"></span>
+                    <span id="presensi-save-msg" class="text-sm font-bold ml-2"></span>
                 </div>
-                <div class="text-xs text-gray-500 font-medium">Jumlah hari: 30</div>
+                <div class="px-4 py-2 bg-white rounded-xl border border-gray-100 text-xs font-bold text-gray-500 shadow-sm flex items-center gap-2">
+                    <i data-lucide="calendar-days" class="w-4 h-4 text-blue-500"></i>
+                    {{ $daysCount }} Hari Aktif
+                </div>
             </div>
 
-            <!-- INSTRUCTION -->
-            <div class="mb-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                <p class="text-sm text-gray-700">📝 <strong>Instruksi:</strong> Klik sel pada kolom presensi untuk mengganti status (Klik berulang untuk cycle)</p>
-            </div>
-
-            <!-- TABLE CONTAINER -->
-                <div class="overflow-x-scroll overflow-y-auto max-h-[680px] scrollbar-visible" style="scrollbar-width: auto;">
-                    <table class="min-w-full border text-sm table-fixed">
-                        <thead class="bg-blue-600 text-white sticky top-0 z-20">
-                        <tr>
-                            <th class="border border-gray-400 px-3 py-2 w-16 col-no font-semibold">NO</th>
-                            <th class="border border-gray-400 px-3 py-2 w-64 col-name font-semibold">Nama Siswa</th>
-                            <th class="border border-gray-400 px-3 py-2 w-56 col-phone font-semibold">No Telp Wali Siswa</th>
-                            @for ($i = 1; $i <= 30; $i++)
-                                <th class="border border-gray-400 px-3 py-2 w-12 text-center font-semibold">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <span>{{ $i }}</span>
-                                        <button class="day-info-btn text-xs bg-gray-100 px-1 rounded" data-day="{{ $i - 1 }}" title="Lihat keterangan hari {{ $i }}">i</button>
+            <!-- Table Container -->
+            <div class="presensi-wrapper">
+                <div class="bg-white border-2 border-gray-100 rounded-[2rem] flex-1 shadow-sm relative z-0 pb-6">
+                    <div class="max-h-[600px] presensi-scroll">
+                    <table class="border-collapse w-max text-left">
+                        <thead class="bg-[#173A67] text-white sticky top-0 z-20">
+                            <tr>
+                                <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky left-0 bg-[#173A67] z-30 w-16 border-r border-blue-800">No</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 min-w-[200px] border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-[280px] bg-[#173A67] z-30 min-w-[140px] border-r border-blue-800 shadow-xl">No. Telp</th>
+                                @foreach($days as $day)
+                                <th class="px-1 py-2 font-bold text-xs text-center w-10 border-r border-blue-800/30">
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span>{{ $day }}</span>
+                                        <button class="day-info-btn w-4 h-4 rounded-full bg-blue-500/50 hover:bg-blue-400 text-white flex items-center justify-center text-[8px]" data-day="{{ $day - 1 }}">
+                                            i
+                                        </button>
                                     </div>
                                 </th>
-                            @endfor
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {{-- CONTOH DATA --}}
-                        @php
-                            $days = range(1,30);
-
-                            // Load saved data from session if available; otherwise start with empty list so user can fill manually
-                            $saved = session('penilaian_presensi');
-                            if(is_array($saved) && count($saved)) {
-                                $students = $saved;
-                            } else {
-                                $students = [];
-                            }
-
-                            // ensure each student (if any) has 30 day entries
-                            foreach ($students as $k => $st) {
-                                if(!isset($st[2]) || !is_array($st[2])) $students[$k][2] = array_fill(0, count($days), '');
-                                if(count($students[$k][2]) < count($days)) {
-                                    $students[$k][2] = array_merge($students[$k][2], array_fill(0, count($days) - count($students[$k][2]), ''));
-                                }
-                            }
-                        @endphp
-
-                        @foreach ($students as $i => $s)
-                        <tr class="student-row hover:bg-blue-50 transition border-b border-gray-300" data-student="{{ $i }}">
-                            <td class="border border-gray-400 text-center col-no bg-gray-50">{{ $i+1 }}</td>
-                            <td class="border border-gray-400 px-2 col-name"><input class="w-full name-input border-0 text-sm" value="{{ $s[0] }}" data-student="{{ $i }}" /></td>
-                            <td class="border border-gray-400 px-2 col-phone"><input class="w-full phone-input border-0 text-sm" value="{{ $s[1] }}" data-student="{{ $i }}" /></td>
-
-                            @foreach ($s[2] as $dayIndex => $status)
-                                <td class="border border-gray-400 text-center">
-                                    @include('sensei.penilaian.partials.presensi-icon', ['status' => $status, 'student' => $i, 'day' => $dayIndex])
-                                </td>
-                            @endforeach
-                        </tr>
-                        @endforeach
-
-                        {{-- BARIS KOSONG --}}
-                        @for ($i = 1; $i <= 38; $i++)
-                        <tr class="student-row hover:bg-blue-50 transition border-b border-gray-300" data-student="n{{ $i }}">
-                            <td class="border border-gray-400 text-center col-no bg-gray-50">{{ $i }}</td>
-                            <td class="border border-gray-400 px-2 col-name"><input class="w-full name-input border-0 text-sm" value="" data-student="n{{ $i }}" /></td>
-                            <td class="border border-gray-400 px-2 col-phone"><input class="w-full phone-input border-0 text-sm" value="" data-student="n{{ $i }}" /></td>
-                            @for ($j = 0; $j < 30; $j++)
-                                <td class="border border-gray-400 text-center">@include('sensei.penilaian.partials.presensi-icon', ['status' => '', 'student' => 'n'.$i, 'day' => $j])</td>
-                            @endfor
-                        </tr>
-                        @endfor
-
-                        {{-- TOTAL --}}
-                        <tr class="font-semibold bg-gray-50 border-t-2 border-gray-400">
-                            <td class="border border-gray-400 text-center col-no">39</td>
-                            <td class="border border-gray-400 px-2 col-name">Total Siswa Masuk</td>
-                            <td class="border border-gray-400 col-phone"></td>
-                            <td class="border border-gray-400 text-center" colspan="30"></td>
-                        </tr>
-                        <tr class="font-bold bg-gray-50 border-b-2 border-gray-400">
-                            <td class="border border-gray-400 text-center col-no">40</td>
-                            <td class="border border-gray-400 px-2 col-name">TOTAL</td>
-                            <td class="border border-gray-400 col-phone"></td>
-                            <td class="border border-gray-400" colspan="30"></td>
-                        </tr>
-                    </tbody>
-                </table>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            @forelse($users as $idx => $user)
+                                @php
+                                    $savedRow = isset($rows[$idx]) ? $rows[$idx] : [];
+                                    $savedStatuses = [];
+                                    $savedPhone = $user->phone ?? '-';
+                                    
+                                    if(is_array($savedRow)) {
+                                        if(isset($savedRow['statuses'])) {
+                                            $savedStatuses = $savedRow['statuses'];
+                                            $savedPhone = $savedRow['phone'] ?? $savedPhone;
+                                        } elseif(isset($savedRow[2])) {
+                                            $savedStatuses = $savedRow[2];
+                                            $savedPhone = $savedRow[1] ?? $savedPhone;
+                                        }
+                                    }
+                                    $savedStatuses = array_pad($savedStatuses, $daysCount, '');
+@endphp
+                                <tr class="group hover:bg-blue-50/30 transition-colors student-row">
+                                    <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                        {{ $idx + 1 }}
+                                    </td>
+                                    <td class="px-6 py-5 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
+                                                {{ substr($user->name, 0, 1) }}
+                                            </div>
+                                            <input type="text" class="bg-transparent border-none p-0 text-xs font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input truncate" 
+                                                   value="{{ $user->name }}" readonly title="{{ $user->name }}">
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-5 sticky left-[280px] bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                        <input type="text" class="bg-transparent border-none p-0 text-xs font-medium text-gray-500 w-full focus:ring-0 phone-input" 
+                                               value="{{ $savedPhone }}">
+                                    </td>
+                                    
+                                    @foreach($days as $dayIdx => $day)
+                                    <td class="p-2 border-r border-gray-100 text-center relative group/cell min-w-[50px]">
+                                        <button class="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 focus:outline-none attendance-btn mx-auto shadow-sm"
+                                                data-status="{{ $savedStatuses[$dayIdx] ?? '' }}"
+                                                data-day="{{ $dayIdx }}">
+                                            <!-- icon rendered by js -->
+                                        </button>
+                                        <select class="attendance-select absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10 hidden">
+                                            <option value="">-</option>
+                                            <option value="H">Hadir</option>
+                                            <option value="A">Alfa</option>
+                                            <option value="S">Sakit</option>
+                                            <option value="I">Izin</option>
+                                        </select>
+                                    </td>
+                                    @endforeach
+                                </tr>
+                            @empty
+                                <tr><td colspan="{{ count($days) + 3 }}" class="p-8 text-center text-gray-400 font-bold">Belum ada data siswa.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-span-12 lg:col-span-3">
-        <div class="bg-white rounded-xl p-4">
-            <h3 class="font-semibold mb-4 text-base">📊 Ringkasan</h3>
-            @php
-                $counts = session('penilaian_presensi_counts') ?? ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0];
-                $studentsCount = isset($students) ? count($students) : 0;
-                $daysCount = isset($days) ? count($days) : 30;
-                $jumlahTotal = $counts['H'] ?? 0;
-                $percent = ($studentsCount && $daysCount) ? round(($jumlahTotal / ($studentsCount * $daysCount)) * 100, 2) : 0;
-            @endphp
+
+        <!-- RIGHT: SUMMARY -->
+        <div class="col-span-12 lg:col-span-3 space-y-6">
+            <!-- Stats Card -->
+             <div class="bg-[#173A67] rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i data-lucide="pie-chart" class="w-32 h-32"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-6 relative z-10">Statistik Kehadiran</h3>
+                
+                <div class="space-y-4 relative z-10">
+                    <div class="grid grid-cols-2 gap-3">
+                         <div class="bg-green-500/20 rounded-2xl p-3 border border-green-400/20 flex flex-col items-center">
+                            <span class="text-[10px] font-bold text-green-300 uppercase">Hadir</span>
+                            <span class="text-2xl font-black text-green-300" id="count-h">{{ $counts['H'] }}</span>
+                        </div>
+                        <div class="bg-red-500/20 rounded-2xl p-3 border border-red-400/20 flex flex-col items-center">
+                            <span class="text-[10px] font-bold text-red-300 uppercase">Alfa</span>
+                            <span class="text-2xl font-black text-red-300" id="count-a">{{ $counts['A'] }}</span>
+                        </div>
+                        <div class="bg-yellow-500/20 rounded-2xl p-3 border border-yellow-400/20 flex flex-col items-center">
+                            <span class="text-[10px] font-bold text-yellow-300 uppercase">Sakit</span>
+                            <span class="text-2xl font-black text-yellow-300" id="count-s">{{ $counts['S'] }}</span>
+                        </div>
+                        <div class="bg-blue-500/20 rounded-2xl p-3 border border-blue-400/20 flex flex-col items-center">
+                            <span class="text-[10px] font-bold text-blue-300 uppercase">Izin</span>
+                            <span class="text-2xl font-black text-blue-300" id="count-i">{{ $counts['I'] }}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/10 rounded-2xl p-4 backdrop-blur-sm mt-4">
+                        <div class="flex justify-between items-end mb-2">
+                             <span class="text-xs font-bold text-blue-200 uppercase">Kehadiran</span>
+                             <span class="text-2xl font-black text-white" id="percent">{{ $percent }}%</span>
+                        </div>
+                        <div class="w-full bg-black/20 rounded-full h-2 overflow-hidden">
+                            <div class="bg-green-400 h-full rounded-full transition-all duration-1000" style="width: {{ $percent }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            <!-- Tabel Keterangan -->
-            <div class="mb-6">
-                <h3 class="font-semibold mb-3 text-base bg-gray-200 px-3 py-2 rounded">Tabel Keterangan</h3>
-                <table class="w-full border-2 border-gray-400 text-sm">
-                    <thead>
-                        <tr class="bg-gray-100 border-b-2 border-gray-400">
-                            <th class="border border-gray-400 px-3 py-2 text-left font-semibold">Keterangan</th>
-                            <th class="border border-gray-400 px-3 py-2 text-right font-semibold">Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-gray-400">
-                            <td class="border border-gray-400 px-3 py-2 text-center"><span class="w-6 h-6 rounded-full bg-green-500 inline-block"></span></td>
-                            <td class="border border-gray-400 px-3 py-2 text-right font-semibold" id="count-h">{{ $counts['H'] ?? 0 }}</td>
-                        </tr>
-                        <tr class="border-b border-gray-400">
-                            <td class="border border-gray-400 px-3 py-2 text-center"><span class="w-6 h-6 rounded-full bg-red-500 inline-block"></span></td>
-                            <td class="border border-gray-400 px-3 py-2 text-right font-semibold" id="count-a">{{ $counts['A'] ?? 0 }}</td>
-                        </tr>
-                        <tr class="border-b border-gray-400">
-                            <td class="border border-gray-400 px-3 py-2 text-center"><span class="w-6 h-6 rounded-full bg-yellow-400 inline-block"></span></td>
-                            <td class="border border-gray-400 px-3 py-2 text-right font-semibold" id="count-s">{{ $counts['S'] ?? 0 }}</td>
-                        </tr>
-                        <tr>
-                            <td class="border border-gray-400 px-3 py-2 text-center"><span class="w-6 h-6 rounded-full bg-blue-500 inline-block"></span></td>
-                            <td class="border border-gray-400 px-3 py-2 text-right font-semibold" id="count-i">{{ $counts['I'] ?? 0 }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Legend -->
+            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
+                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest">Keterangan Icon</h4>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px]">✓</span> <span class="text-xs font-bold text-gray-500">Hadir (H)</span></div>
+                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-[10px]">A</span> <span class="text-xs font-bold text-gray-500">Alfa (A)</span></div>
+                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white text-[10px]">S</span> <span class="text-xs font-bold text-gray-500">Sakit (S)</span></div>
+                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px]">I</span> <span class="text-xs font-bold text-gray-500">Izin (I)</span></div>
+                </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Tabel Kesimpulan -->
+<!-- Modal & Popover -->
+<div id="day-modal" class="fixed inset-0 bg-[#173A67]/50 backdrop-blur-sm hidden items-center justify-center z-[100] p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-lg p-6 shadow-2xl transform transition-all scale-100">
+        <div class="flex justify-between items-center mb-6">
             <div>
-                <h3 class="font-semibold mb-3 text-base bg-blue-500 text-white px-3 py-2 rounded">Tabel Kesimpulan</h3>
-                <table class="w-full border-2 border-blue-400 text-sm">
-                    <thead>
-                        <tr class="bg-blue-300 border-b-2 border-blue-400">
-                            <th class="border border-blue-400 px-3 py-2 text-left font-semibold">Keterangan</th>
-                            <th class="border border-blue-400 px-3 py-2 text-right font-semibold">Hasil</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b border-blue-400 hover:bg-blue-50">
-                            <td class="border border-blue-400 px-3 py-2">Jumlah Total</td>
-                            <td class="border border-blue-400 px-3 py-2 text-right font-semibold text-blue-600">{{ $studentsCount }}</td>
-                        </tr>
-                        <tr class="border-b border-blue-400 hover:bg-blue-50">
-                            <td class="border border-blue-400 px-3 py-2">Rata" per siswa</td>
-                            <td class="border border-blue-400 px-3 py-2 text-right font-semibold text-blue-600">-</td>
-                        </tr>
-                        <tr class="border-b border-blue-400 hover:bg-blue-50">
-                            <td class="border border-blue-400 px-3 py-2">Rata-rata kelas</td>
-                            <td class="border border-blue-400 px-3 py-2 text-right font-semibold text-blue-600">-</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50">
-                            <td class="border border-blue-400 px-3 py-2">Prosentase</td>
-                            <td class="border border-blue-400 px-3 py-2 text-right font-semibold text-blue-600" id="percent">{{ $percent }}%</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h3 class="font-black text-xl text-[#173A67]">Detail Hari Ke-<span id="day-modal-day"></span></h3>
+                <p class="text-xs font-bold text-gray-400 uppercase">Ringkasan kehadiran siswa</p>
             </div>
+            <button id="day-modal-close" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
-    
-</div>
-
-<!-- Day details modal -->
-<div id="day-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-11/12 max-w-2xl p-4">
-        <div class="flex justify-between items-center">
-            <h3 id="day-modal-title" class="font-semibold">Keterangan Hari <span id="day-modal-day"></span></h3>
-            <div class="flex items-center gap-2">
-                <button id="day-modal-close" class="text-gray-600 px-2 py-1 rounded hover:bg-gray-100">Tutup</button>
-            </div>
+        
+        <div class="grid grid-cols-4 gap-2 mb-6">
+             <div class="bg-green-50 rounded-xl p-3 text-center"><div class="text-[10px] font-bold text-green-400 uppercase">Hadir</div><div class="font-black text-xl text-green-600" id="modal-count-h">0</div></div>
+             <div class="bg-red-50 rounded-xl p-3 text-center"><div class="text-[10px] font-bold text-red-400 uppercase">Alfa</div><div class="font-black text-xl text-red-600" id="modal-count-a">0</div></div>
+             <div class="bg-yellow-50 rounded-xl p-3 text-center"><div class="text-[10px] font-bold text-yellow-500 uppercase">Sakit</div><div class="font-black text-xl text-yellow-600" id="modal-count-s">0</div></div>
+             <div class="bg-blue-50 rounded-xl p-3 text-center"><div class="text-[10px] font-bold text-blue-400 uppercase">Izin</div><div class="font-black text-xl text-blue-600" id="modal-count-i">0</div></div>
         </div>
-        <div class="mt-3">
-            <table class="w-full text-sm">
-                <tr><td>Hadir</td><td id="modal-count-h" class="text-right font-semibold">0</td></tr>
-                <tr><td>Alfa</td><td id="modal-count-a" class="text-right font-semibold">0</td></tr>
-                <tr><td>Sakit</td><td id="modal-count-s" class="text-right font-semibold">0</td></tr>
-                <tr><td>Izin</td><td id="modal-count-i" class="text-right font-semibold">0</td></tr>
-            </table>
-            <hr class="my-3" />
-            <div id="modal-students-list" class="max-h-64 overflow-y-auto text-sm"></div>
+        
+        <div class="max-h-[300px] overflow-y-auto pr-2 space-y-2" id="modal-students-list">
+            <!-- inserted by js -->
         </div>
     </div>
 </div>
 
-<!-- Floating popover for quick per-day totals -->
-<div id="day-popover" class="hidden absolute z-50 bg-white rounded-lg shadow-lg border p-3 w-64" role="dialog" aria-hidden="true" style="display:none;">
-    <div class="flex justify-between items-center">
-        <div class="font-semibold">Hari <span id="popover-day"></span></div>
-        <button id="popover-close" class="text-gray-500 hover:bg-gray-100 px-1 rounded">×</button>
+<div id="day-popover" class="hidden absolute bg-white rounded-2xl shadow-xl border border-gray-100 p-4 w-64">
+    <div class="flex justify-between items-center mb-3">
+        <div class="font-bold text-[#173A67]">Hari <span id="popover-day"></span></div>
+        <button id="popover-close" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-3 h-3"></i></button>
     </div>
-    <div class="mt-2 text-sm">
-        <div class="flex justify-between"><div>Hadir</div><div id="popover-count-h" class="font-semibold">0</div></div>
-        <div class="flex justify-between"><div>Alfa</div><div id="popover-count-a" class="font-semibold">0</div></div>
-        <div class="flex justify-between"><div>Sakit</div><div id="popover-count-s" class="font-semibold">0</div></div>
-        <div class="flex justify-between"><div>Izin</div><div id="popover-count-i" class="font-semibold">0</div></div>
-        <hr class="my-2" />
-        <div id="popover-students-preview" class="text-xs text-gray-600 max-h-28 overflow-y-auto"></div>
-        <div class="mt-2 text-right"><button id="popover-open-modal" class="text-sm text-blue-600">Lihat semua</button></div>
+    <div class="space-y-2 text-xs font-bold text-gray-600 mb-3">
+        <div class="flex justify-between"><span>Hadir</span><span class="text-green-500" id="popover-count-h">0</span></div>
+        <div class="flex justify-between"><span>Alfa</span><span class="text-red-500" id="popover-count-a">0</span></div>
+        <div class="flex justify-between"><span>Sakit</span><span class="text-yellow-500" id="popover-count-s">0</span></div>
+        <div class="flex justify-between"><span>Izin</span><span class="text-blue-500" id="popover-count-i">0</span></div>
     </div>
+    <!-- Custom Scroll Buttons - Always Visible -->
+    <button id="scroll-left" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-40 w-12 h-12 bg-[#173A67] rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-blue-800 hover:scale-110 transition-all border-4 border-white">
+        <i data-lucide="chevron-left" class="w-8 h-8"></i>
+    </button>
+    <button id="scroll-right" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-40 w-12 h-12 bg-[#173A67] rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-blue-800 hover:scale-110 transition-all border-4 border-white">
+        <i data-lucide="chevron-right" class="w-8 h-8"></i>
+    </button>
+
+    <div id="popover-students-preview" class="space-y-1 mb-3 max-h-32 overflow-hidden relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-8 after:bg-gradient-to-t after:from-white"></div>
+    <button id="popover-open-modal" class="w-full py-2 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold hover:bg-blue-100 transition">Lihat Detail</button>
 </div>
+
+
 
 <style>
-/* Layout tweaks to match the design */
 .presensi-wrapper { position: relative; }
+
 /* Popover */
-#day-popover { position: absolute; display: none; transform-origin: top left; transition: transform .12s ease, opacity .12s ease; }
+#day-popover { position: absolute; display: none; transform-origin: top left; transition: transform .12s ease, opacity .12s ease; z-index: 60; }
 #day-popover.show { display: block; opacity: 1; transform: translateY(0); }
-#day-popover[style] { z-index: 60; }
-@media (min-width: 768px) { #day-popover { min-width: 220px; } }
-.presensi-scroll { overflow-x: scroll; overflow-y: scroll; scrollbar-gutter: stable both-edges; -webkit-overflow-scrolling: touch; scrollbar-width: auto; scrollbar-color: #cbd5e1 transparent; }
-.presensi-scroll::-webkit-scrollbar { height: 12px; width: 12px; }
-.presensi-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; border: 3px solid rgba(0,0,0,0.03); }
-.presensi-scroll::-webkit-scrollbar-thumb:hover { background: #94b3c7; }
-.presensi-scroll::-webkit-scrollbar-track { background: transparent; }
-.presensi-badge { width: 28px; height: 28px; border-radius: 9999px; display:inline-flex; align-items:center; justify-content:center; font-weight:600; }
+
+@media (min-width: 768px) { 
+    #day-popover { min-width: 220px; } 
+}
+
+/* Custom scrollbar styling - Forced Visibility */
+.presensi-scroll {
+    overflow: auto !important;
+    scrollbar-width: auto !important;
+    scrollbar-color: #cbd5e1 #f1f5f9 !important;
+}
+.presensi-scroll::-webkit-scrollbar { 
+    height: 16px !important; width: 16px !important; 
+    -webkit-appearance: none !important; display: block !important;
+}
+.presensi-scroll::-webkit-scrollbar-track { 
+    background-color: #f1f5f9 !important; border-radius: 8px !important; 
+}
+.presensi-scroll::-webkit-scrollbar-thumb { 
+    background-color: #94a3b8 !important; border-radius: 8px !important; border: 4px solid #f1f5f9 !important; 
+}
+.presensi-scroll::-webkit-scrollbar-thumb:hover { 
+    background-color: #64748b !important; 
+}
+.presensi-scroll::-webkit-scrollbar-corner {
+    background-color: #f1f5f9 !important;
+}
+
+.presensi-badge { 
+    width: 28px; 
+    height: 28px; 
+    border-radius: 9999px; 
+    display:inline-flex; 
+    align-items:center; 
+    justify-content:center; 
+    font-weight:600; 
+}
+
 .presensi-badge .caret { position: absolute; right: -5px; bottom: -5px; }
+
 .table-fixed th, .table-fixed td { border: 1px solid #d1d5db; vertical-align: middle; padding: 8px; }
+
 .table-fixed thead th { background: #8A9BB2; color: #fff; }
 
-/* Freeze behavior: keep the first columns visible on both vertical and horizontal scroll */
-.sticky-col { position: sticky; top: 56px; /* height of header area */ z-index: 55; background: #fff; }
-.sticky-col-head { position: sticky; top: 0; z-index: 70; background: #8A9BB2; color: #fff; }
-/* ensure day number headers stay at top */
-.table-fixed thead th.sticky-top, .table-fixed thead th[style] { position: sticky; top: 0; z-index: 60; }
-
-/* explicit column sizes for consistency */
-.col-no { min-width: 64px; width: 64px; }
-.col-name { min-width: 260px; width: 260px; }
-.col-phone { min-width: 220px; width: 220px; }
+/* Existing compatibility styles if any are still needed */
+.sticky-column {
+    position: sticky;
+    background-color: white;
+    z-index: 10;
+}
 </style>
 
 <script>
-// initial per-day counts (from session)
-window.__penilaianPerDay = {!! json_encode(session('penilaian_presensi_counts_per_day') ?? []) !!};
+    const CONFIG = {
+        month: {{ $month }},
+        year: {{ $year }},
+        daysCount: {{ $daysCount }},
+        csrf: '{{ csrf_token() }}',
+        saveRoute: '{{ route('sensei.penilaian.presensi.save') }}',
+        resetRoute: '{{ route('sensei.penilaian.presensi.reset') }}'
+    };
+    window.__penilaianPerDay = {!! json_encode($counts_per_day ?? []) !!};
 
-document.addEventListener('DOMContentLoaded', function () {
-    const p = document.querySelector('select[name="penilaian-select"]');
-    // per-day cache used for modal details
-    let perDayCounts = window.__penilaianPerDay || [];
-
-    function fillDayModal(dayIndex) {
-        const d = perDayCounts[dayIndex] || { counts: {H:0,A:0,S:0,I:0}, students: [] };
-        document.getElementById('day-modal-day').textContent = (parseInt(dayIndex)+1);
-        document.getElementById('modal-count-h').textContent = d.counts.H || 0;
-        document.getElementById('modal-count-a').textContent = d.counts.A || 0;
-        document.getElementById('modal-count-s').textContent = d.counts.S || 0;
-        document.getElementById('modal-count-i').textContent = d.counts.I || 0;
-
-        const list = document.getElementById('modal-students-list');
-        list.innerHTML = '';
-        if(d.students && d.students.length) {
-            d.students.forEach(st => {
-                const s = document.createElement('div');
-                s.className = 'py-1 border-b last:border-b-0 flex items-center justify-between gap-2';
-                s.innerHTML = '<div><div class="font-semibold">'+(st.name||'')+'</div><div class="text-xs text-gray-500">'+(st.phone||'')+'</div></div><div class="font-semibold">'+(st.status||'')+'</div>';
-                list.appendChild(s);
-            });
-        } else {
-            list.innerHTML = '<div class="text-sm text-gray-500">Belum ada data.</div>';
-        }
-        // show modal
-        const modal = document.getElementById('day-modal');
-        if(modal) modal.classList.remove('hidden');
-        window.__currentDayModal = dayIndex;
-    }
-
-    // popover & attach day buttons
-    const popover = document.getElementById('day-popover');
-
-    function showDayPopover(btn, dayIndex) {
-        if(!popover) return;
-        const d = perDayCounts[dayIndex] || { counts: {H:0,A:0,S:0,I:0}, students: [] };
-        document.getElementById('popover-day').textContent = (parseInt(dayIndex) + 1);
-        document.getElementById('popover-count-h').textContent = d.counts.H || 0;
-        document.getElementById('popover-count-a').textContent = d.counts.A || 0;
-        document.getElementById('popover-count-s').textContent = d.counts.S || 0;
-        document.getElementById('popover-count-i').textContent = d.counts.I || 0;
-
-        const preview = document.getElementById('popover-students-preview');
-        preview.innerHTML = '';
-        if(d.students && d.students.length) {
-            d.students.slice(0,6).forEach(st => {
-                const div = document.createElement('div');
-                div.className = 'py-1 border-b last:border-b-0 flex items-center justify-between gap-2 text-xs';
-                div.innerHTML = '<div><div class="font-semibold">'+(st.name||'')+'</div><div class="text-xs text-gray-500">'+(st.phone||'')+'</div></div><div class="font-semibold">'+(st.status||'')+'</div>';
-                preview.appendChild(div);
-            });
-        } else {
-            preview.innerHTML = '<div class="text-sm text-gray-500">Belum ada data.</div>';
-        }
-
-        // position popover relative to scroll container
-        const rect = btn.getBoundingClientRect();
-        const container = document.querySelector('.presensi-scroll');
-        const parentRect = container ? container.getBoundingClientRect() : document.body.getBoundingClientRect();
-        let left = rect.left - parentRect.left + (container ? container.scrollLeft : 0);
-        let top = rect.bottom - parentRect.top + (container ? container.scrollTop : 0) + 8; // offset
-
-        // clamp horizontally
-        const maxLeft = (parentRect.width || window.innerWidth) - popover.offsetWidth - 12;
-        if(left > maxLeft) left = Math.max(8, maxLeft);
-        if(left < 8) left = 8;
-
-        popover.style.left = left + 'px';
-        popover.style.top = top + 'px';
-        popover.classList.add('show');
-        popover.style.display = 'block';
-        window.__currentPopoverDay = dayIndex;
-    }
-
-    function hideDayPopover() {
-        if(!popover) return;
-        popover.classList.remove('show');
-        popover.style.display = 'none';
-        window.__currentPopoverDay = undefined;
-    }
-
-    function attachDayButtons() {
-        document.querySelectorAll('.day-info-btn').forEach(btn => {
-            btn.removeEventListener('click', btn._dayInfoHandler);
-            btn._dayInfoHandler = function (e) {
-                e.preventDefault();
-                const day = parseInt(btn.dataset.day || 0);
-                if(window.__currentPopoverDay === day) { hideDayPopover(); return; }
-                showDayPopover(btn, day);
-            };
-            btn.addEventListener('click', btn._dayInfoHandler);
-        });
-    }
-
-    // popover close
-    const popoverCloseBtn = document.getElementById('popover-close');
-    if(popoverCloseBtn) popoverCloseBtn.addEventListener('click', function () { hideDayPopover(); });
-
-    // open modal from popover
-    const popoverOpenModal = document.getElementById('popover-open-modal');
-    if(popoverOpenModal) popoverOpenModal.addEventListener('click', function () { hideDayPopover(); const day = window.__currentPopoverDay; if(typeof day !== 'undefined') fillDayModal(day); });
-
-    // click outside to close popover
-    document.addEventListener('click', function (e) {
-        if(!popover) return;
-        const isTarget = e.target.closest('.day-info-btn') || e.target.closest('#day-popover');
-        if(!isTarget) hideDayPopover();
-    });
-
-    // close modal
-    const dayModalClose = document.getElementById('day-modal-close');
-    if(dayModalClose) dayModalClose.addEventListener('click', function () { document.getElementById('day-modal').classList.add('hidden'); window.__currentDayModal = undefined; });
-    // click outside to close modal
-    document.getElementById('day-modal')?.addEventListener('click', function (e) { if(e.target === this) { this.classList.add('hidden'); window.__currentDayModal = undefined; } });
-
-    // initial attach
-    attachDayButtons();
-
-    if (p) {
-        p.addEventListener('change', function (e) {
-            const url = e.target.value;
-            if (url) window.location.href = url;
-        });
-    }
-
-    const statuses = ['', 'H', 'A', 'S', 'I'];
-    const csrf = '{{ csrf_token() }}';
-
-    function renderAttendanceButton(btn, status) {
+    function renderIcon(btn, status) {
         status = (status || '').toUpperCase();
         btn.dataset.status = status;
-        const existing = btn.querySelector('span');
-        let html = '';
-        if(status === 'H') html = '<span class="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-white"><svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 10.5l3 3 8-8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
-        else if(status === 'A') html = '<span class="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center text-white">A</span>';
-        else if(status === 'S') html = '<span class="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center text-gray-800">S</span>';
-        else if(status === 'I') html = '<span class="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white">I</span>';
-        else html = '<span class="w-7 h-7 rounded-full bg-gray-100"></span>';
+        let html = '<span class="w-8 h-8 rounded-xl bg-gray-100/50 border border-gray-200 block transition-all hover:bg-gray-200"></span>'; // default clearer empty state
+        
+        if(status === 'H') html = '<span class="w-full h-full rounded-xl bg-green-500 shadow-md shadow-green-200 flex items-center justify-center text-white scale-110 transition-transform"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
+        else if(status === 'A') html = '<span class="w-full h-full rounded-xl bg-red-500 shadow-md shadow-red-200 flex items-center justify-center text-white font-black text-sm scale-110 transition-transform">A</span>';
+        else if(status === 'S') html = '<span class="w-full h-full rounded-xl bg-yellow-400 shadow-md shadow-yellow-200 flex items-center justify-center text-white font-black text-sm scale-110 transition-transform">S</span>';
+        else if(status === 'I') html = '<span class="w-full h-full rounded-xl bg-blue-500 shadow-md shadow-blue-200 flex items-center justify-center text-white font-black text-sm scale-110 transition-transform">I</span>';
 
-        if(existing) existing.outerHTML = html;
-        else btn.insertAdjacentHTML('afterbegin', html);
-
-        // also sync any select in the same cell
-        const sel = btn.parentElement.querySelector('.attendance-select');
-        if(sel) sel.value = status;
+        btn.innerHTML = html;
+        // update select if needed
+        const sel = btn.nextElementSibling;
+        if(sel && sel.tagName === 'SELECT') sel.value = status;
     }
 
-    // Initialize attendance buttons
-    document.querySelectorAll('.attendance-btn').forEach(btn => {
-        renderAttendanceButton(btn, btn.dataset.status);
-
-        const sel = btn.parentElement.querySelector('.attendance-select');
-        if(sel) sel.value = (btn.dataset.status || '');
-
-        // click cycles
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const cur = (btn.dataset.status || '').toUpperCase();
-            let idx = statuses.indexOf(cur);
-            idx = (idx + 1) % statuses.length;
-            const next = statuses[idx];
-            renderAttendanceButton(btn, next);
-            if(sel) sel.value = next;
+    document.addEventListener('DOMContentLoaded', () => {
+        // Init Icons
+        document.querySelectorAll('.attendance-btn').forEach(btn => {
+            renderIcon(btn, btn.dataset.status);
+            
+            // Click Handler
+            btn.addEventListener('click', (e) => {
+                const statuses = ['', 'H', 'A', 'S', 'I'];
+                let cur = (btn.dataset.status || '').toUpperCase();
+                let idx = statuses.indexOf(cur);
+                let next = statuses[(idx + 1) % statuses.length];
+                renderIcon(btn, next);
+            });
         });
 
-        // double click opens select for direct choice
-        if(sel) {
-            btn.addEventListener('dblclick', function (e) {
-                e.preventDefault();
-                // show select and focus
-                sel.classList.remove('hidden');
-                sel.focus();
-            });
-
-            sel.addEventListener('change', function () {
-                const v = (sel.value || '').toUpperCase();
-                renderAttendanceButton(btn, v);
-                sel.classList.add('hidden');
-            });
-
-            sel.addEventListener('blur', function () { sel.classList.add('hidden'); });
-        }
-
-        // keyboard support
-        btn.addEventListener('keydown', function (e) {
-            const key = (e.key || '').toUpperCase();
-            if(['H','A','S','I'].includes(key)) {
-                e.preventDefault();
-                renderAttendanceButton(btn, key);
-            } else if (e.key === 'Enter') {
-                if(sel) { sel.classList.remove('hidden'); sel.focus(); }
-            }
-        });
-    });
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function (e) {
-        document.querySelectorAll('.attendance-select').forEach(s => {
-            if(!s.classList.contains('hidden') && !s.contains(e.target) && !s.parentElement.contains(e.target)) {
-                s.classList.add('hidden');
-            }
-        });
-    });
-
-    // Save handler (collect only rows with a name)
-    const saveBtn = document.getElementById('save-presensi');
-    if(saveBtn) {
-        saveBtn.addEventListener('click', function () {
-            const rows = document.querySelectorAll('tbody tr.student-row');
-            const payload = [];
-            rows.forEach(row => {
-                const name = (row.querySelector('.name-input') || {value:''}).value.trim();
-                if(!name) return; // skip empty rows
-                const phone = (row.querySelector('.phone-input') || {value:''}).value.trim();
-                const statusesArr = [];
-                row.querySelectorAll('.attendance-btn').forEach(btn => {
-                    statusesArr.push((btn.dataset.status || '').toUpperCase());
-                });
-                payload.push({ name, phone, statuses: statusesArr });
-            });
-
+        // Save
+        document.getElementById('save-presensi').addEventListener('click', async () => {
             const msg = document.getElementById('presensi-save-msg');
-            if(msg) msg.textContent = 'Menyimpan...';
+            msg.textContent = 'Menyimpan...'; msg.className='text-xs font-bold text-gray-400 ml-2';
+            
+            const payload = [];
+            document.querySelectorAll('tr.student-row').forEach(tr => {
+                const name = tr.querySelector('.name-input').value;
+                const phone = tr.querySelector('.phone-input').value;
+                const statuses = [];
+                tr.querySelectorAll('.attendance-btn').forEach(b => statuses.push(b.dataset.status || ''));
+                if(name) payload.push({ name, phone, statuses });
+            });
 
-            fetch('{{ route('sensei.penilaian.presensi.save') }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                body: JSON.stringify({ students: payload })
-            }).then(r => r.json()).then(res => {
-                if(res.success) {
-                    // update counts in the sidebar
-                    const counts = res.counts || {};
-                    const elH = document.getElementById('count-h'); if(elH) elH.textContent = counts.H || 0;
-                    const elA = document.getElementById('count-a'); if(elA) elA.textContent = counts.A || 0;
-                    const elS = document.getElementById('count-s'); if(elS) elS.textContent = counts.S || 0;
-                    const elI = document.getElementById('count-i'); if(elI) elI.textContent = counts.I || 0;
-
-                    // update per-day cache and refresh modal/popover if open
-                    perDayCounts = res.counts_per_day || perDayCounts;
-                    if(typeof window.__currentDayModal !== 'undefined' && window.__currentDayModal !== undefined) {
-                        fillDayModal(window.__currentDayModal);
-                    }
-                    if(typeof window.__currentPopoverDay !== 'undefined' && window.__currentPopoverDay !== undefined) {
-                        const btn = document.querySelector('.day-info-btn[data-day="'+window.__currentPopoverDay+'"]');
-                        if(btn) showDayPopover(btn, window.__currentPopoverDay);
-                    }
-
-                    // update summary calculations
-                    const daysCount = {{ count($days) }} || 30;
-                    const totalH = (res.counts && res.counts.H) ? res.counts.H : 0;
-                    const studentsSaved = res.saved || payload.length || 0;
-                    const percent = (studentsSaved && daysCount) ? ((totalH / (studentsSaved * daysCount)) * 100) : 0;
-
-                    const elPerc = document.getElementById('percent'); if(elPerc) elPerc.textContent = percent.toFixed(2) + '%';
-
-                    alert('Data presensi disimpan. Tersimpan: ' + (res.saved || payload.length) + ' siswa.');
-                    if(msg) msg.textContent = 'Tersimpan.';
-                    setTimeout(() => { if(msg) msg.textContent = ''; }, 1200);
-                } else {
-                    alert('Gagal menyimpan.');
-                    if(msg) msg.textContent = 'Gagal menyimpan';
-                }
-            }).catch(err => { console.error(err); alert('Gagal menyimpan (network).'); if(msg) msg.textContent = 'Gagal (network)'; });
-        });
-    }
-
-    // Reset handler
-    const resetBtn = document.getElementById('reset-presensi');
-    if(resetBtn) {
-        resetBtn.addEventListener('click', function () {
-            if(!confirm('Reset data presensi tersimpan?')) return;
-            fetch('{{ route('sensei.penilaian.presensi.reset') }}', {
-                method: 'POST', headers: { 'X-CSRF-TOKEN': csrf }
-            }).then(r => r.json()).then(res => {
-                if(res.success) {
-                    ['count-h','count-a','count-s','count-i'].forEach(id => {
-                        const el = document.getElementById(id); if(el) el.textContent = 0;
+            try {
+                const res = await fetch(CONFIG.saveRoute, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CONFIG.csrf },
+                    body: JSON.stringify({ 
+                        students: payload,
+                        month: CONFIG.month,
+                        year: CONFIG.year
+                    })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    msg.textContent = 'Tersimpan'; msg.className='text-xs font-bold text-green-500 ml-2';
+                    // Update stats
+                    const c = data.counts || {};
+                    ['h','a','s','i'].forEach(k => {
+                        const el = document.getElementById('count-'+k);
+                        if(el && c[k.toUpperCase()] !== undefined) el.textContent = c[k.toUpperCase()];
                     });
-                    // clear per-day cache and close modal
-                    perDayCounts = [];
-                    const modal = document.getElementById('day-modal'); if(modal) modal.classList.add('hidden');
-                    window.__currentDayModal = undefined;
-                    window.__penilaianPerDay = [];
-                    window.location.reload();
+                    
+                    const savedCount = data.saved || payload.length; 
+                    const totalEntriesAtCurrentPeriod = savedCount * CONFIG.daysCount;
+                    const hCount = c.H || 0;
+                    const p = totalEntriesAtCurrentPeriod > 0 ? ((hCount / totalEntriesAtCurrentPeriod) * 100).toFixed(2) : 0;
+                    const elP = document.getElementById('percent');
+                    if(elP) {
+                         elP.textContent = p + '%';
+                         const parent = elP.closest('div').nextElementSibling;
+                         if(parent) {
+                             const bar = parent.firstElementChild;
+                             if(bar) bar.style.width = p + '%';
+                         }
+                    }
+                    
+                    window.__penilaianPerDay = data.counts_per_day || [];
+                    setTimeout(() => msg.textContent='', 2000);
                 }
+            } catch(e) { console.error(e); msg.textContent = 'Error'; msg.className='text-xs font-bold text-red-500 ml-2'; }
+        });
+
+        // Reset
+        document.getElementById('reset-presensi').addEventListener('click', async () => {
+            if(confirm('Reset semua data presensi bulan ini?')) {
+                await fetch(CONFIG.resetRoute, {
+                    method:'POST', 
+                    headers:{
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CONFIG.csrf
+                    },
+                    body: JSON.stringify({
+                        month: CONFIG.month,
+                        year: CONFIG.year
+                    })
+                });
+                window.location.reload();
+            }
+        });
+        
+        // Popover Logic
+        let perDayCounts = window.__penilaianPerDay || [];
+        const popover = document.getElementById('day-popover');
+        
+        document.querySelectorAll('.day-info-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const day = parseInt(btn.dataset.day);
+                const dData = perDayCounts[day] || { counts: {H:0,A:0,S:0,I:0}, students:[] };
+                
+                document.getElementById('popover-day').textContent = day + 1;
+                document.getElementById('popover-count-h').textContent = dData.counts.H || 0;
+                document.getElementById('popover-count-a').textContent = dData.counts.A || 0;
+                document.getElementById('popover-count-s').textContent = dData.counts.S || 0;
+                document.getElementById('popover-count-i').textContent = dData.counts.I || 0;
+                
+                const preview = document.getElementById('popover-students-preview');
+                preview.innerHTML = '';
+                if(dData.students && dData.students.length) {
+                    dData.students.slice(0,5).forEach(s => {
+                        preview.innerHTML += `<div class="flex justify-between items-center text-[10px] text-gray-500 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                            <span class="font-bold text-[#173A67] truncate w-24">${s.name}</span>
+                            <span class="font-bold">${s.status}</span>
+                        </div>`;
+                    });
+                } else {
+                    preview.innerHTML = '<span class="text-gray-400 italic">Belum ada data</span>';
+                }
+                
+                const rect = btn.getBoundingClientRect();
+                popover.style.display = 'block';
+                popover.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+                popover.style.left = (rect.left + window.scrollX - 100) + 'px';
+                popover.classList.remove('hidden');
+                
+                window.__currentDay = day;
             });
         });
-    }
+        
+        document.addEventListener('click', (e) => {
+            if(!popover.contains(e.target) && !e.target.closest('.day-info-btn')) {
+                popover.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('popover-close').addEventListener('click', () => popover.style.display = 'none');
+        
+        // Modal Logic
+        const modal = document.getElementById('day-modal');
+        function openModal(day) {
+           const dData = perDayCounts[day] || { counts: {H:0,A:0,S:0,I:0}, students:[] };
+           document.getElementById('day-modal-day').textContent = (day + 1);
+           document.getElementById('modal-count-h').textContent = dData.counts.H || 0;
+           document.getElementById('modal-count-a').textContent = dData.counts.A || 0;
+           document.getElementById('modal-count-s').textContent = dData.counts.S || 0;
+           document.getElementById('modal-count-i').textContent = dData.counts.I || 0;
+           
+           const list = document.getElementById('modal-students-list');
+           list.innerHTML = '';
+           if(dData.students && dData.students.length) {
+               dData.students.forEach(s => {
+                   let colorClass = 'bg-gray-100 text-gray-600';
+                   if(s.status == 'H') colorClass = 'bg-green-100 text-green-600';
+                   if(s.status == 'A') colorClass = 'bg-red-100 text-red-600';
+                   if(s.status == 'S') colorClass = 'bg-yellow-100 text-yellow-600';
+                   if(s.status == 'I') colorClass = 'bg-blue-100 text-blue-600';
+                   
+                   list.innerHTML += `<div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
+                       <span class="font-bold text-[#173A67] text-sm">${s.name}</span>
+                       <span class="px-2 py-1 rounded-lg text-xs font-black ${colorClass}">${s.status}</span>
+                   </div>`;
+               });
+           } else {
+               list.innerHTML = '<div class="text-center text-gray-400 py-8 font-bold text-sm">Belum ada absen pada hari ini</div>';
+           }
+           
+           modal.classList.remove('hidden');
+           modal.classList.add('flex');
+        }
+        
+        document.getElementById('popover-open-modal').addEventListener('click', () => {
+            popover.style.display = 'none';
+            if(window.__currentDay !== undefined) openModal(window.__currentDay);
+        });
+        
+        document.getElementById('day-modal-close').addEventListener('click', () => {
+             modal.classList.add('hidden');
+             modal.classList.remove('flex');
+        });
+        });
 
-});
+        // Month/Year Selector Change
+        const updatePeriod = () => {
+            const m = document.getElementById('month-select').value;
+            const y = document.getElementById('year-select').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('month', m);
+            url.searchParams.set('year', y);
+            window.location.href = url.toString();
+        };
+
+        document.getElementById('month-select').addEventListener('change', updatePeriod);
+        document.getElementById('year-select').addEventListener('change', updatePeriod);
+    });
 </script>
-
-<style>
-/* Custom scrollbar styling */
-.scrollbar-visible::-webkit-scrollbar {
-    height: 12px;
-}
-
-.scrollbar-visible::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 6px;
-}
-
-.scrollbar-visible::-webkit-scrollbar-thumb {
-    background: #3b82f6;
-    border-radius: 6px;
-    border: 2px solid #f3f4f6;
-}
-
-.scrollbar-visible::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
-}
-</style>
 @endsection

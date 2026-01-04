@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Sensei\PenilaianController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -43,87 +44,25 @@ Route::middleware(['auth'])
             ->name('dashboard');
         
         // Penilaian routes (different assessment types)
-        Route::get('/penilaian-kelas', fn () => view('sensei.penilaian-presensi'))
+        Route::get('/penilaian-kelas', fn () => redirect()->route('sensei.penilaian.presensi'))
             ->name('penilaian');
-        Route::get('/penilaian-kelas/preensi-siswa', fn () => view('sensei.penilaian-presensi'))
-            ->name('penilaian.presensi');
 
-        // Save presensi (stores session data for now)
-        Route::post('/penilaian-kelas/preensi-siswa/save', function (Request $request) {
-            $students = $request->input('students', []);
-            $daysCount = 30;
-            $allowed = ['H','A','S','I'];
-            $clean = [];
 
-            foreach ($students as $s) {
-                $name = trim($s['name'] ?? '');
-                if ($name === '') continue; // skip empty rows
-                $phone = trim($s['phone'] ?? '');
-                $statuses = array_values($s['statuses'] ?? []);
+        // Save/Reset presensi using Controller
+        Route::post('/penilaian-kelas/preensi-siswa/save', [PenilaianController::class, 'savePresensi'])->name('penilaian.presensi.save');
+        Route::post('/penilaian-kelas/preensi-siswa/reset', [PenilaianController::class, 'resetPresensi'])->name('penilaian.presensi.reset');
 
-                // normalize and sanitize statuses to exactly $daysCount entries
-                $statuses = array_slice($statuses, 0, $daysCount);
-                $statuses = array_pad($statuses, $daysCount, '');
-                $statuses = array_map(function ($v) use ($allowed) {
-                    $c = strtoupper((string)($v ?? ''));
-                    return in_array($c, $allowed) ? $c : '';
-                }, $statuses);
-
-                $clean[] = [ $name, $phone, $statuses ];
-            }
-
-            session(['penilaian_presensi' => $clean]);
-
-            // compute counts for H/A/S/I across all saved students
-            $counts = ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0];
-
-            $daysCount = 30;
-            // initialize per-day structure
-            $perDay = [];
-            for ($d = 0; $d < $daysCount; $d++) {
-                $perDay[$d] = [ 'counts' => ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0], 'students' => [] ];
-            }
-
-            foreach ($clean as $st) {
-                if(isset($st[2]) && is_array($st[2])) {
-                    foreach ($st[2] as $s) {
-                        $c = strtoupper((string)($s ?? ''));
-                        if(in_array($c, array_keys($counts))) {
-                            $counts[$c] = ($counts[$c] ?? 0) + 1;
-                        }
-                    }
-                }
-
-                // also collect per-day info
-                $name = $st[0] ?? '';
-                $phone = $st[1] ?? '';
-                for ($d = 0; $d < $daysCount; $d++) {
-                    $stval = strtoupper((string)($st[2][$d] ?? ''));
-                    if(in_array($stval, ['H','A','S','I'])) {
-                        $perDay[$d]['counts'][$stval] = ($perDay[$d]['counts'][$stval] ?? 0) + 1;
-                    }
-                    $perDay[$d]['students'][] = [ 'name' => $name, 'phone' => $phone, 'status' => $stval ];
-                }
-            }
-
-            session(['penilaian_presensi_counts' => $counts, 'penilaian_presensi_counts_per_day' => $perDay]);
-
-            return response()->json(['success' => true, 'saved' => count($clean), 'counts' => $counts, 'counts_per_day' => $perDay]);
-        })->name('penilaian.presensi.save');
-
-        // Reset saved presensi
-        Route::post('/penilaian-kelas/preensi-siswa/reset', function (Request $request) {
-            session()->forget('penilaian_presensi');
-            session()->forget('penilaian_presensi_counts');
-            session()->forget('penilaian_presensi_counts_per_day');
-            return response()->json(['success' => true]);
-        })->name('penilaian.presensi.reset');
-        Route::get('/penilaian-kelas/bunpou', fn () => view('sensei.penilaian-bunpou'))
-            ->name('penilaian.bunpou');
 
         // Support both /penilaian-kelas and /penilaian-kelas/kanji for Kanji page
-        Route::get('/penilaian-kelas/kanji', fn () => view('sensei.penilaian-kanji'))
-            ->name('penilaian.kanji');
+        Route::controller(PenilaianController::class)->group(function() {
+            Route::get('/penilaian-kelas/kanji', 'show')->defaults('type', 'kanji')->name('penilaian.kanji');
+            Route::get('/penilaian-kelas/bunpou', 'show')->defaults('type', 'bunpou')->name('penilaian.bunpou');
+            Route::get('/penilaian-kelas/kotoba', 'show')->defaults('type', 'kotoba')->name('penilaian.kotoba');
+            Route::get('/penilaian-kelas/fmd', 'show')->defaults('type', 'fmd')->name('penilaian.fmd');
+            Route::get('/penilaian-kelas/wawancara', 'show')->defaults('type', 'wawancara')->name('penilaian.wawancara');
+            Route::get('/penilaian-kelas/presensi', 'show')->defaults('type', 'presensi')->name('penilaian.presensi');
+            Route::get('/penilaian-kelas/nilai-akhir', 'show')->defaults('type', 'nilai-akhir')->name('penilaian.nilai-akhir');
+        });
 
         // Kanji save/reset routes (per-bab)
         Route::post('/penilaian-kelas/kanji/save', function (Request $request) {
@@ -191,48 +130,9 @@ Route::middleware(['auth'])
             }
         })->name('penilaian.kanji.reset');
 
-        // Save bunpou scores (store in session for now)
-        Route::post('/penilaian-kelas/bunpou/save', function (Request $request) {
-            $students = $request->input('students', []);
-            $clean = [];
-            foreach ($students as $s) {
-                $name = trim($s['name'] ?? '');
-                if ($name === '') continue; // skip empty rows
-                $eval1 = isset($s['eval1']) ? floatval($s['eval1']) : null;
-                $eval2 = isset($s['eval2']) ? floatval($s['eval2']) : null;
-                $date = trim($s['date'] ?? '');
-                // clamp scores
-                if($eval1 !== null) $eval1 = max(0, min(100, $eval1));
-                if($eval2 !== null) $eval2 = max(0, min(100, $eval2));
-                $clean[] = ['name' => $name, 'eval1' => $eval1, 'eval2' => $eval2, 'date' => $date];
-            }
+        Route::post('/penilaian-kelas/bunpou/save', [PenilaianController::class, 'saveBunpou'])->name('penilaian.bunpou.save');
+        Route::post('/penilaian-kelas/bunpou/reset', [PenilaianController::class, 'resetBunpou'])->name('penilaian.bunpou.reset');
 
-            session(['penilaian_bunpou' => $clean]);
-
-            // compute summary
-            $total = count($clean);
-            $lulus = 0;
-            foreach ($clean as $c) {
-                $e1 = $c['eval1']; $e2 = $c['eval2'];
-                if($e1 !== null && $e2 !== null && $e1 >= 75 && $e2 >= 75) $lulus++;
-            }
-            $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
-            $summary = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent];
-            session(['penilaian_bunpou_summary' => $summary]);
-
-            return response()->json(['success' => true, 'saved' => $total, 'summary' => $summary, 'students' => $clean]);
-        })->name('penilaian.bunpou.save');
-
-        // Reset bunpou
-        Route::post('/penilaian-kelas/bunpou/reset', function (Request $request) {
-            session()->forget('penilaian_bunpou');
-            session()->forget('penilaian_bunpou_summary');
-            return response()->json(['success' => true]);
-        })->name('penilaian.bunpou.reset');
-        Route::get('/penilaian-kelas/kotoba', fn () => view('sensei.penilaian-kotoba'))
-            ->name('penilaian.kotoba');
-        Route::get('/penilaian-kelas/wawancara', fn () => view('sensei.penilaian-wawancara'))
-            ->name('penilaian.wawancara');
 
         // Wawancara save/reset
         Route::post('/penilaian-kelas/wawancara/save', function (Request $request) {
@@ -286,68 +186,8 @@ Route::middleware(['auth'])
         })->name('penilaian.wawancara.reset');
 
         // Kotoba save/reset routes (per-bab)
-        Route::post('/penilaian-kelas/kotoba/save', function (Request $request) {
-            try {
-                $bab = intval($request->input('bab', 1));
-                $students = $request->input('students', []);
-
-                if(!is_array($students) || count($students) === 0) {
-                    return response()->json(['success' => false, 'message' => 'Tidak ada data siswa untuk disimpan.'], 422);
-                }
-
-                $map = [1 => 35, 2 => 59, 3 => 59, 4 => 59, 5 => 59, 6 => 59, 7 => 59];
-                $questionsCount = $map[$bab] ?? 35;
-                $clean = [];
-                $return = [];
-                
-                foreach ($students as $s) {
-                    $name = trim($s['name'] ?? '');
-                    $correctRaw = isset($s['correct']) ? $s['correct'] : null;
-                    $hasContent = $name !== '' || ($correctRaw !== null && $correctRaw !== '');
-                    if (!$hasContent) continue; // skip truly empty rows
-                    
-                    $correct = intval($correctRaw ?? 0);
-                    $correct = max(0, min($correct, $questionsCount));
-                    $date = trim($s['date'] ?? '');
-                    $rowIdx = isset($s['row']) ? intval($s['row']) : null;
-                    $score = $questionsCount ? round(($correct / $questionsCount) * 100, 2) : 0;
-                    
-                    $clean[] = ['name' => $name, 'correct' => $correct, 'score' => $score, 'date' => $date];
-                    $return[] = ['row' => $rowIdx, 'name' => $name, 'correct' => $correct, 'score' => $score, 'date' => $date];
-                }
-
-                session(['penilaian_kotoba_bab_' . $bab => $clean]);
-
-                // summary
-                $total = count($clean);
-                $lulus = 0;
-                foreach ($clean as $c) { 
-                    if (($c['score'] ?? 0) >= 75) $lulus++; 
-                }
-                $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
-                $summary = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent, 'questions' => $questionsCount, 'bab' => $bab];
-                session(['penilaian_kotoba_summary_bab_' . $bab => $summary]);
-
-                return response()->json(['success' => true, 'saved' => $total, 'summary' => $summary, 'students' => $return]);
-            } catch (\Throwable $e) {
-                logger()->error('Kotoba save failed: ' . $e->getMessage(), ['exception' => $e]);
-                $resp = ['success' => false, 'message' => 'Server error saat menyimpan.'];
-                if(config('app.debug')) { $resp['error'] = $e->getMessage(); }
-                return response()->json($resp, 500);
-            }
-        })->name('penilaian.kotoba.save');
-
-        Route::post('/penilaian-kelas/kotoba/reset', function (Request $request) {
-            try {
-                $bab = intval($request->input('bab', 1));
-                session()->forget('penilaian_kotoba_bab_' . $bab);
-                session()->forget('penilaian_kotoba_summary_bab_' . $bab);
-                return response()->json(['success' => true]);
-            } catch (\Throwable $e) {
-                logger()->error('Kotoba reset failed: ' . $e->getMessage(), ['exception' => $e]);
-                return response()->json(['success' => false, 'message' => 'Server error saat reset.'], 500);
-            }
-        })->name('penilaian.kotoba.reset');
+        Route::post('/penilaian-kelas/kotoba/save', [PenilaianController::class, 'saveKotoba'])->name('penilaian.kotoba.save');
+        Route::post('/penilaian-kelas/kotoba/reset', [PenilaianController::class, 'resetKotoba'])->name('penilaian.kotoba.reset');
 
         // Nilai Akhir save/reset routes
         Route::post('/penilaian-kelas/nilai-akhir/save', function (Request $request) {
@@ -453,10 +293,7 @@ Route::middleware(['auth'])
             }
         })->name('penilaian.nilai-akhir.reset');
 
-        Route::get('/penilaian-kelas/nilai-akhir', fn () => view('sensei.penilaian-nilai-akhir'))
-            ->name('penilaian.nilai-akhir');
-        Route::get('/penilaian-kelas/fmd', fn () => view('sensei.penilaian-fmd'))
-            ->name('penilaian.fmd');
+
         Route::get('/status-siswa', fn () => view('sensei.statussiswa'))
             ->name('status-siswa');
     });
@@ -488,17 +325,17 @@ Route::get('/sensei/test', [\App\Http\Controllers\Sensei\DashboardController::cl
 // Preview of Penilaian Kelas without auth for development (remove in production)
 Route::get('/sensei/penilaian-kelas-preview', fn () => view('sensei.penilaian-kanji'))
     ->name('sensei.penilaian.preview');
-Route::get('/sensei/penilaian-presensi-preview', fn () => view('sensei.penilaian-presensi'))
+Route::get('/sensei/penilaian-presensi-preview', fn () => view('sensei.penilaian-presensi', ['type' => 'presensi']))
     ->name('sensei.penilaian.presensi.preview');
-Route::get('/sensei/penilaian-bunpou-preview', fn () => view('sensei.penilaian-bunpou'))
+Route::get('/sensei/penilaian-bunpou-preview', fn () => view('sensei.penilaian-bunpou', ['type' => 'bunpou']))
     ->name('sensei.penilaian.bunpou.preview');
-Route::get('/sensei/penilaian-kotoba-preview', fn () => view('sensei.penilaian-kotoba'))
+Route::get('/sensei/penilaian-kotoba-preview', fn () => view('sensei.penilaian-kotoba', ['type' => 'kotoba']))
     ->name('sensei.penilaian.kotoba.preview');
-Route::get('/sensei/penilaian-wawancara-preview', fn () => view('sensei.penilaian-wawancara'))
+Route::get('/sensei/penilaian-wawancara-preview', fn () => view('sensei.penilaian-wawancara', ['type' => 'wawancara']))
     ->name('sensei.penilaian.wawancara.preview');
-Route::get('/sensei/penilaian-nilai-akhir-preview', fn () => view('sensei.penilaian-nilai-akhir'))
+Route::get('/sensei/penilaian-nilai-akhir-preview', fn () => view('sensei.penilaian-nilai-akhir', ['type' => 'nilai-akhir']))
     ->name('sensei.penilaian.nilai-akhir.preview');
-Route::get('/sensei/penilaian-fmd-preview', fn () => view('sensei.penilaian-fmd'))
+Route::get('/sensei/penilaian-fmd-preview', fn () => view('sensei.penilaian-fmd', ['type' => 'fmd']))
     ->name('sensei.penilaian.fmd.preview');
 Route::get('/sensei/evaluasi-preview', fn () => view('sensei.evaluasi.index'))
     ->name('sensei.evaluasi.preview');

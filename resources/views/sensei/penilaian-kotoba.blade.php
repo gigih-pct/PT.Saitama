@@ -1,173 +1,203 @@
 @extends('layouts.header_dashboard_sensei')
 
+@section('title', 'Penilaian Kotoba')
+
 @section('content')
 @php
-    $selectedBab = intval(request()->query('bab', 1));
-    $questionsMap = [1 => 35, 2 => 59, 3 => 59, 4 => 59, 5 => 59, 6 => 59, 7 => 59];
-    $questionsCount = $questionsMap[$selectedBab] ?? 35; // Default 35 untuk BAB tidak terdaftar
-    $saved = session('penilaian_kotoba_bab_' . $selectedBab) ?? null;
-    if(is_array($saved) && count($saved)) { $rows = $saved; }
-    else { $rows = array_fill(0, 25, ['name'=>'','correct'=>'','score'=>0,'date'=>'']); }
-    $summary = session('penilaian_kotoba_summary_bab_' . $selectedBab, ['total'=>0,'lulus'=>0,'percent'=>0]);
+    // Data from Controller: $students, $selectedBab, $questionsCount, $savedScores, $summary, $questionsMap
+    $bab = $selectedBab ?? 1;
+    $maxScore = $questionsCount ?? 35;
+    $users = $students ?? [];
+    $rows = $savedScores ?? [];
+    $stats = $summary ?? ['total'=>0, 'lulus'=>0, 'percent'=>0];
 @endphp
 
-<div class="grid grid-cols-12 gap-6">
-    <!-- HEADER FILTER -->
-    <div class="col-span-12">
-        <div class="bg-[#173A67] rounded-full px-6 py-3 flex items-center justify-between text-white">
-            <div class="flex items-center gap-4">
-                <span class="font-semibold">Penilaian Kelas</span>
-                <div class="flex items-center gap-2 ml-2">
-                    <select name="kelas-select" class="bg-white text-black rounded-full px-3 py-1 text-sm border">
-                        <option>A1</option>
-                        <option>A2</option>
-                        <option>A3</option>
+<div class="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-sm border border-gray-100 min-h-[85vh] flex flex-col relative overflow-hidden font-sans">
+    
+    <!-- HEADER SECTION -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 z-10 relative">
+        <div class="space-y-2">
+            <h1 class="text-[#173A67] font-black text-2xl lg:text-3xl tracking-tight flex items-center gap-3">
+                Penilaian Kotoba
+                <!-- Class Selector -->
+                <div class="relative group inline-block">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="users" class="w-3 h-3 text-white"></i>
+                    </div>
+                    <select onchange="window.location.href='?kelas_id='+this.value" class="pl-8 pr-8 py-1.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-700 transition-all appearance-none uppercase tracking-widest">
+                        @foreach($kelases as $k)
+                            <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>{{ $k->nama_kelas }}</option>
+                        @endforeach
                     </select>
-                    <div class="relative">
-                        <select name="penilaian-select" class="bg-green-500 text-white rounded-full px-4 py-1 text-sm border-0">
-                            <option value="{{ route('sensei.penilaian.presensi') }}" {{ Route::currentRouteName() === 'sensei.penilaian.presensi' ? 'selected' : '' }}>Penilaian : Presensi Siswa</option>
-                            <option value="{{ route('sensei.penilaian.bunpou') }}" {{ Route::currentRouteName() === 'sensei.penilaian.bunpou' ? 'selected' : '' }}>Penilaian : Bunpou</option>
-                            <option value="{{ route('sensei.penilaian.kanji') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kanji' ? 'selected' : '' }}>Penilaian : Kanji</option>
-                            <option value="{{ route('sensei.penilaian.kotoba') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kotoba' ? 'selected' : '' }}>Penilaian : Kotoba</option>
-                            <option value="{{ route('sensei.penilaian.fmd') }}" {{ Route::currentRouteName() === 'sensei.penilaian.fmd' ? 'selected' : '' }}>Penilaian : FMD</option>
-                            <option value="{{ route('sensei.penilaian.wawancara') }}" {{ Route::currentRouteName() === 'sensei.penilaian.wawancara' ? 'selected' : '' }}>Penilaian : Wawancara</option>
-                            <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ Route::currentRouteName() === 'sensei.penilaian.nilai-akhir' ? 'selected' : '' }}>Penilaian : Nilai Akhir</option>
-                        </select>
-                        <svg class="w-3 h-3 absolute right-2 top-2 text-white pointer-events-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8l4 4 4-4"/></svg>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                         <i data-lucide="chevron-down" class="w-3 h-3 text-white"></i>
                     </div>
                 </div>
-            </div>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+            </h1>
+            <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Penilaian kosakata siswa per bab</p>
         </div>
 
-        <!-- SUB HEADER -->
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <span class="font-semibold text-lg">Penilaian Kotoba : Kelas A2</span>
-            <div class="flex items-center gap-2 flex-wrap">
-                <div class="relative">
-                    <select id="kotoba-bab-select" class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm border-0 cursor-pointer">
-                        @for($b=1;$b<=35;$b++)
-                            <option value="{{ $b }}" {{ $selectedBab === $b ? 'selected' : '' }}>BAB {{ $b }}</option>
-                        @endfor
-                    </select>
-                    <svg class="w-3 h-3 absolute right-2 top-2 text-white pointer-events-none" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8l4 4 4-4"/></svg>
+        <div class="flex items-center gap-3 flex-wrap">
+
+            <!-- Bab Selector -->
+            <div class="relative">
+                <select id="bab-select" class="pl-4 pr-10 py-3 rounded-2xl bg-blue-50 text-blue-800 text-sm font-bold border-2 border-blue-100 focus:border-blue-500 cursor-pointer appearance-none transition-all hover:bg-white text-center">
+                    @foreach($questionsMap as $bName => $qCount)
+                        <option value="{{ $bName }}" {{ $bab == $bName ? 'selected' : '' }}>BAB {{ $bName }} ({{ $qCount }} Soal)</option>
+                    @endforeach
+                </select>
+                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                     <i data-lucide="chevron-down" class="w-4 h-4 text-blue-800"></i>
                 </div>
-                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm whitespace-nowrap">Jumlah soal: <strong id="questions-count">{{ $questionsCount }}</strong></span>
+            </div>
+            <!-- Navigation Dropdown -->
+             <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-white"></i>
+                </div>
+                <select onchange="if(this.value) window.location.href=this.value" class="pl-10 pr-10 py-3 rounded-2xl bg-[#173A67] text-white text-sm font-bold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-900 transition-all appearance-none">
+                    <option value="{{ route('sensei.penilaian.presensi') }}" {{ $type === 'presensi' ? 'selected' : '' }}>Presensi</option>
+                    <option value="{{ route('sensei.penilaian.bunpou') }}" {{ $type === 'bunpou' ? 'selected' : '' }}>Bunpou</option>
+                    <option value="{{ route('sensei.penilaian.kanji') }}" {{ $type === 'kanji' ? 'selected' : '' }}>Kanji</option>
+                    <option value="{{ route('sensei.penilaian.kotoba') }}" {{ $type === 'kotoba' ? 'selected' : '' }}>Kotoba</option>
+                    <option value="{{ route('sensei.penilaian.fmd') }}" {{ $type === 'fmd' ? 'selected' : '' }}>FMD</option>
+                    <option value="{{ route('sensei.penilaian.wawancara') }}" {{ $type === 'wawancara' ? 'selected' : '' }}>Wawancara</option>
+                    <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ $type === 'nilai-akhir' ? 'selected' : '' }}>Nilai Akhir</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                     <i data-lucide="chevron-down" class="w-4 h-4 text-white"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN TABLE SECTION -->
-    <div class="col-span-12 lg:col-span-9">
-        <div class="bg-white rounded-xl p-4 shadow-sm">
-            <!-- TOOLBAR -->
-            <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
-                <div class="flex items-center gap-2">
-                    <button id="save-kotoba" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium transition">
-                        💾 Simpan
+    <div class="grid grid-cols-12 gap-8 flex-1">
+        <!-- LEFT: TABLE -->
+        <div class="col-span-12 lg:col-span-9 flex flex-col gap-6">
+            
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-3xl border border-gray-100">
+                <div class="flex items-center gap-3">
+                     <button id="btn-save" class="px-6 py-2.5 bg-[#173A67] text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i> Simpan Nilai
                     </button>
-                    <button id="reset-kotoba" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">
-                        🔄 Reset
+                    <button id="btn-reset" class="px-6 py-2.5 bg-white text-red-500 border-2 border-red-100 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
                     </button>
-                    <span id="kotoba-save-msg" class="ml-3 text-sm font-medium"></span>
+                    <span id="save-msg" class="text-sm font-bold ml-2"></span>
                 </div>
-                <div class="text-xs text-gray-500">25 Siswa</div>
+                <div class="px-4 py-2 bg-white rounded-xl border border-gray-100 text-xs font-bold text-gray-500 shadow-sm">
+                    Max Score: {{ $maxScore }}
+                </div>
             </div>
 
-            <!-- INSTRUCTION -->
-            <div class="mb-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                <p class="text-sm text-gray-700">📝 <strong>Instruksi:</strong> Isi nama siswa dan jumlah jawaban yang benar. Nilai akan otomatis dihitung. ✓ Hijau (≥75%), ✗ Merah (<75%)</p>
-            </div>
-
-            <!-- TABLE CONTAINER -->
-            <div class="border rounded-lg overflow-hidden">
-                <div class="overflow-x-auto max-h-[680px] overflow-y-auto scrollbar-visible" style="scrollbar-width: auto;">
-                    <table class="w-full border-collapse text-sm">
-                        <thead class="bg-blue-600 text-white sticky top-0 z-20">
+            <!-- Table Container -->
+            <div class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden flex-1 shadow-sm relative">
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
-                                <th class="border border-gray-400 px-3 py-2 text-center w-12 font-semibold">No</th>
-                                <th class="border border-gray-400 px-3 py-2 text-left font-semibold min-w-[300px]">Nama Siswa</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center w-32 font-semibold">Jawaban Benar</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center w-24 font-semibold">Nilai (%)</th>
-                                <th class="border border-gray-400 px-3 py-2 text-center w-32 font-semibold">Tanggal</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest w-16 text-center">No</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest">Nama Siswa</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-32">Benar</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-32">Nilai</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-40">Tanggal</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach($rows as $idx => $r)
-                            <tr class="hover:bg-blue-50 transition border-b border-gray-300">
-                                <td class="border border-gray-400 px-3 py-2 text-center text-gray-600 font-medium bg-gray-50">{{ $idx + 1 }}</td>
-                                <td class="border border-gray-400 px-3 py-2">
-                                    <input 
-                                        type="text" 
-                                        class="w-full name-input border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                                        placeholder="Ketik nama siswa..." 
-                                        value="{{ $r['name'] ?? '' }}" 
-                                        data-row="{{ $idx }}"
-                                    />
-                                </td>
-                                <td class="border border-gray-400 px-3 py-2 bg-blue-50">
-                                    <input 
-                                        type="number" 
-                                        min="0"
-                                        max="{{ $questionsCount }}"
-                                        class="w-full correct-input border rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                                        placeholder="0"
-                                        value="{{ $r['correct'] ?? '' }}" 
-                                        data-row="{{ $idx }}"
-                                    />
-                                </td>
-                                <td class="border border-gray-400 px-3 py-2 text-center bg-blue-50">
-                                    <span class="score-display font-bold text-lg" data-row="{{ $idx }}">{{ isset($r['score']) ? $r['score'] : '-' }}</span>
-                                </td>
-                                <td class="border border-gray-400 px-3 py-2">
-                                    <input 
-                                        type="date" 
-                                        class="w-full date-input border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                                        value="{{ $r['date'] ?? '' }}" 
-                                        data-row="{{ $idx }}"
-                                    />
-                                </td>
-                            </tr>
-                            @endforeach
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            @forelse($users as $idx => $user)
+                                @php
+                                    $saved = isset($rows[$idx]) ? $rows[$idx] : null;
+                                    $savedScore = $saved['score'] ?? '-';
+                                    $savedCorrect = $saved['correct'] ?? '';
+                                @endphp
+                                <tr class="group hover:bg-blue-50/30 transition-colors">
+                                    <td class="px-6 py-4 text-center font-bold text-gray-400 text-xs">
+                                        {{ $idx + 1 }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
+                                                {{ substr($user->name, 0, 1) }}
+                                            </div>
+                                            <input type="text" class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input" 
+                                                   value="{{ $user->name }}" readonly data-row="{{ $idx }}">
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <input type="number" min="0" max="{{ $maxScore }}"
+                                               class="w-20 text-center bg-gray-50 border-2 border-gray-100 rounded-xl py-2 text-sm font-bold text-[#173A67] focus:border-blue-500 focus:ring-0 transition-all correct-input"
+                                               value="{{ $savedCorrect }}" placeholder="0" data-row="{{ $idx }}">
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex w-16 h-10 items-center justify-center rounded-xl bg-gray-100 text-gray-400 font-black text-sm score-display transition-all" data-row="{{ $idx }}">
+                                            {{ $savedScore }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                         <input type="date" 
+                                               class="w-full text-center bg-transparent border-none text-xs font-bold text-gray-400 focus:ring-0 date-input"
+                                               value="{{ $saved['date'] ?? '' }}" data-row="{{ $idx }}">
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 font-bold">
+                                        Belum ada data siswa.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- SUMMARY PANEL -->
-    <div class="col-span-12 lg:col-span-3">
-        <div class="bg-white rounded-xl p-4 shadow-sm sticky top-6">
-            <h3 class="font-bold text-lg mb-4">📊 Ringkasan</h3>
-            
-            <div class="space-y-3">
-                <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-500">
-                    <p class="text-gray-600 text-sm">Total Siswa</p>
-                    <p class="text-2xl font-bold text-blue-600" id="kotoba-total">{{ $summary['total'] }}</p>
+        <!-- RIGHT: SUMMARY -->
+        <div class="col-span-12 lg:col-span-3 space-y-6">
+            <!-- Stats Card -->
+            <div class="bg-[#173A67] rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i data-lucide="pie-chart" class="w-32 h-32"></i>
                 </div>
+                <h3 class="font-bold text-lg mb-6 relative z-10">Ringkasan Nilai</h3>
+                
+                <div class="space-y-4 relative z-10">
+                    <div class="bg-white/10 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
+                        <p class="text-xs font-bold text-blue-200 uppercase tracking-widest mb-1">Total Siswa</p>
+                        <p class="text-3xl font-black" id="summary-total">{{ $stats['total'] }}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-green-500/20 rounded-2xl p-4 backdrop-blur-sm border border-green-400/20">
+                            <p class="text-[10px] font-bold text-green-300 uppercase tracking-widest mb-1">Lulus</p>
+                            <p class="text-2xl font-black text-green-300" id="summary-lulus">{{ $stats['lulus'] }}</p>
+                        </div>
+                        <div class="bg-red-500/20 rounded-2xl p-4 backdrop-blur-sm border border-red-400/20">
+                            <p class="text-[10px] font-bold text-red-300 uppercase tracking-widest mb-1">Remidial</p>
+                            <p class="text-2xl font-black text-red-300" id="summary-gagal">{{ ($stats['total'] - $stats['lulus']) }}</p>
+                        </div>
+                    </div>
 
-                <div class="bg-green-50 p-3 rounded border-l-4 border-green-500">
-                    <p class="text-gray-600 text-sm">Siswa Lolos (≥75%)</p>
-                    <p class="text-2xl font-bold text-green-600" id="kotoba-lulus">{{ $summary['lulus'] }}</p>
+                    <div class="bg-white/10 rounded-2xl p-4 flex items-center justify-between backdrop-blur-sm">
+                        <span class="text-xs font-bold">Presentase</span>
+                        <span class="text-xl font-black text-yellow-300" id="summary-percent">{{ $stats['percent'] }}%</span>
+                    </div>
                 </div>
+            </div>
 
-                <div class="bg-yellow-50 p-3 rounded border-l-4 border-yellow-500">
-                    <p class="text-gray-600 text-sm">Persentase Kelulusan</p>
-                    <p class="text-2xl font-bold text-yellow-600" id="kotoba-percent">{{ $summary['percent'] }}%</p>
-                </div>
-
-                <div class="bg-red-50 p-3 rounded border-l-4 border-red-500">
-                    <p class="text-gray-600 text-sm">Siswa Tidak Lolos (<75%)</p>
-                    <p class="text-2xl font-bold text-red-600" id="kotoba-tidak-lulus">{{ ($summary['total'] ?? 0) - ($summary['lulus'] ?? 0) }}</p>
-                </div>
-
-            <div class="mt-4 p-3 bg-gray-50 rounded text-xs text-gray-600">
-                <p><strong>💡 Catatan:</strong></p>
-                <ul class="list-disc list-inside mt-2 space-y-1">
-                    <li>Data otomatis tersimpan</li>
-                    <li>Nilai ≥75% hijau</li>
-                    <li>Nilai &lt;75% merah</li>
+            <!-- Guidelines -->
+            <div class="bg-yellow-50 rounded-[2rem] p-6 border-2 border-yellow-100">
+                <h4 class="font-bold text-[#173A67] mb-3 flex items-center gap-2">
+                    <i data-lucide="info" class="w-5 h-5 text-yellow-600"></i>
+                    Panduan
+                </h4>
+                <ul class="text-xs font-semibold text-gray-500 space-y-2 list-disc pl-4">
+                    <li>Isi jumlah jawaban benar pada kolom input.</li>
+                    <li>Nilai otomatis dihitung (Skala 100).</li>
+                    <li><span class="text-green-600">Hijau</span> menandakan lulus (≥75).</li>
+                    <li><span class="text-red-500">Merah</span> menandakan remidial.</li>
+                    <li>Data tersimpan otomatis tiap perubahan.</li>
                 </ul>
             </div>
         </div>
@@ -175,282 +205,151 @@
 </div>
 
 <script>
-// ============ CONFIGURATION ============
-const CONFIG = {
-    questionsCount: {{ $questionsCount }},
-    autoSaveDelay: 1200,
-    successMessageDuration: 2000
-};
+    const CONFIG = {
+        maxScore: {{ $maxScore }},
+        bab: "{{ $bab }}",
+        saveRoute: "{{ route('sensei.penilaian.kotoba.save') }}",
+        resetRoute: "{{ route('sensei.penilaian.kotoba.reset') }}",
+        csrf: "{{ csrf_token() }}"
+    };
 
-let autoSaveTimer = null;
-let autoSaveInFlight = false;
-
-// ============ UTILITY FUNCTIONS ============
-function computeScore(correct) {
-    correct = Number(correct) || 0;
-    if (!CONFIG.questionsCount) return 0;
-    return Number(((correct / CONFIG.questionsCount) * 100).toFixed(2));
-}
-
-function updateRowScore(rowIdx) {
-    const correctEl = document.querySelector(`.correct-input[data-row="${rowIdx}"]`);
-    const scoreEl = document.querySelector(`.score-display[data-row="${rowIdx}"]`);
-    
-    if (!correctEl || !scoreEl) return;
-    
-    let c = Number(correctEl.value) || 0;
-    c = Math.max(0, Math.min(c, CONFIG.questionsCount));
-    correctEl.value = c;
-    
-    const score = computeScore(c);
-    scoreEl.textContent = score;
-    scoreEl.classList.remove('text-green-600', 'text-red-500', 'text-gray-400');
-    
-    if (c === 0) {
-        scoreEl.textContent = '-';
-        scoreEl.classList.add('text-gray-400');
-    } else if (score >= 75) {
-        scoreEl.classList.add('text-green-600');
-    } else {
-        scoreEl.classList.add('text-red-500');
+    // Calculate Score Logic
+    function calculateScore(correct) {
+        if(!CONFIG.maxScore) return 0;
+        return Math.min(100, Math.round((correct / CONFIG.maxScore) * 100 * 100) / 100);
     }
-}
 
-function showMessage(text, type = 'info') {
-    const msgEl = document.getElementById('kotoba-save-msg');
-    if (!msgEl) return;
-    
-    msgEl.textContent = text;
-    msgEl.style.color = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#666';
-}
+    // UI Updates
+    function updateRowUI(rowIdx, correct) {
+        const scoreEl = document.querySelector(`.score-display[data-row="${rowIdx}"]`);
+        if(!scoreEl) return;
 
-function clearMessage() {
-    const msgEl = document.getElementById('kotoba-save-msg');
-    if (msgEl) {
-        setTimeout(() => {
-            msgEl.textContent = '';
-            msgEl.style.color = '#666';
-        }, CONFIG.successMessageDuration);
-    }
-}
-
-// ============ DATA COLLECTION ============
-function collectTableData() {
-    const rows = document.querySelectorAll('tbody tr');
-    const payload = [];
-    
-    rows.forEach((row, idx) => {
-        const nameEl = row.querySelector('.name-input');
-        const correctEl = row.querySelector('.correct-input');
-        const dateEl = row.querySelector('.date-input');
-        
-        const name = (nameEl?.value || '').trim();
-        const correctRaw = correctEl?.value || '';
-        const date = dateEl?.value || '';
-        const hasCorrect = (correctRaw !== '' && !isNaN(Number(correctRaw)));
-        
-        // Skip empty rows
-        if (!name && !hasCorrect) return;
-        
-        const correct = hasCorrect ? Number(correctRaw) : 0;
-        payload.push({
-            name,
-            correct,
-            date,
-            row: idx
-        });
-    });
-    
-    return payload;
-}
-
-// ============ API CALLS ============
-async function saveData(payload) {
-    showMessage('💾 Menyimpan...');
-    
-    try {
-        const response = await fetch('{{ route('sensei.penilaian.kotoba.save') }}', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ 
-                bab: {{ $selectedBab }},
-                students: payload 
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Gagal menyimpan data');
+        correct = parseInt(correct);
+        if(isNaN(correct)) {
+            scoreEl.textContent = '-';
+            scoreEl.className = 'inline-flex w-16 h-10 items-center justify-center rounded-xl bg-gray-100 text-gray-400 font-black text-sm score-display transition-all';
+            return;
         }
 
-        // Update summary
-        if (data.summary) {
-            const total = data.summary.total || 0;
-            const lulus = data.summary.lulus || 0;
-            const tidakLulus = total - lulus;
-            
-            document.getElementById('kotoba-total').textContent = total;
-            document.getElementById('kotoba-lulus').textContent = lulus;
-            document.getElementById('kotoba-percent').textContent = (data.summary.percent || 0) + '%';
-            document.getElementById('kotoba-tidak-lulus').textContent = tidakLulus;
+        const score = calculateScore(correct);
+        scoreEl.textContent = score;
+
+        // Color logic
+        scoreEl.classList.remove('bg-gray-100', 'text-gray-400', 'bg-green-100', 'text-green-600', 'bg-red-100', 'text-red-500');
+        if(score >= 75) {
+            scoreEl.classList.add('bg-green-100', 'text-green-600');
+        } else {
+            scoreEl.classList.add('bg-red-100', 'text-red-500');
         }
-
-        return data;
-    } catch (error) {
-        console.error('Save error:', error);
-        throw error;
-    }
-}
-
-// ============ EVENT HANDLERS ============
-document.addEventListener('DOMContentLoaded', function () {
-    // Initialize scores on load
-    document.querySelectorAll('.correct-input').forEach(inp => {
-        updateRowScore(inp.dataset.row);
-        
-        inp.addEventListener('input', function () {
-            updateRowScore(this.dataset.row);
-            scheduleAutoSave();
-        });
-    });
-
-    // Bind other inputs to autosave
-    document.querySelectorAll('.name-input, .date-input').forEach(inp => {
-        inp.addEventListener('input', scheduleAutoSave);
-    });
-
-    // Penilaian selector navigation
-    const penilaianSelect = document.querySelector('select[name="penilaian-select"]');
-    if (penilaianSelect) {
-        penilaianSelect.addEventListener('change', function (e) {
-            if (this.value) window.location.href = this.value;
-        });
     }
 
-    // BAB selector navigation
-    const babSelect = document.getElementById('kotoba-bab-select');
-    if (babSelect) {
-        babSelect.addEventListener('change', function (e) {
-            const selectedBab = this.value;
-            window.location.href = `{{ route('sensei.penilaian.kotoba') }}?bab=${selectedBab}`;
+    // Collect Data
+    function getPayload() {
+        const payload = [];
+        document.querySelectorAll('tr.group').forEach((tr, idx) => {
+            const name = tr.querySelector('.name-input').value;
+             const correctVal = tr.querySelector('.correct-input').value;
+             const date = tr.querySelector('.date-input').value;
+             
+             if(correctVal !== '') {
+                 payload.push({
+                     name: name,
+                     correct: correctVal,
+                     date: date,
+                     row: idx
+                 });
+             }
         });
+        return payload;
     }
 
-    // Save button
-    const saveBtn = document.getElementById('save-kotoba');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', async function () {
-            const payload = collectTableData();
-            
-            if (payload.length === 0) {
-                showMessage('⚠️ Tidak ada data untuk disimpan', 'error');
-                alert('Isi setidaknya satu baris dengan nama atau jawaban benar.');
-                return;
+    // Sync Stats
+    function updateStats(summary) {
+        if(!summary) return;
+        document.getElementById('summary-total').textContent = summary.total;
+        document.getElementById('summary-lulus').textContent = summary.lulus;
+        document.getElementById('summary-gagal').textContent = (summary.total - summary.lulus);
+        document.getElementById('summary-percent').textContent = summary.percent + '%';
+    }
+
+    let saveTimer;
+    function autoSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveData, 1000);
+    }
+
+    async function saveData() {
+        const btn = document.getElementById('btn-save');
+        const msg = document.getElementById('save-msg');
+        const payload = getPayload();
+
+        if(!payload.length) return;
+
+        msg.textContent = 'Menyimpan...';
+        msg.className = 'text-xs font-bold text-gray-400 ml-2';
+
+        try {
+            const res = await fetch(CONFIG.saveRoute, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CONFIG.csrf
+                },
+                body: JSON.stringify({
+                    bab: CONFIG.bab,
+                    students: payload
+                })
+            });
+            const data = await res.json();
+            if(data.success) {
+                msg.textContent = 'Tersimpan';
+                msg.className = 'text-xs font-bold text-green-500 ml-2';
+                updateStats(data.summary);
+                setTimeout(() => msg.textContent = '', 2000);
             }
-
-            try {
-                saveBtn.disabled = true;
-                saveBtn.style.opacity = '0.6';
-                
-                await saveData(payload);
-                showMessage('✅ Berhasil disimpan!', 'success');
-                clearMessage();
-            } catch (error) {
-                showMessage('❌ Gagal: ' + error.message, 'error');
-                alert('Gagal menyimpan: ' + error.message);
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.style.opacity = '1';
-            }
-        });
+        } catch(e) {
+            console.error(e);
+            msg.textContent = 'Error';
+            msg.className = 'text-xs font-bold text-red-500 ml-2';
+        }
     }
 
-    // Reset button
-    const resetBtn = document.getElementById('reset-kotoba');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', async function () {
-            if (!confirm('Yakin reset semua data Kotoba BAB {{ $selectedBab }}?')) return;
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial Color Calculation
+        document.querySelectorAll('.correct-input').forEach(input => {
+             updateRowUI(input.dataset.row, input.value);
+             
+             input.addEventListener('input', function() {
+                 let val = parseInt(this.value);
+                 if(val > CONFIG.maxScore) { val = CONFIG.maxScore; this.value = val; }
+                 if(val < 0) { val = 0; this.value = val; }
+                 
+                 updateRowUI(this.dataset.row, this.value);
+                 autoSave();
+             });
+        });
 
+        // Bab Change
+        document.getElementById('bab-select').addEventListener('change', function() {
+            window.location.search = '?bab=' + this.value;
+        });
+
+        // Manual Save
+        document.getElementById('btn-save').addEventListener('click', saveData);
+
+        // Reset
+        document.getElementById('btn-reset').addEventListener('click', async () => {
+            if(!confirm('Reset nilai bab ini?')) return;
             try {
-                const response = await fetch('{{ route('sensei.penilaian.kotoba.reset') }}', {
+                await fetch(CONFIG.resetRoute, {
                     method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({ bab: {{ $selectedBab }} })
+                    headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': CONFIG.csrf},
+                    body: JSON.stringify({bab: CONFIG.bab})
                 });
-
-                const data = await response.json();
-                if (data.success) {
-                    showMessage('🔄 Data direset', 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-                }
-            } catch (error) {
-                console.error('Reset error:', error);
-                alert('Gagal reset data');
-            }
+                window.location.reload();
+            } catch(e) { alert('Error reset'); }
         });
-    }
-});
-
-// ============ AUTOSAVE ============
-function scheduleAutoSave() {
-    if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(autoSaveNow, CONFIG.autoSaveDelay);
-}
-
-async function autoSaveNow() {
-    if (autoSaveInFlight) return;
-
-    const payload = collectTableData();
-    if (payload.length === 0) return;
-
-    autoSaveInFlight = true;
-    showMessage('💾 Autosaving...');
-
-    try {
-        await saveData(payload);
-        showMessage('✅ Tersimpan', 'success');
-        clearMessage();
-    } catch (error) {
-        console.warn('Autosave failed:', error);
-        // Silent fail - don't show error for autosave
-    } finally {
-        autoSaveInFlight = false;
-    }
-}
+    });
 </script>
-
-<style>
-/* Custom scrollbar styling */
-.scrollbar-visible::-webkit-scrollbar {
-    height: 12px;
-}
-
-.scrollbar-visible::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 6px;
-}
-
-.scrollbar-visible::-webkit-scrollbar-thumb {
-    background: #3b82f6;
-    border-radius: 6px;
-    border: 2px solid #f3f4f6;
-}
-
-.scrollbar-visible::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
-}
-</style>
 @endsection

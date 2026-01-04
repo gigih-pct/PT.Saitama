@@ -1,623 +1,412 @@
 @extends('layouts.header_dashboard_sensei')
 
+@section('title', 'Penilaian Nilai Akhir')
+
 @section('content')
 @php
-    $saved = session('penilaian_nilai_akhir') ?? null;
-    if(is_array($saved) && count($saved)) { $rows = $saved; }
-    else { $rows = array_fill(0, 30, ['name'=>'','hiragana'=>'','katakana'=>'','bunpou'=>'','kerja'=>'','sifat'=>'','benda'=>'','terjemah'=>'','dengar'=>'','bicara'=>'','sikap'=>'','kehadiran'=>'']); }
-    $summary = session('penilaian_nilai_akhir_summary', ['total'=>0,'lulus'=>0,'percent'=>0]);
+    $users = $students ?? [];
+    // Subject configuration for easy iteration
+    $subjects = [
+        ['key'=>'hiragana', 'label'=>'Hiragana', 'color'=>'blue'],
+        ['key'=>'katakana', 'label'=>'Katakana', 'color'=>'blue'],
+        ['key'=>'bunpou', 'label'=>'Bunpou', 'color'=>'indigo'],
+        ['key'=>'kerja', 'label'=>'Kerja', 'color'=>'indigo'],
+        ['key'=>'sifat', 'label'=>'Sifat', 'color'=>'indigo'],
+        ['key'=>'benda', 'label'=>'Benda', 'color'=>'indigo'],
+        ['key'=>'terjemah', 'label'=>'Terjemah', 'color'=>'purple'],
+        ['key'=>'dengar', 'label'=>'Dengar', 'color'=>'purple'],
+        ['key'=>'bicara', 'label'=>'Bicara', 'color'=>'purple'], 
+    ];
 @endphp
 
-<div class="grid grid-cols-12 gap-6">
+<div class="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-sm border border-gray-100 min-h-[85vh] flex flex-col relative overflow-hidden font-sans">
 
-    <!-- HEADER FILTER -->
-    <div class="col-span-12">
-        <div class="bg-[#173A67] rounded-full px-6 py-3 flex items-center justify-between text-white">
-            <div class="flex items-center gap-4">
-                <span class="font-semibold">Penilaian Kelas</span>
-                <div class="flex items-center gap-2 ml-2">
-                    <select name="kelas-select" class="bg-white text-black rounded-full px-3 py-1 text-sm border">
-                        <option>A1</option>
-                        <option>A2</option>
-                        <option>A3</option>
+    <!-- HEADER SECTION -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 z-10 relative">
+        <div class="space-y-2">
+            <h1 class="text-[#173A67] font-black text-2xl lg:text-3xl tracking-tight flex items-center gap-3">
+                Penilaian Nilai Akhir
+                <!-- Class Selector -->
+                <div class="relative group inline-block">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="users" class="w-3 h-3 text-white"></i>
+                    </div>
+                    <select onchange="window.location.href='?kelas_id='+this.value" class="pl-8 pr-8 py-1.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-700 transition-all appearance-none uppercase tracking-widest">
+                        @foreach($kelases as $k)
+                            <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>{{ $k->nama_kelas }}</option>
+                        @endforeach
                     </select>
-                        <select name="penilaian-select" onchange="if(this.value) window.location.href=this.value" class="bg-green-500 text-white rounded-full px-4 py-1 text-sm border-0">
-                            <option value="{{ route('sensei.penilaian.presensi') }}" {{ Route::currentRouteName() === 'sensei.penilaian.presensi' ? 'selected' : '' }}>Penilaian : Presensi Siswa</option>
-                             <option value="{{ route('sensei.penilaian.bunpou') }}" {{ Route::currentRouteName() === 'sensei.penilaian.bunpou' ? 'selected' : '' }}>Penilaian : Bunpou</option>
-                            <option value="{{ route('sensei.penilaian.kanji') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kanji' ? 'selected' : '' }}>Penilaian : Kanji</option>
-                            <option value="{{ route('sensei.penilaian.kotoba') }}" {{ Route::currentRouteName() === 'sensei.penilaian.kotoba' ? 'selected' : '' }}>Penilaian : Kotoba</option>
-                            <option value="{{ route('sensei.penilaian.fmd') }}" {{ Route::currentRouteName() === 'sensei.penilaian.fmd' ? 'selected' : '' }}>Penilaian : FMD</option>
-                            <option value="{{ route('sensei.penilaian.wawancara') }}" {{ Route::currentRouteName() === 'sensei.penilaian.wawancara' ? 'selected' : '' }}>Penilaian : Wawancara</option>
-                            <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ Route::currentRouteName() === 'sensei.penilaian.nilai-akhir' ? 'selected' : '' }}>Penilaian : Nilai Akhir</option>
-                        </select>
+                    <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                         <i data-lucide="chevron-down" class="w-3 h-3 text-white"></i>
+                    </div>
                 </div>
-            </div>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+            </h1>
+            <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Rekapitulasi Nilai & Kelulusan</p>
         </div>
 
-        <!-- SUB HEADER -->
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <span class="font-semibold text-lg">Penilaian Nilai Akhir : Kelas A2</span>
+        <div class="flex items-center gap-3 flex-wrap">
+             <!-- Page Selector -->
+             <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-white"></i>
+                </div>
+                <select onchange="if(this.value) window.location.href=this.value" class="pl-10 pr-10 py-3 rounded-2xl bg-[#173A67] text-white text-sm font-bold border-none ring-0 focus:ring-4 focus:ring-blue-100 cursor-pointer shadow-lg hover:bg-blue-900 transition-all appearance-none">
+                    <option value="{{ route('sensei.penilaian.presensi') }}" {{ $type === 'presensi' ? 'selected' : '' }}>Presensi</option>
+                    <option value="{{ route('sensei.penilaian.bunpou') }}" {{ $type === 'bunpou' ? 'selected' : '' }}>Bunpou</option>
+                    <option value="{{ route('sensei.penilaian.kanji') }}" {{ $type === 'kanji' ? 'selected' : '' }}>Kanji</option>
+                    <option value="{{ route('sensei.penilaian.kotoba') }}" {{ $type === 'kotoba' ? 'selected' : '' }}>Kotoba</option>
+                    <option value="{{ route('sensei.penilaian.fmd') }}" {{ $type === 'fmd' ? 'selected' : '' }}>FMD</option>
+                    <option value="{{ route('sensei.penilaian.wawancara') }}" {{ $type === 'wawancara' ? 'selected' : '' }}>Wawancara</option>
+                    <option value="{{ route('sensei.penilaian.nilai-akhir') }}" {{ $type === 'nilai-akhir' ? 'selected' : '' }}>Nilai Akhir</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                     <i data-lucide="chevron-down" class="w-4 h-4 text-white"></i>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Main content: table + summary -->
-    <div class="col-span-12 lg:col-span-9">
-        <div class="bg-white rounded-xl p-4 shadow-sm">
+    <!-- MAIN GRID -->
+    <div class="grid grid-cols-12 gap-8 flex-1">
+        
+        <!-- LEFT CONTENT -->
+        <div class="col-span-12 lg:col-span-9 flex flex-col gap-6">
             <!-- TOOLBAR -->
-            <div class="mb-4 flex items-center justify-between gap-4 flex-wrap sticky top-0 z-20 bg-white pb-2">
-                <div class="flex items-center gap-2">
-                    <button id="save-nilai-akhir" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-medium transition">
-                        💾 Simpan
-                    </button>
-                    <button id="reset-nilai-akhir" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">
-                        🔄 Reset
-                    </button>
-                    <span id="nilai-akhir-save-msg" class="ml-3 text-sm font-medium"></span>
-                </div>
-                <div class="text-xs text-gray-500 font-medium">30 Siswa</div>
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-3xl border border-gray-100 sticky top-0 z-30">
+            <div class="flex items-center gap-3">
+                 <button id="save-final" class="px-6 py-2.5 bg-[#173A67] text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-95 transition-all flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i> Simpan Nilai Akhir
+                </button>
+                 <button id="export-excel" class="px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-900/20 hover:bg-green-700 active:scale-95 transition-all flex items-center gap-2">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
+                </button>
+                <span id="save-msg" class="text-sm font-bold ml-2"></span>
             </div>
-
-            <!-- INSTRUCTION -->
-            <div class="mb-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                <p class="text-sm text-gray-700">📝 <strong>Instruksi:</strong> Isi nama siswa dan nilai setiap pelajaran. Grade akan otomatis dihitung berdasarkan formula.</p>
+            
+             <div class="flex items-center gap-4 text-xs font-bold text-gray-500">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Input 0-100</span>
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-500"></span> Grade Auto</span>
             </div>
+        </div>
 
-            <!-- TABLE CONTAINER -->
-            <div class="border rounded-lg overflow-hidden">
-                <div class="overflow-x-scroll overflow-y-auto max-h-[680px] scrollbar-visible" style="scrollbar-width: auto;">
-                    <table class="w-full border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-blue-600 text-white sticky top-0 z-20">
-                                <th class="border border-gray-400 px-3 py-2 text-center font-semibold w-12">No</th>
-                                <th class="border border-gray-400 px-3 py-2 text-left font-semibold min-w-[400px] sticky left-12 z-10 bg-blue-600">Nama Siswa</th>
-                                
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Hiragana</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Katakana</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Bunpou</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Kerja</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Sifat</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Benda</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Terjemah</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Dengar</th>
-                                <th colspan="2" class="border border-gray-400 px-2 py-2 text-center font-semibold">Bicara</th>
-                                
-                                <th class="border border-gray-400 px-2 py-2 text-center font-semibold w-16">Sikap</th>
-                                <th class="border border-gray-400 px-2 py-2 text-center font-semibold w-20">Kehadiran</th>
-                                <th class="border border-gray-400 px-2 py-2 text-center font-semibold w-20">Rata-rata</th>
-                                <th class="border border-gray-400 px-2 py-2 text-center font-semibold w-14">Grade</th>
-                            </tr>
-                            <tr class="bg-blue-100 sticky top-12 z-20">
-                                <th colspan="2" class="border border-gray-300 px-2 py-1"></th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">N</th>
-                                <th class="border border-gray-300 px-1 py-1 text-center text-xs font-semibold">G</th>
-                                
-                                <th colspan="4" class="border border-gray-300 px-1 py-1"></th>
-                            </tr>
-                        </thead>
+        <!-- TABLE CONTAINER -->
+        <div class="col-span-12 bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden shadow-sm relative z-0">
+            <div class="final-scroll overflow-auto max-h-[600px]">
+                <table class="w-max text-left border-collapse">
+                    <thead class="bg-[#173A67] text-white sticky top-0 z-20">
+                        <tr>
+                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30 border-r border-blue-800">No</th>
+                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest min-w-[220px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
                             
-                        </thead>
-                        <tbody>
-                            @foreach($rows as $idx => $r)
-                            <tr class="hover:bg-blue-50 transition border-b border-gray-300">
-                                <td class="border border-gray-300 px-3 py-2 text-center text-gray-600 font-medium bg-gray-50">{{ $idx + 1 }}</td>
-                                <td class="border border-gray-300 px-3 py-2 sticky left-12 z-10 bg-white hover:bg-blue-50">
-                                    <input 
-                                        type="text" 
-                                        class="w-full name-input border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400" 
-                                        placeholder="Nama..." 
-                                        value="{{ $r['name'] ?? '' }}" 
-                                        data-row="{{ $idx }}"
-                                    />
-                                </td>
-                                
-                                <!-- HIRAGANA -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['hiragana'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="hiragana"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-hiragana" data-row="{{ $idx }}">{{ $r['grade_hiragana'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- KATAKANA -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['katakana'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="katakana"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-katakana" data-row="{{ $idx }}">{{ $r['grade_katakana'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- BUNPOU -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['bunpou'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="bunpou"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-bunpou" data-row="{{ $idx }}">{{ $r['grade_bunpou'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- KERJA -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['kerja'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="kerja"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-kerja" data-row="{{ $idx }}">{{ $r['grade_kerja'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- SIFAT -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['sifat'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="sifat"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-sifat" data-row="{{ $idx }}">{{ $r['grade_sifat'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- BENDA -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['benda'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="benda"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-benda" data-row="{{ $idx }}">{{ $r['grade_benda'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- TERJEMAH -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['terjemah'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="terjemah"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-terjemah" data-row="{{ $idx }}">{{ $r['grade_terjemah'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- DENGAR -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['dengar'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="dengar"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-dengar" data-row="{{ $idx }}">{{ $r['grade_dengar'] ?? '-' }}</span>
-                                </td>
-                                
-                                <!-- BICARA -->
-                                <td class="border border-gray-300 px-2 py-2 min-w-[65px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="0" 
-                                        value="{{ $r['bicara'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="bicara"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[50px] text-center font-semibold text-sm">
-                                    <span class="grade-bicara" data-row="{{ $idx }}">{{ $r['grade_bicara'] ?? '-' }}</span>
-                                </td>
-                                
-                                <td class="border border-gray-300 px-2 py-2 min-w-[60px]">
-                                    <input 
-                                        type="text" 
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="A-D" 
-                                        value="{{ $r['sikap'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="sikap"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[70px]">
-                                    <input 
-                                        type="number" 
-                                        min="0" max="100"
-                                        class="w-full nilai-input border border-gray-300 rounded px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400" 
-                                        placeholder="%" 
-                                        value="{{ $r['kehadiran'] ?? '' }}" 
-                                        data-row="{{ $idx }}" data-col="kehadiran"
-                                    />
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[70px] text-center font-bold text-sm bg-blue-50">
-                                    <span class="rata-rata-display" data-row="{{ $idx }}">{{ isset($r['rata_rata']) ? number_format($r['rata_rata'], 2) : '-' }}</span>
-                                </td>
-                                <td class="border border-gray-300 px-2 py-2 min-w-[60px] text-center font-bold text-sm bg-blue-50">
-                                    <span class="grade-display" data-row="{{ $idx }}">{{ $r['grade'] ?? '-' }}</span>
-                                </td>
-                            </tr>
+                            @foreach($subjects as $subj)
+                            <th colspan="2" class="px-2 py-3 font-bold text-[10px] text-center uppercase tracking-wider border-r border-blue-800 bg-[#1e4b85]">
+                                {{ $subj['label'] }}
+                            </th>
                             @endforeach
+                            
+                            <th rowspan="2" class="px-2 py-2 font-bold text-[10px] text-center w-16 border-r border-blue-800 uppercase bg-[#173A67]">Sikap</th>
+                            <th rowspan="2" class="px-2 py-2 font-bold text-[10px] text-center w-16 border-r border-blue-800 uppercase bg-[#173A67]">Hadir</th>
+                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky right-16 bg-[#173A67] z-30 border-l border-blue-800 shadow-xl">Rata-Rata</th>
+                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky right-0 bg-[#173A67] z-30 border-l border-blue-800">Grade</th>
+                        </tr>
+                        <tr>
+                            @foreach($subjects as $subj)
+                            <th class="px-1 py-1 font-bold text-[9px] text-center w-14 bg-[#173A67] border-r border-blue-800/30 text-blue-200">Nilai</th>
+                            <th class="px-1 py-1 font-bold text-[9px] text-center w-10 bg-[#173A67] border-r border-blue-800 text-yellow-400">G</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        @forelse($users as $idx => $user)
+                        <tr class="group hover:bg-blue-50/30 transition-colors student-row">
+                            <td class="px-4 py-3 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                {{ $idx + 1 }}
+                            </td>
+                            <td class="px-6 py-3 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
+                                        {{ substr($user->name, 0, 1) }}
+                                    </div>
+                                    <input type="text" class="bg-transparent border-none p-0 text-xs font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input truncate" 
+                                           value="{{ $user->name }}" readonly>
+                                </div>
+                            </td>
+
+                            @foreach($subjects as $subj)
+                            <td class="px-1 py-2 border-r border-gray-50 text-center">
+                                <input type="number" min="0" max="100" class="w-12 text-center bg-gray-50 border border-gray-200 rounded text-xs font-bold focus:ring-1 focus:ring-blue-500 py-1 score-input" 
+                                       data-key="{{ $subj['key'] }}" data-row="{{ $idx }}" placeholder="-">
+                            </td>
+                            <td class="px-1 py-2 border-r border-gray-100 text-center bg-gray-50/30">
+                                <span class="text-[10px] font-black text-gray-400 grade-display" data-key="{{ $subj['key'] }}" data-row="{{ $idx }}">-</span>
+                            </td>
+                            @endforeach
+
+                            <td class="px-1 py-2 border-r border-gray-100 text-center">
+                                <input type="text" maxlength="2" class="w-12 text-center bg-white border border-gray-200 rounded text-xs font-bold focus:ring-1 focus:ring-blue-500 py-1 uppercase" placeholder="-"
+                                value="A">
+                            </td>
+                            
+                             <td class="px-1 py-2 border-r border-gray-100 text-center">
+                                <span class="text-xs font-bold text-gray-600">100%</span>
+                            </td>
+
+                            <td class="px-4 py-3 text-center font-black text-[#173A67] bg-white group-hover:bg-blue-50/30 sticky right-16 z-10 border-l border-gray-100 shadow-[-4px_0_12px_-4px_rgba(0,0,0,0.05)]">
+                                <span class="final-avg" data-row="{{ $idx }}">-</span>
+                            </td>
+                            <td class="px-4 py-3 text-center font-black bg-white group-hover:bg-blue-50/30 sticky right-0 z-10 border-l border-gray-100 text-white">
+                                <span class="px-2 py-1 rounded-lg bg-gray-400 text-[10px] final-grade" data-row="{{ $idx }}">-</span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="30" class="p-8 text-center text-gray-400 font-bold">Belum ada data siswa.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR: SUMMARY TABLES -->
+        <div class="col-span-12 lg:col-span-3 space-y-6">
+            
+            <!-- Table Kesimpulan 1 (Grades) -->
+            <div class="bg-gray-100 rounded-[2rem] p-6 border border-gray-200 shadow-sm">
+                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest">Tabel Kesimpulan</h4>
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
+                    <table class="w-full text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-[#173A67] border-b border-gray-200">
+                                <th class="px-3 py-3 font-bold border-r border-gray-200 text-center uppercase tracking-wider">Keterangan</th>
+                                <th class="px-3 py-3 font-bold text-center uppercase tracking-wider">Hasil</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-gray-600 font-bold">
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200">A</td>
+                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200">B</td>
+                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200">C</td>
+                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200">D</td>
+                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Summary column -->
-    <div class="col-span-12 lg:col-span-3">
-        <div class="bg-white rounded-xl p-4">
-            <h3 class="font-semibold mb-4 text-base">📊 Ringkasan</h3>
-            <div class="space-y-3">
-                <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-500">
-                    <p class="text-gray-600 text-sm">Total Siswa</p>
-                    <p class="text-2xl font-bold text-blue-600" id="nilai-akhir-total">{{ $summary['total'] }}</p>
-                </div>
-                <div class="bg-green-50 p-3 rounded border-l-4 border-green-500">
-                    <p class="text-gray-600 text-sm">Siswa Lolos (≥75%)</p>
-                    <p class="text-2xl font-bold text-green-600" id="nilai-akhir-lulus">{{ $summary['lulus'] }}</p>
-                </div>
-                <div class="bg-yellow-50 p-3 rounded border-l-4 border-yellow-500">
-                    <p class="text-gray-600 text-sm">Presentase Kelolosan</p>
-                    <p class="text-2xl font-bold text-yellow-600" id="nilai-akhir-percent">{{ $summary['percent'] }}%</p>
+            <!-- Table Kesimpulan 2 (Lolos/Success) -->
+            <div class="bg-gray-100 rounded-[2rem] p-6 border border-gray-200 shadow-sm">
+                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest">Tabel Kesimpulan</h4>
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
+                    <table class="w-full text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-[#173A67] border-b border-gray-200">
+                                <th class="px-3 py-3 font-bold border-r border-gray-200 text-center uppercase tracking-wider">Keterangan</th>
+                                <th class="px-3 py-3 font-bold text-center uppercase tracking-wider">Hasil</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-gray-600 font-bold">
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200">Lolos</td>
+                                <td class="px-3 py-2.5 text-center" id="stat-lolos">20</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200">Presentase</td>
+                                <td class="px-3 py-2.5 text-center" id="stat-percent">100%</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            <!-- Additional Legend -->
+            <div class="bg-[#173A67] rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i data-lucide="award" class="w-24 h-24"></i>
+                </div>
+                <h3 class="font-bold text-sm mb-4 relative z-10 uppercase tracking-widest">Target Kelulusan</h3>
+                <div class="relative z-10 space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-blue-200">Minimal Rata-rata</span>
+                        <span class="font-black">75.00</span>
+                    </div>
+                    <div class="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-blue-400 h-full w-[75%]"></div>
+                    </div>
+                    <p class="text-[10px] text-blue-300 italic">* Nilai di bawah 75 dianggap Tidak Lulus (TU)</p>
+                </div>
+            </div>
+
         </div>
     </div>
-
 </div>
 
-<script>
-// ============ CONFIG ============
-const CONFIG = {
-    autoSaveDelay: 1200,
-    successMessageDuration: 2000
-};
-
-let autoSaveTimer = null;
-let autoSaveInFlight = false;
-
-// ============ UTILITY FUNCTIONS ============
-function calculateGrade(nilai) {
-    nilai = Number(nilai) || 0;
-    if (nilai >= 90) return 'A';
-    if (nilai >= 85) return 'B+';
-    if (nilai >= 80) return 'B';
-    if (nilai >= 75) return 'C+';
-    if (nilai >= 10) return 'C';
-    return 'TU';
-}
-
-function updateSubjectGrade(rowIdx, subject) {
-    const input = document.querySelector(`.nilai-input[data-row="${rowIdx}"][data-col="${subject}"]`);
-    if (!input) return;
-    
-    const nilai = Number(input.value) || 0;
-    const grade = nilai === 0 ? '-' : calculateGrade(nilai);
-    
-    const displayEl = document.querySelector(`.grade-${subject}[data-row="${rowIdx}"]`);
-    if (displayEl) {
-        displayEl.textContent = grade;
-    }
-}
-
-function calculateRataRata(rowIdx) {
-    const subjects = ['hiragana', 'katakana', 'bunpou', 'kerja', 'sifat', 'benda', 'terjemah', 'dengar', 'bicara'];
-    let total = 0;
-    let count = 0;
-    
-    // Update grade untuk setiap subject dan hitung rata-rata
-    subjects.forEach(subject => {
-        updateSubjectGrade(rowIdx, subject);
-        
-        const input = document.querySelector(`.nilai-input[data-row="${rowIdx}"][data-col="${subject}"]`);
-        if (input && input.value) {
-            total += Number(input.value) || 0;
-            count++;
-        }
-    });
-    
-    const rataRata = count > 0 ? total / count : 0;
-    
-    // Update display
-    const displayEl = document.querySelector(`.rata-rata-display[data-row="${rowIdx}"]`);
-    if (displayEl) {
-        displayEl.textContent = rataRata === 0 ? '-' : rataRata.toFixed(2);
-    }
-    
-    // Update grade akhir
-    const gradeEl = document.querySelector(`.grade-display[data-row="${rowIdx}"]`);
-    if (gradeEl) {
-        gradeEl.textContent = rataRata === 0 ? '-' : calculateGrade(rataRata);
-    }
-    
-    return rataRata;
-}
-
-function showMessage(text, type = 'info') {
-    const msgEl = document.getElementById('nilai-akhir-save-msg');
-    if (!msgEl) return;
-    
-    msgEl.textContent = text;
-    msgEl.style.color = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#666';
-}
-
-function clearMessage() {
-    const msgEl = document.getElementById('nilai-akhir-save-msg');
-    if (msgEl) {
-        setTimeout(() => {
-            msgEl.textContent = '';
-            msgEl.style.color = '#666';
-        }, CONFIG.successMessageDuration);
-    }
-}
-
-// ============ DATA COLLECTION ============
-function collectTableData() {
-    const rows = document.querySelectorAll('tbody tr');
-    const payload = [];
-    
-    rows.forEach((row, idx) => {
-        const nameEl = row.querySelector('.name-input');
-        const name = (nameEl?.value || '').trim();
-        
-        const subjects = ['hiragana', 'katakana', 'bunpou', 'kerja', 'sifat', 'benda', 'terjemah', 'dengar', 'bicara', 'sikap', 'kehadiran'];
-        const data = { name, row: idx };
-        let hasContent = name !== '';
-        
-        subjects.forEach(subject => {
-            const input = row.querySelector(`.nilai-input[data-col="${subject}"]`);
-            const value = input?.value || '';
-            data[subject] = value;
-            if (value) hasContent = true;
-            
-            // Include grade for numeric subjects
-            if (subject !== 'sikap' && subject !== 'kehadiran') {
-                const gradeEl = row.querySelector(`.grade-${subject}`);
-                const grade = gradeEl?.textContent || '-';
-                data[`grade_${subject}`] = grade;
-            }
-        });
-        
-        if (!hasContent) return;
-        payload.push(data);
-    });
-    
-    return payload;
-}
-
-// ============ API CALLS ============
-async function saveData(payload) {
-    showMessage('💾 Menyimpan...');
-    
-    try {
-        const response = await fetch('{{ route('sensei.penilaian.nilai-akhir.save') }}', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ students: payload })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Gagal menyimpan data');
-        }
-
-        // Update summary
-        if (data.summary) {
-            document.getElementById('nilai-akhir-total').textContent = data.summary.total || 0;
-            document.getElementById('nilai-akhir-lulus').textContent = data.summary.lulus || 0;
-            document.getElementById('nilai-akhir-percent').textContent = (data.summary.percent || 0) + '%';
-        }
-
-        return data;
-    } catch (error) {
-        console.error('Save error:', error);
-        throw error;
-    }
-}
-
-// ============ EVENT HANDLERS ============
-document.addEventListener('DOMContentLoaded', function () {
-    // Initialize rata-rata on load
-    document.querySelectorAll('.nilai-input').forEach(inp => {
-        inp.addEventListener('input', function () {
-            calculateRataRata(this.dataset.row);
-            scheduleAutoSave();
-        });
-    });
-
-    // Bind name input to autosave
-    document.querySelectorAll('.name-input').forEach(inp => {
-        inp.addEventListener('input', scheduleAutoSave);
-    });
-
-    // Initialize all rows
-    for (let i = 0; i < 30; i++) {
-        calculateRataRata(i);
-    }
-
-    // Save button
-    const saveBtn = document.getElementById('save-nilai-akhir');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', async function () {
-            const payload = collectTableData();
-            
-            if (payload.length === 0) {
-                showMessage('⚠️ Tidak ada data untuk disimpan', 'error');
-                alert('Isi setidaknya satu baris dengan nama atau nilai.');
-                return;
-            }
-
-            try {
-                saveBtn.disabled = true;
-                saveBtn.style.opacity = '0.6';
-                
-                await saveData(payload);
-                showMessage('✅ Berhasil disimpan!', 'success');
-                clearMessage();
-            } catch (error) {
-                showMessage('❌ Gagal: ' + error.message, 'error');
-                alert('Gagal menyimpan: ' + error.message);
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.style.opacity = '1';
-            }
-        });
-    }
-
-    // Reset button
-    const resetBtn = document.getElementById('reset-nilai-akhir');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', async function () {
-            if (!confirm('Yakin reset semua data Nilai Akhir?')) return;
-
-            try {
-                const response = await fetch('{{ route('sensei.penilaian.nilai-akhir.reset') }}', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    showMessage('🔄 Data direset', 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-                }
-            } catch (error) {
-                console.error('Reset error:', error);
-                alert('Gagal reset data');
-            }
-        });
-    }
-
-    // Penilaian selector navigation
-    const penilaianSelect = document.querySelector('select[name="penilaian-select"]');
-    if (penilaianSelect) {
-        penilaianSelect.addEventListener('change', function (e) {
-            if (this.value) window.location.href = this.value;
-        });
-    }
-});
-
-// ============ AUTOSAVE ============
-function scheduleAutoSave() {
-    if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(autoSaveNow, CONFIG.autoSaveDelay);
-}
-
-async function autoSaveNow() {
-    if (autoSaveInFlight) return;
-
-    const payload = collectTableData();
-    if (payload.length === 0) return;
-
-    autoSaveInFlight = true;
-    showMessage('💾 Autosaving...');
-
-    try {
-        await saveData(payload);
-        showMessage('✅ Tersimpan', 'success');
-        clearMessage();
-    } catch (error) {
-        console.warn('Autosave failed:', error);
-    } finally {
-        autoSaveInFlight = false;
-    }
-}
-</script>
-
 <style>
-/* Custom scrollbar styling */
-.scrollbar-visible::-webkit-scrollbar {
-    height: 12px;
+/* Nilai Akhir Scrollbar Standardized - Excel Style Always Visible */
+.final-scroll { 
+    max-height: 600px;
+    overflow-x: scroll !important; 
+    overflow-y: scroll !important; 
+    display: block !important;
+    scrollbar-gutter: stable both-edges; 
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: auto !important; 
+    scrollbar-color: #64748b #f1f5f9 !important; 
 }
 
-.scrollbar-visible::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 6px;
+/* Chrome, Safari, Edge */
+.final-scroll::-webkit-scrollbar { 
+    height: 18px !important; 
+    width: 18px !important; 
+    display: block !important;
+    background-color: #f1f5f9 !important;
+    -webkit-appearance: none !important;
 }
 
-.scrollbar-visible::-webkit-scrollbar-thumb {
-    background: #3b82f6;
-    border-radius: 6px;
-    border: 2px solid #f3f4f6;
+.final-scroll::-webkit-scrollbar:window-inactive {
+    display: block !important;
 }
 
-.scrollbar-visible::-webkit-scrollbar-thumb:hover {
-    background: #2563eb;
+.final-scroll::-webkit-scrollbar-track { 
+    background: #f1f5f9 !important; 
+    border: 1px solid #e2e8f0 !important;
 }
+
+.final-scroll::-webkit-scrollbar-thumb { 
+    background-color: #94a3b8 !important;
+    border-radius: 0px !important;
+    border: 3px solid #f1f5f9 !important;
+    min-height: 40px !important;
+}
+
+.final-scroll::-webkit-scrollbar-thumb:hover { 
+    background-color: #64748b !important; 
+}
+
+.final-scroll::-webkit-scrollbar-corner {
+    background-color: #f1f5f9 !important;
+}
+
+.table-fixed { table-layout: fixed; }
 </style>
 
+<script>
+    // Grading Logic
+    function getGrade(score) {
+        if(!score && score!==0) return '-';
+        score = parseInt(score);
+        if(score >= 90) return 'A';
+        if(score >= 80) return 'B';
+        if(score >= 70) return 'C';
+        if(score >= 60) return 'D';
+        return 'E';
+    }
+
+    function updateRow(rowIdx) {
+        const inputs = document.querySelectorAll(`.score-input[data-row="${rowIdx}"]`);
+        let sum = 0;
+        let count = 0;
+        
+        inputs.forEach(inp => {
+            const val = inp.value;
+            const key = inp.dataset.key;
+            const gradeEl = document.querySelector(`.grade-display[data-key="${key}"][data-row="${rowIdx}"]`);
+            
+            if(val) {
+                const num = parseInt(val);
+                sum += num;
+                count++;
+                
+                // Update per subject grade
+                const g = getGrade(num);
+                gradeEl.textContent = g;
+                // Colorize
+                gradeEl.className = 'text-[10px] font-black grade-display ' + 
+                    (g==='A'?'text-green-600': g==='B'?'text-blue-600': g==='C'?'text-yellow-600': 'text-red-600');
+            } else {
+                gradeEl.textContent = '-';
+                gradeEl.className = 'text-[10px] font-black text-gray-400 grade-display';
+            }
+        });
+
+        const avgEl = document.querySelector(`.final-avg[data-row="${rowIdx}"]`);
+        const gradeEl = document.querySelector(`.final-grade[data-row="${rowIdx}"]`);
+
+        if(count > 0) {
+            const avg = Math.round(sum / count);
+            avgEl.textContent = avg;
+            
+            const finalG = getGrade(avg);
+            gradeEl.textContent = finalG;
+            
+            let bgClass = 'bg-gray-400';
+            if(finalG === 'A') bgClass = 'bg-green-500';
+            else if(finalG === 'B') bgClass = 'bg-blue-500';
+            else if(finalG === 'C') bgClass = 'bg-yellow-500';
+            else bgClass = 'bg-red-500';
+            
+            gradeEl.className = `px-2 py-1 rounded-lg text-[10px] final-grade ${bgClass} text-white shadow-md`;
+        } else {
+            avgEl.textContent = '-';
+            gradeEl.textContent = '-';
+            gradeEl.className = 'px-2 py-1 rounded-lg bg-gray-200 text-gray-400 text-[10px] final-grade';
+        }
+    }
+
+    function updateSummary() {
+        const rows = document.querySelectorAll('.student-row');
+        let total = rows.length;
+        let lolos = 0;
+        
+        rows.forEach(tr => {
+            const avgEl = tr.querySelector('.final-avg');
+            if (avgEl) { // Ensure the element exists
+                const avg = avgEl.textContent;
+                if (avg !== '-' && parseInt(avg) >= 75) {
+                    lolos++;
+                }
+            }
+        });
+        
+        const percent = total > 0 ? Math.round((lolos / total) * 100) : 0;
+        
+        const statLolos = document.getElementById('stat-lolos');
+        const statPercent = document.getElementById('stat-percent');
+        
+        if (statLolos) statLolos.textContent = lolos;
+        if (statPercent) statPercent.textContent = percent + '%';
+    }
+
+    // Bind inputs
+    document.querySelectorAll('.score-input').forEach(inp => {
+        inp.addEventListener('input', function() {
+            let val = parseInt(this.value);
+            if(val > 100) this.value = 100;
+            updateRow(this.dataset.row);
+            updateSummary(); // Update sidebar stats
+        });
+    });
+
+    // Initial calc
+    updateSummary();
+
+    // Mock Save
+    document.getElementById('save-final').addEventListener('click', () => {
+        const msg = document.getElementById('save-msg');
+        msg.textContent = 'Menyimpan...'; msg.className='text-gray-400 font-bold ml-2';
+        setTimeout(() => {
+            msg.textContent = 'Tersimpan (Mock)'; msg.className='text-green-500 font-bold ml-2';
+            setTimeout(() => msg.textContent='', 2000);
+        }, 1000);
+    });
+</script>
 @endsection
