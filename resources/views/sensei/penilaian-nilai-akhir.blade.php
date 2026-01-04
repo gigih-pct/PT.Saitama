@@ -80,7 +80,9 @@
                  <button id="export-excel" class="px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-900/20 hover:bg-green-700 active:scale-95 transition-all flex items-center gap-2">
                     <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
                 </button>
-                <span id="save-msg" class="text-sm font-bold ml-2"></span>
+                <button id="reset-final" class="px-6 py-2.5 bg-white text-red-500 border-2 border-red-100 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all flex items-center gap-2">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                </button>
             </div>
             
              <div class="flex items-center gap-4 text-xs font-bold text-gray-500">
@@ -250,6 +252,52 @@
     </div>
 </div>
 
+<!-- Toast Notification -->
+<div id="toast-container" class="fixed top-20 right-8 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full mx-4 transform transition-all scale-95 opacity-0" id="confirm-modal-content">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-black text-[#173A67] mb-2">Konfirmasi Reset</h3>
+                <p class="text-sm text-gray-600 font-medium" id="confirm-message">Apakah Anda yakin ingin mereset data ini?</p>
+            </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button id="confirm-cancel" class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 active:scale-95 transition-all">
+                Batal
+            </button>
+            <button id="confirm-ok" class="px-6 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-600/30 hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Ya, Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Toast Animation */
+    @keyframes toast-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-item {
+        animation: toast-in 0.3s ease-out forwards;
+    }
+    
+    /* Modal Animation */
+    @keyframes modal-in {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    #confirm-modal.show #confirm-modal-content {
+        animation: modal-in 0.3s ease-out forwards;
+    }
+
 <style>
 /* Nilai Akhir Scrollbar Standardized - Excel Style Always Visible */
 .final-scroll { 
@@ -399,13 +447,108 @@
     // Initial calc
     updateSummary();
 
+    // Custom Confirm Modal
+    function showConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-modal-content');
+            const messageEl = document.getElementById('confirm-message');
+            const okBtn = document.getElementById('confirm-ok');
+            const cancelBtn = document.getElementById('confirm-cancel');
+            
+            messageEl.textContent = message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => modal.classList.add('show'), 10);
+            lucide.createIcons();
+            
+            const cleanup = () => {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 300);
+            };
+            
+            const handleOk = () => {
+                cleanup();
+                resolve(true);
+            };
+            
+            const handleCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+            
+            okBtn.onclick = handleOk;
+            cancelBtn.onclick = handleCancel;
+            modal.onclick = (e) => {
+                if (e.target === modal) handleCancel();
+            };
+        });
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-[#173A67]' : 'bg-red-600';
+        const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+        
+        toast.className = `toast-item flex items-center gap-3 ${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl min-w-[300px] pointer-events-auto`;
+        toast.innerHTML = `
+            <i data-lucide="${icon}" class="w-5 h-5 text-blue-200"></i>
+            <div class="flex-1">
+                <p class="text-xs font-black uppercase tracking-widest opacity-70">${type === 'success' ? 'Berhasil' : 'Error'}</p>
+                <p class="text-sm font-bold">${message}</p>
+            </div>
+            <button class="opacity-50 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        `;
+        
+        container.appendChild(toast);
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.5s ease-in';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
     // Mock Save
     document.getElementById('save-final').addEventListener('click', () => {
-        const msg = document.getElementById('save-msg');
-        msg.textContent = 'Menyimpan...'; msg.className='text-gray-400 font-bold ml-2';
+        const btn = document.getElementById('save-final');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+        btn.disabled = true;
+        lucide.createIcons();
+        
         setTimeout(() => {
-            msg.textContent = 'Tersimpan (Mock)'; msg.className='text-green-500 font-bold ml-2';
-            setTimeout(() => msg.textContent='', 2000);
+            showToast('Berhasil menyimpan nilai akhir');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
+        }, 1000);
+    });
+    
+    // Reset
+    document.getElementById('reset-final').addEventListener('click', async () => {
+        const confirmed = await showConfirm('Reset semua data nilai akhir?');
+        if(!confirmed) return;
+        
+        const btn = document.getElementById('reset-final');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Reset...';
+        btn.disabled = true;
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            showToast('Berhasil reset nilai akhir', 'success');
+            setTimeout(() => window.location.reload(), 1000);
         }, 1000);
     });
 </script>

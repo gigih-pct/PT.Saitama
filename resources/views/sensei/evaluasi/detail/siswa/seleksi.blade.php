@@ -1,192 +1,308 @@
 @extends('layouts.header_dashboard_sensei')
 
+@section('title', 'Detail Evaluasi - ' . $student->name)
+
 @section('content')
-<div class="bg-gray-100 min-h-screen rounded-lg p-6 space-y-6 font-sans">
+<div class="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-sm border border-gray-100 min-h-[85vh] flex flex-col relative overflow-hidden font-sans">
     
-    <!-- HEADER CARD - PROFIL SISWA -->
-    <div class="bg-white rounded-3xl shadow-sm p-8 pb-10">
-        <div class="flex items-start justify-between">
-            <!-- BACK BUTTON -->
-            <div class="w-1/6">
-                <button onclick="window.history.back()" class="group flex items-center gap-2 text-gray-800 hover:text-red-500 transition font-bold text-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-red-500 transform group-hover:-translate-x-1 transition" viewBox="0 0 24 24" fill="currentColor">
-                         <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                    </svg>
-                    <span>Kembali</span>
-                </button>
+    <!-- HEADER SECTION -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10 z-10 relative">
+        <div class="flex items-center gap-6">
+            <button onclick="window.history.back()" class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-[#173A67] hover:text-white hover:rotate-[-90deg] transition-all duration-500 shadow-sm border border-gray-100">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </button>
+            <div class="space-y-1">
+                <h1 class="text-[#173A67] font-black text-2xl lg:text-3xl tracking-tight">Detail Evaluasi</h1>
+                <p class="text-gray-400 text-xs font-bold tracking-widest uppercase">Laporan Perkembangan Kemampuan Siswa</p>
             </div>
+        </div>
 
-            <!-- CENTER - PROFILE -->
-            <div class="flex-1 flex justify-center items-center gap-10">
-                <!-- PHOTO -->
-                <div class="relative shrink-0">
-                    <div class="w-48 h-48 rounded-full bg-blue-500 border-4 border-blue-600 flex items-center justify-center">
-                        <span class="text-6xl font-bold text-white">G</span>
-                    </div>
-                </div>
-                
-                <!-- DATA -->
-                <div class="space-y-3 min-w-[200px]">
-                    <p class="text-base text-gray-800">
-                        <span class="font-bold text-[#1e293b]">Nama :</span> 
-                        <span class="font-bold text-gray-500">Gigih</span>
-                    </p>
-                    <p class="text-base text-gray-800">
-                        <span class="font-bold text-[#1e293b]">NIM :</span> 
-                        <span class="font-bold text-gray-500">23.12.2865</span>
-                    </p>
-                    <p class="text-base text-gray-800">
-                        <span class="font-bold text-[#1e293b]">Tgl Lahir :</span> 
-                        <span class="font-bold text-gray-500">18 Mei 2001</span>
-                    </p>
-                    
-                    <div class="pt-1">
-                        <span class="inline-block bg-gray-200 text-gray-800 text-sm font-bold px-4 py-1.5 rounded-full">
-                            Kesempatan: 5/5
-                        </span>
-                    </div>
-
-                    <div class="pt-2">
-                         <button class="bg-[#00902f] hover:bg-green-700 text-white font-bold px-12 py-2.5 rounded-lg transition shadow-sm w-full">
-                            Aktif
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT - PRINT BUTTON -->
-            <div class="w-1/6 flex justify-end">
-                <button class="text-red-400 hover:text-red-600 transition" title="Print">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 8h-1V3H6v5H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zM8 5h8v3H8V5zm8 12v2H8v-4h8v2zm2-2v-2H6v2H4v-4c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v4h-2z"/>
-                        <circle cx="18" cy="11.5" r="1"/>
-                    </svg>
-                </button>
-            </div>
+        <div class="flex items-center gap-3">
+             <button class="px-6 py-3 bg-[#173A67] text-white rounded-2xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-95 transition-all flex items-center gap-2" title="Print Laporan">
+                <i data-lucide="printer" class="w-4 h-4"></i> Cetak Evaluasi
+            </button>
         </div>
     </div>
 
-    <!-- MIDDLE SECTION -->
-    <div class="space-y-4">
-        <!-- HEADER BAR -->
-        <div class="bg-[#102a4e] rounded-xl px-6 py-4 flex items-center gap-4 shadow-md">
-             <h2 class="text-white font-bold text-lg">Nilai Evaluasi Seleksi</h2>
-             <button class="bg-[#00902f] hover:bg-green-700 text-white font-bold px-4 py-1 rounded-full flex items-center gap-2 text-sm transition">
-                <span>Siap Seleksi</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                </svg>
-             </button>
-        </div>
+    <div class="grid grid-cols-12 gap-8 flex-1">
+        <!-- LEFT: PROFILE CARD -->
+        <div class="col-span-12 lg:col-span-4 lg:border-right lg:border-gray-100">
+            <div class="bg-gray-50 rounded-[2.5rem] p-8 border border-gray-100 flex flex-col items-center text-center relative overflow-hidden group">
+                <!-- Background Pattern -->
+                <div class="absolute -top-10 -right-10 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                    <i data-lucide="user" class="w-64 h-64"></i>
+                </div>
 
-        <!-- TABLE SECTION -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <!-- HEADING ROW -->
-            <div class="bg-[#1e3a8a] text-white">
-                 <div class="flex items-center px-6 py-4 font-bold text-sm">
-                    <div class="w-1/5">Nama Mata Pelajaran</div>
-                    <div class="flex-1 grid grid-cols-4 text-center">
-                        <span>Nilai Minggu 1</span>
-                        <span>Nilai Minggu 2</span>
-                        <span>Nilai Minggu 3</span>
-                        <span>Nilai Minggu 3</span>
+                <!-- Avatar -->
+                <div class="relative mb-6">
+                    <div class="w-40 h-40 rounded-[3rem] bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white text-6xl font-black shadow-2xl rotate-3 group-hover:rotate-0 transition-all duration-500 overflow-hidden">
+                        {{ substr($student->name, 0, 1) }}
+                    </div>
+                    <div class="absolute -bottom-2 -right-2 w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-600 shadow-xl border border-gray-50">
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <!-- Basic Info -->
+                <h2 class="text-2xl font-black text-[#173A67] mb-1">{{ $student->name }}</h2>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">{{ $student->kelas ? $student->kelas->nama_kelas : 'Tanpa Angkatan' }}</p>
+
+                <!-- Status Badge -->
+                <div class="px-8 py-2.5 rounded-2xl bg-green-100 text-green-700 text-xs font-black uppercase tracking-widest mb-10 shadow-sm border border-green-200">
+                    {{ $student->status ?? 'Aktif' }}
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-4 w-full">
+                    <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NIM</p>
+                        <p class="text-sm font-black text-[#173A67]">{{ $student->nim ?? '23.12.2865' }}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TL</p>
+                        <p class="text-sm font-black text-[#173A67]">{{ $student->tanggal_lahir ?? '18/05/2001' }}</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- ROWS -->
-            <div class="divide-y divide-white">
-                <!-- KANJI -->
-                <div onclick="window.location.href='{{ route('sensei.evaluasi.detail.siswa.kanji', ['id' => 1]) }}'" class="flex items-center px-6 py-4 bg-gray-100 hover:bg-gray-200 transition cursor-pointer">
-                    <div class="w-1/5 font-bold text-gray-800">Kanji</div>
-                    <div class="flex-1 grid grid-cols-4 place-items-center">
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <a href="{{ route('sensei.evaluasi.detail.siswa.kanji', ['id' => 1]) }}" class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </a>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
+        <!-- RIGHT: EVALUASI LIST -->
+        <div class="col-span-12 lg:col-span-8 space-y-6">
+            
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-3xl border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="px-5 py-2 bg-[#173A67] rounded-xl text-[10px] font-black text-white shadow-lg uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-3 h-3 text-blue-300"></i>
+                        Matrix Penilaian
                     </div>
                 </div>
-
-                <!-- BUNPOU -->
-                <div class="flex items-center px-6 py-4 bg-gray-100 hover:bg-gray-200 transition">
-                    <div class="w-1/5 font-bold text-gray-800">Bunpou</div>
-                    <div class="flex-1 grid grid-cols-4 place-items-center">
-                         <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                    </div>
+                <div class="flex gap-2">
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Lulus</span>
+                    <div class="w-3 h-3 rounded-full bg-red-500 ml-2"></div>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Remidial</span>
                 </div>
+            </div>
 
-                <!-- KUTOBA -->
-                <div class="flex items-center px-6 py-4 bg-gray-100 hover:bg-gray-200 transition">
-                    <div class="w-1/5 font-bold text-gray-800">Kutoba</div>
-                    <div class="flex-1 grid grid-cols-4 place-items-center">
-                         <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <span class="bg-[#d95d5d] text-white w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm">7.7</span>
-                            <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2 rounded-full transition" title="Edit">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            </button>
-                        </div>
-                    </div>
+            <!-- Table Container -->
+            <div class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden shadow-sm">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-[#173A67] text-white">
+                        <tr>
+                            <th class="px-8 py-5 font-black text-xs uppercase tracking-widest">Mata Pelajaran</th>
+                            @for($i=1; $i<=4; $i++)
+                                <th class="px-4 py-5 font-black text-xs uppercase tracking-widest text-center">M{{ $i }}</th>
+                            @endfor
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <!-- KANJI -->
+                        <tr class="group hover:bg-blue-50/50 transition-all">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                        <span class="font-black text-sm">漢</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-[#173A67]">Kanji</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Logographic System</p>
+                                    </div>
+                                </div>
+                            </td>
+                            @for($i=1; $i<=4; $i++)
+                                <td class="px-4 py-6 text-center">
+                                    @php $score = $kanjiAssessments[$i]->score ?? null; @endphp
+                                    <div class="inline-flex items-center gap-2">
+                                        <span class="w-10 h-10 flex items-center justify-center rounded-xl {{ $score !== null && $score >= 75 ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500' }} font-black text-xs shadow-sm border {{ $score !== null && $score >= 75 ? 'border-green-200' : 'border-red-100' }}">
+                                            {{ $score ?? '-' }}
+                                        </span>
+                                        <a href="{{ route('sensei.evaluasi.detail.siswa.kanji', ['id' => $student->id]) }}" class="text-gray-300 hover:text-[#173A67] transition-colors">
+                                            <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            @endfor
+                        </tr>
+
+                        <!-- BUNPOU -->
+                        <tr class="group hover:bg-blue-50/50 transition-all">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                        <span class="font-black text-sm">文</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-[#173A67]">Bunpou</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Grammar Structure</p>
+                                    </div>
+                                </div>
+                            </td>
+                            @for($i=1; $i<=4; $i++)
+                                <td class="px-4 py-6 text-center">
+                                    @php $field = "eval{$i}"; $score = $bunpouAssessment->$field ?? null; @endphp
+                                    <div class="inline-flex items-center gap-2">
+                                        <span class="w-10 h-10 flex items-center justify-center rounded-xl {{ $score !== null && $score >= 75 ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500' }} font-black text-xs shadow-sm border {{ $score !== null && $score >= 75 ? 'border-green-200' : 'border-red-100' }}">
+                                            {{ $score ?? '-' }}
+                                        </span>
+                                        <a href="{{ route('sensei.penilaian.bunpou') }}?kelas_id={{ $student->kelas_id }}" class="text-gray-300 hover:text-[#173A67] transition-colors">
+                                            <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            @endfor
+                        </tr>
+
+                        <!-- KOTOBA -->
+                        <tr class="group hover:bg-blue-50/50 transition-all">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                        <span class="font-black text-sm">言</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-[#173A67]">Kotoba</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vocabulary Base</p>
+                                    </div>
+                                </div>
+                            </td>
+                            @for($i=1; $i<=4; $i++)
+                                <td class="px-4 py-6 text-center">
+                                    @php $score = $kotobaAssessments[$i]->score ?? null; @endphp
+                                    <div class="inline-flex items-center gap-2">
+                                        <span class="w-10 h-10 flex items-center justify-center rounded-xl {{ $score !== null && $score >= 75 ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500' }} font-black text-xs shadow-sm border {{ $score !== null && $score >= 75 ? 'border-green-200' : 'border-red-100' }}">
+                                            {{ $score ?? '-' }}
+                                        </span>
+                                        <a href="{{ route('sensei.penilaian.kotoba') }}?kelas_id={{ $student->kelas_id }}" class="text-gray-300 hover:text-[#173A67] transition-colors">
+                                            <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            @endfor
+                        </tr>
+
+                        <!-- FMD, WAWANCARA, PRESENSI GANG -->
+                        <tr class="bg-gray-50/30">
+                            <td colspan="5" class="px-8 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Assessment Tambahan</td>
+                        </tr>
+
+                        <!-- WAWANCARA -->
+                        <tr class="group hover:bg-blue-50/50 transition-all">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                        <i data-lucide="mic-2" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-[#173A67]">Wawancara</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Communication Skills</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td colspan="4" class="px-4 py-6 text-right pr-12">
+                                <div class="inline-flex items-center gap-4">
+                                    <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Skor Akhir:</span>
+                                    <span class="px-6 py-2 rounded-xl {{ $wawancaraScore >= 75 ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-500 border-red-100' }} border font-black text-sm">
+                                        {{ $wawancaraScore }}
+                                    </span>
+                                    <a href="{{ route('sensei.penilaian.wawancara') }}?kelas_id={{ $student->kelas_id }}" class="text-gray-300 hover:text-[#173A67] transition-colors">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- FMD -->
+                        <tr class="group hover:bg-blue-50/50 transition-all">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                        <i data-lucide="activity" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-[#173A67]">FMD</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Physical & Mental</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td colspan="4" class="px-4 py-6 text-right pr-12">
+                                <div class="inline-flex items-center gap-4">
+                                    <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Rata-rata:</span>
+                                    <span class="px-6 py-2 rounded-xl {{ $fmdScore >= 75 ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-500 border-red-100' }} border font-black text-sm">
+                                        {{ $fmdScore }}
+                                    </span>
+                                    <a href="{{ route('sensei.penilaian.fmd') }}?kelas_id={{ $student->kelas_id }}" class="text-gray-300 hover:text-[#173A67] transition-colors">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- PRESENSI -->
+                        <tr class="group hover:bg-blue-50/50 transition-all">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                        <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black text-[#173A67]">Presensi</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Attendance Rate</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td colspan="4" class="px-4 py-6 text-right pr-12">
+                                <div class="inline-flex items-center gap-4">
+                                    <span class="text-xs font-black text-gray-400 uppercase tracking-widest">Kehadiran:</span>
+                                    <span class="px-6 py-2 rounded-xl {{ $presensiScore >= 80 ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-500 border-red-100' }} border font-black text-sm">
+                                        {{ $presensiScore }}%
+                                    </span>
+                                    <a href="{{ route('sensei.penilaian.presensi') }}?kelas_id={{ $student->kelas_id }}" class="text-gray-300 hover:text-[#173A67] transition-colors">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- NILAI AKHIR FOOTER -->
+                        <tr class="bg-[#173A67] text-white">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center">
+                                        <i data-lucide="award" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-black">Nilai Akhir</p>
+                                        <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest">Final Cumulative Score</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td colspan="4" class="px-4 py-6 text-right pr-12">
+                                <div class="inline-flex items-center gap-6">
+                                    <div class="flex flex-col items-end">
+                                        <span class="text-[10px] font-black text-blue-200 uppercase tracking-widest">Grade Terkalkulasi</span>
+                                        <span class="text-3xl font-black text-yellow-400">{{ $nilaiAkhirScore }}</span>
+                                    </div>
+                                    <a href="{{ route('sensei.penilaian.nilai-akhir') }}?kelas_id={{ $student->kelas_id }}" class="w-12 h-12 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/20 shadow-lg">
+                                        <i data-lucide="trending-up" class="w-6 h-6"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="bg-blue-50/50 rounded-[2rem] p-6 border-2 border-dashed border-blue-100 flex items-center gap-6">
+                <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm shrink-0 border border-blue-50">
+                    <i data-lucide="info" class="w-7 h-7 text-blue-500"></i>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm font-black text-[#173A67]">Instruksi Evaluasi</p>
+                    <p class="text-xs font-bold text-gray-500/80 leading-relaxed uppercase tracking-wider italic">
+                        "Nilai Akhir dihitung secara otomatis berdasarkan bobot setiap mata pelajaran. Pastikan semua penilaian harian sudah terisi."
+                    </p>
                 </div>
             </div>
         </div>
@@ -195,11 +311,8 @@
 
 @push('scripts')
 <script>
-    document.querySelectorAll('button[title="Edit"]').forEach(button => {
-        button.addEventListener('click', function() {
-            // Functionality to be added
-            console.log('Edit clicked');
-        });
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
     });
 </script>
 @endpush

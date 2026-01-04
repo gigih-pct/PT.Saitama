@@ -84,7 +84,6 @@
                     <button id="btn-reset" class="px-6 py-2.5 bg-white text-red-500 border-2 border-red-100 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all flex items-center gap-2">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
                     </button>
-                    <span id="save-msg" class="text-sm font-bold ml-2"></span>
                 </div>
                 <div class="px-4 py-2 bg-white rounded-xl border border-gray-100 text-xs font-bold text-gray-500 shadow-sm">
                     Max Score: {{ $maxScore }}
@@ -107,7 +106,7 @@
                         <tbody class="divide-y divide-gray-100 bg-white">
                             @forelse($users as $idx => $user)
                                 @php
-                                    $saved = isset($rows[$idx]) ? $rows[$idx] : null;
+                                    $saved = $rows[$user->id] ?? null;
                                     $savedScore = $saved['score'] ?? '-';
                                     $savedCorrect = $saved['correct'] ?? '';
                                 @endphp
@@ -121,7 +120,7 @@
                                                 {{ substr($user->name, 0, 1) }}
                                             </div>
                                             <input type="text" class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input" 
-                                                   value="{{ $user->name }}" readonly data-row="{{ $idx }}">
+                                                   value="{{ $user->name }}" readonly data-row="{{ $idx }}" data-id="{{ $user->id }}">
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-center">
@@ -197,12 +196,59 @@
                     <li>Nilai otomatis dihitung (Skala 100).</li>
                     <li><span class="text-green-600">Hijau</span> menandakan lulus (≥75).</li>
                     <li><span class="text-red-500">Merah</span> menandakan remidial.</li>
-                    <li>Data tersimpan otomatis tiap perubahan.</li>
+                    <li>Klik <span class="text-blue-600 font-bold">Simpan Nilai</span> untuk menyimpan data.</li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Toast Notification -->
+<div id="toast-container" class="fixed top-20 right-8 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full mx-4 transform transition-all scale-95 opacity-0" id="confirm-modal-content">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-black text-[#173A67] mb-2">Konfirmasi Reset</h3>
+                <p class="text-sm text-gray-600 font-medium" id="confirm-message">Apakah Anda yakin ingin mereset data ini?</p>
+            </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button id="confirm-cancel" class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 active:scale-95 transition-all">
+                Batal
+            </button>
+            <button id="confirm-ok" class="px-6 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-600/30 hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Ya, Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Toast Animation */
+    @keyframes toast-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-item {
+        animation: toast-in 0.3s ease-out forwards;
+    }
+    
+    /* Modal Animation */
+    @keyframes modal-in {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    #confirm-modal.show #confirm-modal-content {
+        animation: modal-in 0.3s ease-out forwards;
+    }
+</style>
 
 <script>
     const CONFIG = {
@@ -252,7 +298,9 @@
              const date = tr.querySelector('.date-input').value;
              
              if(correctVal !== '') {
+                 const id = tr.querySelector('.name-input').dataset.id;
                  payload.push({
+                     user_id: id,
                      name: name,
                      correct: correctVal,
                      date: date,
@@ -272,21 +320,91 @@
         document.getElementById('summary-percent').textContent = summary.percent + '%';
     }
 
-    let saveTimer;
-    function autoSave() {
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(saveData, 1000);
+    // Custom Confirm Modal
+    function showConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-modal-content');
+            const messageEl = document.getElementById('confirm-message');
+            const okBtn = document.getElementById('confirm-ok');
+            const cancelBtn = document.getElementById('confirm-cancel');
+            
+            messageEl.textContent = message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => modal.classList.add('show'), 10);
+            lucide.createIcons();
+            
+            const cleanup = () => {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 300);
+            };
+            
+            const handleOk = () => {
+                cleanup();
+                resolve(true);
+            };
+            
+            const handleCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+            
+            okBtn.onclick = handleOk;
+            cancelBtn.onclick = handleCancel;
+            modal.onclick = (e) => {
+                if (e.target === modal) handleCancel();
+            };
+        });
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-[#173A67]' : 'bg-red-600';
+        const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+        
+        toast.className = `toast-item flex items-center gap-3 ${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl min-w-[300px] pointer-events-auto`;
+        toast.innerHTML = `
+            <i data-lucide="${icon}" class="w-5 h-5 text-blue-200"></i>
+            <div class="flex-1">
+                <p class="text-xs font-black uppercase tracking-widest opacity-70">${type === 'success' ? 'Berhasil' : 'Error'}</p>
+                <p class="text-sm font-bold">${message}</p>
+            </div>
+            <button class="opacity-50 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        `;
+        
+        container.appendChild(toast);
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.5s ease-in';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
     }
 
     async function saveData() {
         const btn = document.getElementById('btn-save');
-        const msg = document.getElementById('save-msg');
         const payload = getPayload();
 
-        if(!payload.length) return;
+        if(!payload.length) {
+            showToast('Tidak ada data untuk disimpan', 'error');
+            return;
+        }
 
-        msg.textContent = 'Menyimpan...';
-        msg.className = 'text-xs font-bold text-gray-400 ml-2';
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+        btn.disabled = true;
+        lucide.createIcons();
 
         try {
             const res = await fetch(CONFIG.saveRoute, {
@@ -302,15 +420,18 @@
             });
             const data = await res.json();
             if(data.success) {
-                msg.textContent = 'Tersimpan';
-                msg.className = 'text-xs font-bold text-green-500 ml-2';
+                showToast(`Berhasil menyimpan nilai Kotoba BAB ${CONFIG.bab}`);
                 updateStats(data.summary);
-                setTimeout(() => msg.textContent = '', 2000);
+            } else {
+                showToast(data.message || 'Gagal menyimpan data', 'error');
             }
         } catch(e) {
             console.error(e);
-            msg.textContent = 'Error';
-            msg.className = 'text-xs font-bold text-red-500 ml-2';
+            showToast('Terjadi kesalahan server', 'error');
+        } finally {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
         }
     }
 
@@ -326,7 +447,6 @@
                  if(val < 0) { val = 0; this.value = val; }
                  
                  updateRowUI(this.dataset.row, this.value);
-                 autoSave();
              });
         });
 
@@ -340,15 +460,39 @@
 
         // Reset
         document.getElementById('btn-reset').addEventListener('click', async () => {
-            if(!confirm('Reset nilai bab ini?')) return;
+            const confirmed = await showConfirm(`Reset nilai Kotoba BAB ${CONFIG.bab}?`);
+            if(!confirmed) return;
+            
+            const btn = document.getElementById('btn-reset');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Reset...';
+            btn.disabled = true;
+            lucide.createIcons();
+            
             try {
-                await fetch(CONFIG.resetRoute, {
+                const res = await fetch(CONFIG.resetRoute, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': CONFIG.csrf},
                     body: JSON.stringify({bab: CONFIG.bab})
                 });
-                window.location.reload();
-            } catch(e) { alert('Error reset'); }
+                const data = await res.json();
+                
+                if(data.success || res.ok) {
+                    showToast(`Berhasil reset nilai Kotoba BAB ${CONFIG.bab}`, 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('Gagal reset data', 'error');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            } catch(e) {
+                console.error(e);
+                showToast('Terjadi kesalahan saat reset', 'error');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
         });
     });
 </script>

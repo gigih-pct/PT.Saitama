@@ -65,70 +65,8 @@ Route::middleware(['auth'])
         });
 
         // Kanji save/reset routes (per-bab)
-        Route::post('/penilaian-kelas/kanji/save', function (Request $request) {
-            try {
-                $bab = intval($request->input('bab', 1));
-                $students = $request->input('students', []);
-
-                // Temporary debug logging to help diagnose client issues
-                logger()->info('Kanji save request', ['bab' => $bab, 'students' => $students, 'ip' => $request->ip(), 'user_id' => auth()->check() ? auth()->id() : null]);
-
-                if(!is_array($students) || count($students) === 0) {
-                    return response()->json(['success' => false, 'message' => 'Tidak ada data siswa untuk disimpan.'], 422);
-                }
-
-                // map of question counts per bab
-                $map = [1 => 15, 2 => 12, 3 => 18, 4 => 25];
-                $questions = $map[$bab] ?? 10;
-
-                $clean = [];
-                $return = [];
-                foreach ($students as $s) {
-                    $name = trim($s['name'] ?? '');
-                    $correctRaw = isset($s['correct']) ? $s['correct'] : null;
-                    $hasContent = $name !== '' || ($correctRaw !== null && $correctRaw !== '');
-                    if (!$hasContent) continue; // skip truly empty rows
-                    $correct = intval($correctRaw ?? 0);
-                    $correct = max(0, min($correct, $questions));
-                    $date = trim($s['date'] ?? '');
-                    $rowIdx = isset($s['row']) ? intval($s['row']) : null;
-                    $score = $questions ? round(($correct / $questions) * 100, 2) : 0;
-                    $clean[] = ['name' => $name, 'correct' => $correct, 'score' => $score, 'date' => $date];
-                    $return[] = ['row' => $rowIdx, 'name' => $name, 'correct' => $correct, 'score' => $score, 'date' => $date];
-                }
-
-                session(['penilaian_kanji_bab_' . $bab => $clean]);
-
-                // summary
-                $total = count($clean);
-                $lulus = 0;
-                foreach ($clean as $c) { if (($c['score'] ?? 0) >= 75) $lulus++; }
-                $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
-                $summary = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent, 'questions' => $questions, 'bab' => $bab];
-                session(['penilaian_kanji_summary_bab_' . $bab => $summary]);
-
-                return response()->json(['success' => true, 'saved' => $total, 'summary' => $summary, 'students' => $return]);
-            } catch (\Throwable $e) {
-                // Log server error and return JSON
-                logger()->error('Kanji save failed: ' . $e->getMessage(), ['exception' => $e]);
-                // If debug mode enabled, include exception message to aid debugging locally
-                $resp = ['success' => false, 'message' => 'Server error saat menyimpan.'];
-                if(config('app.debug')) { $resp['error'] = $e->getMessage(); }
-                return response()->json($resp, 500);
-            }
-        })->name('penilaian.kanji.save');
-
-        Route::post('/penilaian-kelas/kanji/reset', function (Request $request) {
-            try {
-                $bab = intval($request->input('bab', 1));
-                session()->forget('penilaian_kanji_bab_' . $bab);
-                session()->forget('penilaian_kanji_summary_bab_' . $bab);
-                return response()->json(['success' => true]);
-            } catch (\Throwable $e) {
-                logger()->error('Kanji reset failed: ' . $e->getMessage(), ['exception' => $e]);
-                return response()->json(['success' => false, 'message' => 'Server error saat reset.'], 500);
-            }
-        })->name('penilaian.kanji.reset');
+        Route::post('/penilaian-kelas/kanji/save', [PenilaianController::class, 'saveKanji'])->name('penilaian.kanji.save');
+        Route::post('/penilaian-kelas/kanji/reset', [PenilaianController::class, 'resetKanji'])->name('penilaian.kanji.reset');
 
         Route::post('/penilaian-kelas/bunpou/save', [PenilaianController::class, 'saveBunpou'])->name('penilaian.bunpou.save');
         Route::post('/penilaian-kelas/bunpou/reset', [PenilaianController::class, 'resetBunpou'])->name('penilaian.bunpou.reset');
@@ -294,8 +232,13 @@ Route::middleware(['auth'])
         })->name('penilaian.nilai-akhir.reset');
 
 
-        Route::get('/status-siswa', fn () => view('sensei.statussiswa'))
+        Route::get('/status-siswa', [PenilaianController::class, 'statusSiswa'])
             ->name('status-siswa');
+            
+        // Student Update API Routes for Sensei
+        Route::post('/students/{id}/update-status', [PenilaianController::class, 'updateStudentStatus'])->name('students.update-status');
+        Route::post('/students/{id}/update-followup', [PenilaianController::class, 'updateStudentFollowUp'])->name('students.update-followup');
+        Route::post('/students/{id}/update-batch', [PenilaianController::class, 'updateStudentBatch'])->name('students.update-batch');
     });
     
     Route::middleware(['auth'])
@@ -308,7 +251,7 @@ Route::middleware(['auth'])
                 ->name('evaluasi.detail.siswa');
             
             // Route for checking Kanji details
-            Route::get('/evaluasi/siswa/{id}/kanji', fn () => view('sensei.evaluasi.detail.siswa.niali_kanji'))
+            Route::get('/evaluasi/siswa/{id}/kanji', [EvaluasiController::class, 'detailSiswaKanji'])
                 ->name('evaluasi.detail.siswa.kanji');
         });
 

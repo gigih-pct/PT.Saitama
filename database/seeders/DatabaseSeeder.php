@@ -27,6 +27,9 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\AdminSeeder::class,
             \Database\Seeders\UserRoleSeeder::class,
             \Database\Seeders\StudentSeeder::class,
+            \Database\Seeders\KanjiAssessmentSeeder::class,
+            \Database\Seeders\KotobaAssessmentSeeder::class,
+            \Database\Seeders\BunpouAssessmentSeeder::class,
         ]);
     }
 }

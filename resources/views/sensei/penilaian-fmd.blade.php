@@ -75,7 +75,9 @@
                  <button id="save-fmd" class="px-6 py-2.5 bg-[#173A67] text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-95 transition-all flex items-center gap-2">
                     <i data-lucide="save" class="w-4 h-4"></i> Simpan ({{ strtoupper($mode) }})
                 </button>
-                 <span id="fmd-save-msg" class="text-sm font-bold ml-2"></span>
+                <button id="reset-fmd" class="px-6 py-2.5 bg-white text-red-500 border-2 border-red-100 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all flex items-center gap-2">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                </button>
             </div>
             <div class="flex items-center gap-3 text-xs font-bold text-gray-500">
                 <span class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-gray-200"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Input Nilai</span>
@@ -96,7 +98,7 @@
                                 Minggu {{ $week }}
                             </th>
                             @endforeach
-                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center bg-[#173A67] border-l border-blue-800">Total</th>
+                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center bg-[#173A67] border-l border-blue-800 sticky right-0 z-30">Total</th>
                         </tr>
                         <tr>
                             @foreach($weeks as $week)
@@ -109,10 +111,10 @@
                     <tbody class="divide-y divide-gray-100 bg-white">
                          @forelse($users as $idx => $user)
                             <tr class="group hover:bg-blue-50/30 transition-colors student-row">
-                                <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-5 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                <td class="px-6 py-5 sticky left-16 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                             {{ substr($user->name, 0, 1) }}
@@ -128,11 +130,10 @@
                                            data-week="{{ $week }}" placeholder="-">
                                 </td>
                                 <td class="px-2 py-4 border-r border-gray-100 text-center">
-                                    <select class="w-full bg-white border border-gray-200 rounded-lg text-xs font-medium py-1.5 focus:ring-2 focus:ring-blue-500 ket-input" data-week="{{ $week }}">
-                                        <option value="">-</option>
-                                        <option value="H">Hadir</option>
-                                        <option value="TL">Terlambat</option>
-                                        <option value="A">Alfa</option>
+                                    <select class="w-full bg-gray-100 border border-gray-200 rounded-lg text-xs font-medium py-1.5 focus:ring-0 cursor-not-allowed ket-input appearance-none" data-week="{{ $week }}" disabled>
+                                        <option value="TH">TH</option>
+                                        <option value="L">L</option>
+                                        <option value="TL">TL</option>
                                     </select>
                                 </td>
                                 <td class="px-2 py-4 border-r border-gray-100 text-center bg-gray-50/50">
@@ -140,7 +141,7 @@
                                 </td>
                                 @endforeach
                                 
-                                <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50/50 sticky right-0">
+                                <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50 sticky right-0">
                                     <span class="total-score">0</span>
                                 </td>
                             </tr>
@@ -164,7 +165,6 @@
                         <thead>
                             <tr class="bg-gray-50 text-[#173A67] border-b border-gray-200">
                                 <th class="px-2 py-3 font-bold border-r border-gray-200 text-left uppercase tracking-wider">Keterangan</th>
-                                <th class="px-1 py-3 font-bold border-r border-gray-200 text-center w-4 text-transparent">~</th>
                                 <th class="px-2 py-3 font-bold border-r border-gray-200 text-center">4 Minggu</th>
                                 <th class="px-2 py-3 font-bold text-center">5 Minggu</th>
                             </tr>
@@ -172,25 +172,11 @@
                         <tbody class="divide-y divide-gray-200 text-gray-600 font-bold text-center">
                             <tr>
                                 <td class="px-2 py-2.5 text-left border-r border-gray-200 bg-gray-50/50">Jumlah</td>
-                                <td class="px-1 py-2.5 border-r border-gray-200 bg-gray-50/50 text-transparent">~</td>
                                 <td class="px-2 py-2.5 border-r border-gray-200" id="stat-jumlah-4">-</td>
                                 <td class="px-2 py-2.5" id="stat-jumlah-5">-</td>
                             </tr>
                             <tr>
-                                <td class="px-2 py-2.5 text-left border-r border-gray-200 bg-gray-50/50">Rata Rata Siswa</td>
-                                <td class="px-1 py-2.5 border-r border-gray-200 bg-gray-50/50 text-transparent">~</td>
-                                <td class="px-2 py-2.5 border-r border-gray-200" id="stat-avg-siswa-4">-</td>
-                                <td class="px-2 py-2.5" id="stat-avg-siswa-5">-</td>
-                            </tr>
-                            <tr>
-                                <td class="px-2 py-2.5 text-left border-r border-gray-200 bg-gray-50/50">Rata Rata Kelas</td>
-                                <td class="px-1 py-2.5 border-r border-gray-200 bg-gray-50/50 text-transparent">~</td>
-                                <td class="px-2 py-2.5 border-r border-gray-200" id="stat-avg-kelas-4">-</td>
-                                <td class="px-2 py-2.5" id="stat-avg-kelas-5">-</td>
-                            </tr>
-                            <tr>
                                 <td class="px-2 py-2.5 text-left border-r border-gray-200 bg-gray-50/50 text-top font-bold">Presentase</td>
-                                <td class="px-1 py-2.5 border-r border-gray-200 bg-gray-50/50 text-transparent">~</td>
                                 <td class="px-2 py-2.5 border-r border-gray-200 font-black text-[#173A67]" id="stat-percent-4">-</td>
                                 <td class="px-2 py-2.5 font-black text-[#173A67]" id="stat-percent-5">-</td>
                             </tr>
@@ -217,6 +203,52 @@
         </div>
     </div>
 </div>
+
+<!-- Toast Notification -->
+<div id="toast-container" class="fixed top-20 right-8 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full mx-4 transform transition-all scale-95 opacity-0" id="confirm-modal-content">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-black text-[#173A67] mb-2">Konfirmasi Reset</h3>
+                <p class="text-sm text-gray-600 font-medium" id="confirm-message">Apakah Anda yakin ingin mereset data ini?</p>
+            </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button id="confirm-cancel" class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 active:scale-95 transition-all">
+                Batal
+            </button>
+            <button id="confirm-ok" class="px-6 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-600/30 hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Ya, Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Toast Animation */
+    @keyframes toast-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-item {
+        animation: toast-in 0.3s ease-out forwards;
+    }
+    
+    /* Modal Animation */
+    @keyframes modal-in {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    #confirm-modal.show #confirm-modal-content {
+        animation: modal-in 0.3s ease-out forwards;
+    }
 
 <style>
 /* FMD Scrollbar Standardized - Excel Style Always Visible */
@@ -279,56 +311,206 @@
             let rowTotal = 0;
             let rowCount = 0;
             
-            tr.querySelectorAll('.val-input').forEach(inp => {
-                const val = parseFloat(inp.value);
-                const week = parseInt(inp.dataset.week);
-                if (!isNaN(val)) {
-                    if (week <= 4) { totalVal4 += val; count4++; }
-                    totalVal5 += val; count5++;
-                    rowTotal += val;
+            // Sum based on score-display (1 or 0) derived from Ket
+            tr.querySelectorAll('.score-display').forEach(scoreEl => {
+                const score = parseFloat(scoreEl.textContent);
+                const week = parseInt(scoreEl.dataset.week);
+                
+                if (!isNaN(score)) {
+                    if (week <= 4) { totalVal4 += score; count4++; }
+                    totalVal5 += score; count5++;
+                    rowTotal += score;
                     rowCount++;
                 }
             });
             
             // Update row total display if needed
             const totalEl = tr.querySelector('.total-score');
-            if (totalEl) totalEl.textContent = rowTotal || '-';
+            if (totalEl) totalEl.textContent = rowTotal || '0';
         });
 
         const safeAvg = (sum, count) => count > 0 ? (sum / count).toFixed(2) : '-';
         const safeSumByStudent = (sum, students) => students > 0 ? (sum / students).toFixed(2) : '-';
 
-        document.getElementById('stat-jumlah-4').textContent = totalVal4 || '-';
-        document.getElementById('stat-jumlah-5').textContent = totalVal5 || '-';
+        document.getElementById('stat-jumlah-4').textContent = totalVal4 || '0';
+        document.getElementById('stat-jumlah-5').textContent = totalVal5 || '0';
         
-        document.getElementById('stat-avg-siswa-4').textContent = safeSumByStudent(totalVal4, studentsCount);
-        document.getElementById('stat-avg-siswa-5').textContent = safeSumByStudent(totalVal5, studentsCount);
+        // Percent: (Total Passes / Total Possible Weeks For All Students) * 100
+        // Total Possible Weeks For All Students (Week 1-4) = studentsCount * 4
+        // Total Possible Weeks For All Students (Week 1-5) = studentsCount * 5
         
-        document.getElementById('stat-avg-kelas-4').textContent = safeAvg(totalVal4, count4);
-        document.getElementById('stat-avg-kelas-5').textContent = safeAvg(totalVal5, count5);
+        const totalPossible4 = studentsCount * 4;
+        const totalPossible5 = studentsCount * 5;
         
-        // Mock percentage for now
-        document.getElementById('stat-percent-4').textContent = totalVal4 ? '100%' : '-';
-        document.getElementById('stat-percent-5').textContent = totalVal5 ? '100%' : '-';
+        const percent4 = totalPossible4 > 0 ? ((totalVal4 / totalPossible4) * 100).toFixed(0) + '%' : '0%';
+        const percent5 = totalPossible5 > 0 ? ((totalVal5 / totalPossible5) * 100).toFixed(0) + '%' : '0%';
+        
+        document.getElementById('stat-percent-4').textContent = percent4;
+        document.getElementById('stat-percent-5').textContent = percent5;
+    }
+
+    // Bind inputs
+    // Logic Keterangan FMD
+    function updateKet(valInput) {
+        const row = valInput.closest('tr');
+        const week = valInput.dataset.week;
+        const ketSelect = row.querySelector(`.ket-input[data-week="${week}"]`);
+        
+        if (!ketSelect) return;
+
+        let val = valInput.value.trim();
+        
+        // =IF(kolom="-","TH",IF(kolom>=37,"L","TL"))
+        if (val === '' || val === '-') {
+            ketSelect.value = 'TH';
+        } else {
+            const num = parseFloat(val.replace(',', '.'));
+            if (!isNaN(num)) {
+                if (num >= 37) {
+                    ketSelect.value = 'L';
+                } else {
+                    ketSelect.value = 'TL';
+                }
+            } else {
+                // Determine behavior for non-numeric other than "-"
+                // For now, if it's not a number and not "-", default to TH or keep as is?
+                // Based on strict formula reading: IF(kolom="-","TH", ...) -> checks specific string
+                // But usually we handle empty as well.
+                // User input might be just text. Let's assume treat as TH if invalid number, or TL? 
+                // Let's stick to: if it parses as number, check >= 37. If not number, check if "-".
+                 ketSelect.value = 'TH';
+            }
+        }
+        
+        // Update Score Display based on Ket
+        // =IF(kolommtk="L","1","0")
+        const scoreDisplay = row.querySelector(`.score-display[data-week="${week}"]`);
+        if (scoreDisplay) {
+            scoreDisplay.textContent = (ketSelect.value === 'L') ? '1' : '0';
+        }
     }
 
     // Bind inputs
     document.querySelectorAll('.val-input').forEach(inp => {
-        inp.addEventListener('input', () => updateSummary());
+        inp.addEventListener('input', () => {
+            updateKet(inp);
+            updateSummary();
+        });
+        
+    });
+
+    // Initial calc
+    document.querySelectorAll('.val-input').forEach(inp => {
+        updateKet(inp);
     });
 
     // Initial calc
     updateSummary();
 
+    // Custom Confirm Modal
+    function showConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-modal-content');
+            const messageEl = document.getElementById('confirm-message');
+            const okBtn = document.getElementById('confirm-ok');
+            const cancelBtn = document.getElementById('confirm-cancel');
+            
+            messageEl.textContent = message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => modal.classList.add('show'), 10);
+            lucide.createIcons();
+            
+            const cleanup = () => {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 300);
+            };
+            
+            const handleOk = () => {
+                cleanup();
+                resolve(true);
+            };
+            
+            const handleCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+            
+            okBtn.onclick = handleOk;
+            cancelBtn.onclick = handleCancel;
+            modal.onclick = (e) => {
+                if (e.target === modal) handleCancel();
+            };
+        });
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-[#173A67]' : 'bg-red-600';
+        const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+        
+        toast.className = `toast-item flex items-center gap-3 ${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl min-w-[300px] pointer-events-auto`;
+        toast.innerHTML = `
+            <i data-lucide="${icon}" class="w-5 h-5 text-blue-200"></i>
+            <div class="flex-1">
+                <p class="text-xs font-black uppercase tracking-widest opacity-70">${type === 'success' ? 'Berhasil' : 'Error'}</p>
+                <p class="text-sm font-bold">${message}</p>
+            </div>
+            <button class="opacity-50 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        `;
+        
+        container.appendChild(toast);
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.5s ease-in';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
     // Save logic
     document.getElementById('save-fmd').addEventListener('click', async () => {
-        const msg = document.getElementById('fmd-save-msg');
-        msg.textContent = 'Menyimpan...'; msg.className = 'text-xs font-bold text-gray-400 ml-2';
+        const btn = document.getElementById('save-fmd');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+        btn.disabled = true;
+        lucide.createIcons();
         
         // Mock save
         setTimeout(() => {
-            msg.textContent = 'Tersimpan'; msg.className = 'text-xs font-bold text-green-500 ml-2';
-            setTimeout(() => msg.textContent='', 2000);
+            showToast('Berhasil menyimpan data FMD');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
+        }, 800);
+    });
+    
+    // Reset logic
+    document.getElementById('reset-fmd').addEventListener('click', async () => {
+        const confirmed = await showConfirm('Reset semua data FMD?');
+        if(!confirmed) return;
+        
+        const btn = document.getElementById('reset-fmd');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Reset...';
+        btn.disabled = true;
+        lucide.createIcons();
+        
+        // Mock reset
+        setTimeout(() => {
+            showToast('Berhasil reset data FMD', 'success');
+            setTimeout(() => window.location.reload(), 1000);
         }, 800);
     });
 </script>
