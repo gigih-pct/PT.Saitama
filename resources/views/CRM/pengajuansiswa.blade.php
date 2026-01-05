@@ -67,12 +67,12 @@
                     </button>
                     
                     <!-- Reject -->
-                    <button class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm group/btn active:scale-90">
+                    <button class="w-12 h-12 rounded-2xl bg-[#D85B63] text-white flex items-center justify-center hover:bg-red-600 hover:rotate-12 transition-all shadow-lg shadow-red-900/10 active:scale-90">
                         <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
 
                     <!-- Accept -->
-                    <button class="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-all shadow-sm group/btn active:scale-90">
+                    <button class="w-12 h-12 rounded-2xl bg-[#22C55E] text-white flex items-center justify-center hover:bg-green-600 hover:rotate-12 transition-all shadow-lg shadow-green-900/10 active:scale-90">
                         <i data-lucide="check" class="w-6 h-6"></i>
                     </button>
 

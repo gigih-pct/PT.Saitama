@@ -1,7 +1,5 @@
 @extends('layouts.header_dashboard_sensei')
 
-@section('title', 'Evaluasi Siswa')
-
 @section('content')
 @php
     $studentsList = $students ?? [];
@@ -74,7 +72,7 @@
 
             <!-- Table Container -->
             <div class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden flex-1 shadow-sm relative">
-                <div class="overflow-x-auto max-h-[600px] overflow-y-auto" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;" x-init="$watch('searchSiswa', () => $nextTick(() => lucide.createIcons())); $watch('selectedClass', () => $nextTick(() => lucide.createIcons())); $watch('perPage', () => $nextTick(() => lucide.createIcons())); lucide.createIcons();">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
@@ -110,8 +108,8 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-5 text-center">
-                                        <a :href="'/sensei/evaluasi/siswa/' + student.id" class="inline-flex w-10 h-10 items-center justify-center rounded-xl bg-[#173A67] text-white shadow-lg shadow-blue-900/20 hover:bg-blue-900 active:scale-90 transition-all">
-                                            <i data-lucide="eye" class="w-5 h-5"></i>
+                                        <a :href="'/sensei/evaluasi/siswa/' + student.id" class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
+                                            <i data-lucide="eye" class="w-6 h-6"></i>
                                         </a>
                                     </td>
                                 </tr>

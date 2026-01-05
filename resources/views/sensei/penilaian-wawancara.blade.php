@@ -105,8 +105,11 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-white">
-                            @forelse($users as $idx => $user)
-                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-materi">
+                            @forelse($students as $idx => $user)
+                            @php
+                                $saved = $savedScores[$user->id] ?? null;
+                            @endphp
+                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-materi" data-id="{{ $user->id }}">
                                 <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
@@ -119,27 +122,38 @@
                                                value="{{ $user->name }}" readonly>
                                     </div>
                                 </td>
-                                @for($j=1; $j<=4; $j++)
+                                @php
+                                    $materiFields = ['program', 'umum', 'jepang', 'indo'];
+                                @endphp
+                                @foreach($materiFields as $field)
                                 <td class="px-2 py-4 text-center">
-                                    <select class="w-16 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold py-2 focus:ring-2 focus:ring-blue-500 text-center materi-select" data-row="{{ $idx }}">
+                                    <select class="w-16 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold py-2 focus:ring-2 focus:ring-blue-500 text-center materi-select" data-id="{{ $user->id }}" data-field="{{ $field }}">
                                         <option value=""></option>
-                                        <option value="3">3</option>
-                                        <option value="2">2</option>
-                                        <option value="1">1</option>
+                                        <option value="3" {{ ($saved[$field] ?? '') == 3 ? 'selected' : '' }}>3</option>
+                                        <option value="2" {{ ($saved[$field] ?? '') == 2 ? 'selected' : '' }}>2</option>
+                                        <option value="1" {{ ($saved[$field] ?? '') == 1 ? 'selected' : '' }}>1</option>
                                     </select>
                                 </td>
-                                @endfor
+                                @endforeach
                                 <td class="px-4 py-4 text-center font-black text-[#173A67] bg-blue-50/50">
-                                    <span class="materi-sum" data-row="{{ $idx }}">-</span>
+                                    <span class="materi-sum" data-id="{{ $user->id }}">{{ $saved['sum'] ?? '-' }}</span>
                                 </td>
                                 <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50/50">
-                                    <span class="materi-percent" data-row="{{ $idx }}">-</span>
+                                    <span class="materi-percent" data-id="{{ $user->id }}">{{ isset($saved['percent']) ? round($saved['percent']) . '%' : '-' }}</span>
                                 </td>
                                 <td class="px-4 py-4 text-center text-xs font-bold bg-blue-50/50">
-                                    <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-500 materi-ket" data-row="{{ $idx }}">-</span>
+                                    @php
+                                        $p = $saved['percent'] ?? 0;
+                                        $ket = '-'; $cls = 'bg-gray-200 text-gray-500';
+                                        if($p >= 90) { $ket = 'Sangat Menguasai'; $cls = 'bg-green-100 text-green-700'; }
+                                        elseif($p >= 80) { $ket = 'Menguasai'; $cls = 'bg-blue-100 text-blue-700'; }
+                                        elseif($p >= 70) { $ket = 'Cukup'; $cls = 'bg-yellow-100 text-yellow-700'; }
+                                        elseif($p > 0) { $ket = 'Kurang'; $cls = 'bg-red-100 text-red-700'; }
+                                    @endphp
+                                    <span class="px-3 py-1 rounded-full font-bold materi-ket {{ $cls }}" data-id="{{ $user->id }}">{{ $ket }}</span>
                                 </td>
                                 <td class="px-4 py-4">
-                                     <input type="text" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 text-gray-600 materi-note" placeholder="Tulis catatan...">
+                                     <input type="text" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 text-gray-600 materi-note" data-id="{{ $user->id }}" placeholder="Tulis catatan..." value="{{ $saved['note'] ?? '' }}">
                                 </td>
                             </tr>
                             @empty
@@ -168,8 +182,11 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-white">
-                            @forelse($users as $idx => $user)
-                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-sikap">
+                            @forelse($students as $idx => $user)
+                            @php
+                                $saved = $savedScores[$user->id] ?? null;
+                            @endphp
+                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-sikap" data-id="{{ $user->id }}">
                                 <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
@@ -182,27 +199,38 @@
                                                value="{{ $user->name }}" readonly>
                                     </div>
                                 </td>
-                                @for($j=1; $j<=3; $j++)
+                                @php
+                                    $sikapFields = ['cara_duduk', 'suara', 'fokus'];
+                                @endphp
+                                @foreach($sikapFields as $field)
                                 <td class="px-2 py-4 text-center">
-                                    <select class="w-16 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold py-2 focus:ring-2 focus:ring-blue-500 text-center sikap-select" data-row="{{ $idx }}">
+                                    <select class="w-16 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold py-2 focus:ring-2 focus:ring-blue-500 text-center sikap-select" data-id="{{ $user->id }}" data-field="{{ $field }}">
                                         <option value=""></option>
-                                        <option value="3">3</option>
-                                        <option value="2">2</option>
-                                        <option value="1">1</option>
+                                        <option value="3" {{ ($saved[$field] ?? '') == 3 ? 'selected' : '' }}>3</option>
+                                        <option value="2" {{ ($saved[$field] ?? '') == 2 ? 'selected' : '' }}>2</option>
+                                        <option value="1" {{ ($saved[$field] ?? '') == 1 ? 'selected' : '' }}>1</option>
                                     </select>
                                 </td>
-                                @endfor
+                                @endforeach
                                 <td class="px-4 py-4 text-center font-black text-[#173A67] bg-blue-50/50">
-                                    <span class="sikap-sum" data-row="{{ $idx }}">-</span>
+                                    <span class="sikap-sum" data-id="{{ $user->id }}">{{ $saved['sum_sikap'] ?? '-' }}</span>
                                 </td>
                                 <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50/50">
-                                    <span class="sikap-percent" data-row="{{ $idx }}">-</span>
+                                    <span class="sikap-percent" data-id="{{ $user->id }}">{{ isset($saved['percent_sikap']) ? round($saved['percent_sikap']) . '%' : '-' }}</span>
                                 </td>
                                 <td class="px-4 py-4 text-center text-xs font-bold bg-blue-50/50">
-                                    <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-500 sikap-ket" data-row="{{ $idx }}">-</span>
+                                    @php
+                                        $p = $saved['percent_sikap'] ?? 0;
+                                        $ket = '-'; $cls = 'bg-gray-200 text-gray-500';
+                                        if($p >= 90) { $ket = 'Sangat Menguasai'; $cls = 'bg-green-100 text-green-700'; }
+                                        elseif($p >= 80) { $ket = 'Menguasai'; $cls = 'bg-blue-100 text-blue-700'; }
+                                        elseif($p >= 70) { $ket = 'Cukup'; $cls = 'bg-yellow-100 text-yellow-700'; }
+                                        elseif($p > 0) { $ket = 'Kurang'; $cls = 'bg-red-100 text-red-700'; }
+                                    @endphp
+                                    <span class="px-3 py-1 rounded-full font-bold sikap-ket {{ $cls }}" data-id="{{ $user->id }}">{{ $ket }}</span>
                                 </td>
                                 <td class="px-4 py-4">
-                                     <input type="text" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 text-gray-600 sikap-note" placeholder="Tulis catatan...">
+                                     <input type="text" class="w-full bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:ring-0 text-xs py-1 text-gray-600 sikap-note" data-id="{{ $user->id }}" placeholder="Tulis catatan..." value="{{ $saved['note_sikap'] ?? '' }}">
                                 </td>
                             </tr>
                             @empty
@@ -356,9 +384,9 @@
     }
 
     // Logic perhitungan otomatis
-    function updateRowWawancara(rowIdx, type) {
+    function updateRowWawancara(id, type = 'materi') {
         const selector = type === 'materi' ? '.materi-select' : '.sikap-select';
-        const inputs = document.querySelectorAll(`${selector}[data-row="${rowIdx}"]`);
+        const inputs = document.querySelectorAll(`${selector}[data-id="${id}"]`);
         let sum = 0;
         let count = 0;
         
@@ -369,54 +397,96 @@
             }
         });
 
-        // Max possible score: Materi (4 items * 3 = 12), Sikap (3 items * 3 = 9)
         const maxScore = type === 'materi' ? 12 : 9;
-        const percent = Math.round((sum / maxScore) * 100);
+        const percent = count > 0 ? Math.round((sum / maxScore) * 100) : 0;
 
         if(count === 0) {
-             document.querySelector(`.${type}-sum[data-row="${rowIdx}"]`).textContent = '-';
-             document.querySelector(`.${type}-percent[data-row="${rowIdx}"]`).textContent = '-';
-             document.querySelector(`.${type}-ket[data-row="${rowIdx}"]`).textContent = '-';
-             document.querySelector(`.${type}-ket[data-row="${rowIdx}"]`).className = 'px-3 py-1 rounded-full bg-gray-200 text-gray-500 '+type+'-ket';
+             document.querySelector(`.${type}-sum[data-id="${id}"]`).textContent = '-';
+             document.querySelector(`.${type}-percent[data-id="${id}"]`).textContent = '-';
+             document.querySelector(`.${type}-ket[data-id="${id}"]`).textContent = '-';
+             document.querySelector(`.${type}-ket[data-id="${id}"]`).className = `px-3 py-1 rounded-full bg-gray-200 text-gray-500 font-bold ${type}-ket`;
              return;
         }
 
-        document.querySelector(`.${type}-sum[data-row="${rowIdx}"]`).textContent = sum;
+        document.querySelector(`.${type}-sum[data-id="${id}"]`).textContent = sum;
         
-        const pctEl = document.querySelector(`.${type}-percent[data-row="${rowIdx}"]`);
+        const pctEl = document.querySelector(`.${type}-percent[data-id="${id}"]`);
         pctEl.textContent = percent + '%';
         
         // Keterangan Style
-        const ketEl = document.querySelector(`.${type}-ket[data-row="${rowIdx}"]`);
+        const ketEl = document.querySelector(`.${type}-ket[data-id="${id}"]`);
         if(percent >= 90) {
             ketEl.textContent = 'Sangat Menguasai';
-            ketEl.className = 'px-3 py-1 rounded-full bg-green-100 text-green-700 font-bold '+type+'-ket';
+            ketEl.className = `px-3 py-1 rounded-full bg-green-100 text-green-700 font-bold ${type}-ket`;
         } else if(percent >= 80) {
              ketEl.textContent = 'Menguasai';
-             ketEl.className = 'px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold '+type+'-ket';
+             ketEl.className = `px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold ${type}-ket`;
         } else if(percent >= 70) {
              ketEl.textContent = 'Cukup';
-             ketEl.className = 'px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold '+type+'-ket';
+             ketEl.className = `px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 font-bold ${type}-ket`;
         } else {
              ketEl.textContent = 'Kurang';
-             ketEl.className = 'px-3 py-1 rounded-full bg-red-100 text-red-700 font-bold '+type+'-ket';
+             ketEl.className = `px-3 py-1 rounded-full bg-red-100 text-red-700 font-bold ${type}-ket`;
         }
     }
 
     // Bind events
-    document.querySelectorAll('select').forEach(sel => {
+    document.querySelectorAll('.materi-select').forEach(sel => {
         sel.addEventListener('change', function() {
-            const row = this.dataset.row;
-            if(this.classList.contains('materi-select')) updateRowWawancara(row, 'materi');
-            if(this.classList.contains('sikap-select')) updateRowWawancara(row, 'sikap');
+            const id = this.dataset.id;
+            updateRowWawancara(id, 'materi');
         });
     });
+
+    document.querySelectorAll('.sikap-select').forEach(sel => {
+        sel.addEventListener('change', function() {
+            const id = this.dataset.id;
+            updateRowWawancara(id, 'sikap');
+        });
+    });
+
+    // getPayload
+    function getPayload() {
+        const payload = [];
+        const studentIds = [...new Set([...document.querySelectorAll('.student-row-materi'), ...document.querySelectorAll('.student-row-sikap')].map(r => r.dataset.id))];
+        
+        studentIds.forEach(id => {
+            const materiRow = document.querySelector(`.student-row-materi[data-id="${id}"]`);
+            const sikapRow = document.querySelector(`.student-row-sikap[data-id="${id}"]`);
+            
+            const program = materiRow.querySelector('.materi-select[data-field="program"]').value;
+            const umum = materiRow.querySelector('.materi-select[data-field="umum"]').value;
+            const jepang = materiRow.querySelector('.materi-select[data-field="jepang"]').value;
+            const indo = materiRow.querySelector('.materi-select[data-field="indo"]').value;
+            const note = materiRow.querySelector('.materi-note').value;
+
+            const cara_duduk = sikapRow.querySelector('.sikap-select[data-field="cara_duduk"]').value;
+            const suara = sikapRow.querySelector('.sikap-select[data-field="suara"]').value;
+            const fokus = sikapRow.querySelector('.sikap-select[data-field="fokus"]').value;
+            const note_sikap = sikapRow.querySelector('.sikap-note').value;
+
+            if (program || umum || jepang || indo || note || cara_duduk || suara || fokus || note_sikap) {
+                payload.push({
+                    id: id,
+                    program: program || 0,
+                    umum: umum || 0,
+                    jepang: jepang || 0,
+                    indo: indo || 0,
+                    note: note,
+                    cara_duduk: cara_duduk || 0,
+                    suara: suara || 0,
+                    fokus: fokus || 0,
+                    note_sikap: note_sikap
+                });
+            }
+        });
+        return payload;
+    }
 
     // Custom Confirm Modal
     function showConfirm(message) {
         return new Promise((resolve) => {
             const modal = document.getElementById('confirm-modal');
-            const content = document.getElementById('confirm-modal-content');
             const messageEl = document.getElementById('confirm-message');
             const okBtn = document.getElementById('confirm-ok');
             const cancelBtn = document.getElementById('confirm-cancel');
@@ -485,24 +555,47 @@
     }
 
     // Save
-    document.getElementById('save-btn').addEventListener('click', () => {
+    document.getElementById('save-btn').addEventListener('click', async () => {
+        const students = getPayload();
+        if (students.length === 0) {
+            showToast('Tidak ada data untuk disimpan', 'error');
+            return;
+        }
+
         const btn = document.getElementById('save-btn');
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
         btn.disabled = true;
         lucide.createIcons();
         
-        setTimeout(() => {
-            showToast(`Berhasil menyimpan penilaian wawancara (${activeMode})`);
+        try {
+            const response = await fetch("{{ route('sensei.penilaian.wawancara.save') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ students })
+            });
+            const res = await response.json();
+            if (res.success) {
+                showToast('Berhasil menyimpan penilaian wawancara');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast(res.message || 'Gagal menyimpan', 'error');
+            }
+        } catch (e) {
+            showToast('Terjadi kesalahan server', 'error');
+        } finally {
             btn.innerHTML = originalHtml;
             btn.disabled = false;
             lucide.createIcons();
-        }, 1000);
+        }
     });
     
     // Reset
     document.getElementById('reset-btn').addEventListener('click', async () => {
-        const confirmed = await showConfirm(`Reset semua data penilaian wawancara (${activeMode})?`);
+        const confirmed = await showConfirm('Reset semua data penilaian wawancara di kelas ini?');
         if(!confirmed) return;
         
         const btn = document.getElementById('reset-btn');
@@ -511,10 +604,28 @@
         btn.disabled = true;
         lucide.createIcons();
         
-        setTimeout(() => {
-            showToast('Berhasil reset data wawancara', 'success');
-            setTimeout(() => window.location.reload(), 1000);
-        }, 1000);
+        try {
+            const response = await fetch("{{ route('sensei.penilaian.wawancara.reset') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            const res = await response.json();
+            if (res.success) {
+                showToast('Berhasil reset data wawancara', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast(res.message || 'Gagal reset', 'error');
+            }
+        } catch (e) {
+            showToast('Terjadi kesalahan server', 'error');
+        } finally {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
+        }
     });
 
 </script>

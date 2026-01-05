@@ -125,9 +125,9 @@
                         <tbody class="divide-y divide-gray-100 bg-white">
                             @forelse($users as $idx => $user)
                                 @php
-                                    $savedRow = isset($rows[$idx]) ? $rows[$idx] : [];
+                                    $savedRow = $rows[$user->id] ?? [];
                                     $savedStatuses = [];
-                                    $savedPhone = $user->phone ?? '-';
+                                    $savedPhone = $user->no_wa_pribadi ?? '-';
                                     
                                     if(is_array($savedRow)) {
                                         if(isset($savedRow['statuses'])) {
@@ -140,7 +140,7 @@
                                     }
                                     $savedStatuses = array_pad($savedStatuses, $daysCount, '');
 @endphp
-                                <tr class="group hover:bg-blue-50/30 transition-colors student-row">
+                                <tr class="group hover:bg-blue-50/30 transition-colors student-row" data-id="{{ $user->id }}">
                                     <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                         {{ $idx + 1 }}
                                     </td>
@@ -512,12 +512,13 @@
         saveBtn.addEventListener('click', async () => {
             const payload = [];
             document.querySelectorAll('tr.student-row').forEach(tr => {
-                const name = tr.querySelector('.name-input').value;
+                const id = tr.dataset.id;
                 const phone = tr.querySelector('.phone-input').value;
                 const statuses = [];
                 tr.querySelectorAll('.attendance-btn').forEach(b => statuses.push(b.dataset.status || ''));
-                if(name) payload.push({ name, phone, statuses });
+                if(id) payload.push({ id, phone, statuses });
             });
+
 
             if(!payload.length) {
                 showToast('Tidak ada data untuk disimpan', 'error');

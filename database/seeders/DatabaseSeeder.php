@@ -30,6 +30,10 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\KanjiAssessmentSeeder::class,
             \Database\Seeders\KotobaAssessmentSeeder::class,
             \Database\Seeders\BunpouAssessmentSeeder::class,
+            \Database\Seeders\WawancaraAssessmentSeeder::class,
+            \Database\Seeders\FinalAssessmentSeeder::class,
+            \Database\Seeders\FmdAssessmentSeeder::class,
+            \Database\Seeders\PresensiAssessmentSeeder::class,
         ]);
     }
 }

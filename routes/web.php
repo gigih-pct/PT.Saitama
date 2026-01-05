@@ -49,8 +49,8 @@ Route::middleware(['auth'])
 
 
         // Save/Reset presensi using Controller
-        Route::post('/penilaian-kelas/preensi-siswa/save', [PenilaianController::class, 'savePresensi'])->name('penilaian.presensi.save');
-        Route::post('/penilaian-kelas/preensi-siswa/reset', [PenilaianController::class, 'resetPresensi'])->name('penilaian.presensi.reset');
+        Route::post('/penilaian-kelas/presensi/save', [PenilaianController::class, 'savePresensi'])->name('penilaian.presensi.save');
+        Route::post('/penilaian-kelas/presensi/reset', [PenilaianController::class, 'resetPresensi'])->name('penilaian.presensi.reset');
 
 
         // Support both /penilaian-kelas and /penilaian-kelas/kanji for Kanji page
@@ -73,163 +73,20 @@ Route::middleware(['auth'])
 
 
         // Wawancara save/reset
-        Route::post('/penilaian-kelas/wawancara/save', function (Request $request) {
-            try {
-                $students = $request->input('students', []);
-                if(!is_array($students) || count($students) === 0) {
-                    return response()->json(['success' => false, 'message' => 'Tidak ada data siswa untuk disimpan.'], 422);
-                }
-
-                $clean = [];
-                $return = [];
-                foreach ($students as $s) {
-                    $rowIdx = isset($s['row']) ? intval($s['row']) : null;
-                    $program = isset($s['program']) ? intval($s['program']) : 0;
-                    $umum = isset($s['umum']) ? intval($s['umum']) : 0;
-                    $jepang = isset($s['jepang']) ? intval($s['jepang']) : 0;
-                    $indo = isset($s['indo']) ? intval($s['indo']) : 0;
-                    $note = trim($s['note'] ?? '');
-                    $sum = $program + $umum + $jepang + $indo;
-                    $percent = $sum ? round(($sum / 12) * 100, 2) : 0;
-                    if($program === 0 && $umum === 0 && $jepang === 0 && $indo === 0 && $note === '') continue;
-                    $clean[] = ['row' => $rowIdx, 'program'=>$program,'umum'=>$umum,'jepang'=>$jepang,'indo'=>$indo,'sum'=>$sum,'percent'=>$percent,'note'=>$note];
-                    $return[] = ['row' => $rowIdx, 'program'=>$program,'umum'=>$umum,'jepang'=>$jepang,'indo'=>$indo,'sum'=>$sum,'percent'=>$percent,'note'=>$note];
-                }
-
-                session(['penilaian_wawancara_bab_1' => $clean]);
-
-                $total = count($clean);
-                $lulus = 0;
-                foreach ($clean as $c) { if (($c['percent'] ?? 0) >= 75) $lulus++; }
-                $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
-                $summary = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent];
-                session(['penilaian_wawancara_summary_bab_1' => $summary]);
-
-                return response()->json(['success'=>true,'saved'=>$total,'summary'=>$summary,'students'=>$return]);
-            } catch (\Throwable $e) {
-                logger()->error('Wawancara save failed: ' . $e->getMessage(), ['exception' => $e]);
-                return response()->json(['success'=>false,'message'=>'Server error saat menyimpan.','error'=>config('app.debug') ? $e->getMessage() : null], 500);
-            }
-        })->name('penilaian.wawancara.save');
-
-        Route::post('/penilaian-kelas/wawancara/reset', function (Request $request) {
-            try {
-                session()->forget('penilaian_wawancara_bab_1');
-                session()->forget('penilaian_wawancara_summary_bab_1');
-                return response()->json(['success' => true]);
-            } catch (\Throwable $e) {
-                logger()->error('Wawancara reset failed: ' . $e->getMessage(), ['exception' => $e]);
-                return response()->json(['success' => false, 'message' => 'Server error saat reset.'], 500);
-            }
-        })->name('penilaian.wawancara.reset');
+        Route::post('/penilaian-kelas/wawancara/save', [PenilaianController::class, 'saveWawancara'])->name('penilaian.wawancara.save');
+        Route::post('/penilaian-kelas/wawancara/reset', [PenilaianController::class, 'resetWawancara'])->name('penilaian.wawancara.reset');
 
         // Kotoba save/reset routes (per-bab)
         Route::post('/penilaian-kelas/kotoba/save', [PenilaianController::class, 'saveKotoba'])->name('penilaian.kotoba.save');
         Route::post('/penilaian-kelas/kotoba/reset', [PenilaianController::class, 'resetKotoba'])->name('penilaian.kotoba.reset');
 
+        // FMD save/reset routes
+        Route::post('/penilaian-kelas/fmd/save', [PenilaianController::class, 'saveFmd'])->name('penilaian.fmd.save');
+        Route::post('/penilaian-kelas/fmd/reset', [PenilaianController::class, 'resetFmd'])->name('penilaian.fmd.reset');
+
         // Nilai Akhir save/reset routes
-        Route::post('/penilaian-kelas/nilai-akhir/save', function (Request $request) {
-            try {
-                $students = $request->input('students', []);
-
-                if(!is_array($students) || count($students) === 0) {
-                    return response()->json(['success' => false, 'message' => 'Tidak ada data siswa untuk disimpan.'], 422);
-                }
-
-                $clean = [];
-                $return = [];
-                
-                // Helper function to calculate grade
-                $calculateGrade = function($nilai) {
-                    $nilai = (int)$nilai;
-                    if ($nilai >= 90) return 'A';
-                    if ($nilai >= 85) return 'B+';
-                    if ($nilai >= 80) return 'B';
-                    if ($nilai >= 75) return 'C+';
-                    if ($nilai >= 10) return 'C';
-                    return 'TU';
-                };
-                
-                foreach ($students as $s) {
-                    $name = trim($s['name'] ?? '');
-                    
-                    // Collect all nilai subjects
-                    $subjects = ['hiragana', 'katakana', 'bunpou', 'kerja', 'sifat', 'benda', 'terjemah', 'dengar', 'bicara'];
-                    $nilaiValues = [];
-                    $gradeValues = [];
-                    $hasContent = $name !== '';
-                    
-                    foreach ($subjects as $subject) {
-                        $value = intval($s[$subject] ?? 0);
-                        $value = max(0, min($value, 100));
-                        $nilaiValues[$subject] = $value;
-                        // Calculate grade untuk setiap subject
-                        $gradeValues["grade_$subject"] = $value === 0 ? '-' : $calculateGrade($value);
-                        if ($value > 0) $hasContent = true;
-                    }
-                    
-                    // Also include sikap and kehadiran
-                    $sikap = trim($s['sikap'] ?? '');
-                    $kehadiran = intval($s['kehadiran'] ?? 0);
-                    if ($sikap || $kehadiran) $hasContent = true;
-                    
-                    if (!$hasContent) continue; // skip empty rows
-                    
-                    // Calculate rata-rata
-                    $sum = array_sum($nilaiValues);
-                    $count = count(array_filter($nilaiValues));
-                    $rataRata = $count > 0 ? $sum / $count : 0;
-                    
-                    // Calculate grade akhir using formula
-                    $grade = 'TU';
-                    if ($rataRata >= 90) $grade = 'A';
-                    elseif ($rataRata >= 85) $grade = 'B+';
-                    elseif ($rataRata >= 80) $grade = 'B';
-                    elseif ($rataRata >= 75) $grade = 'C+';
-                    elseif ($rataRata >= 10) $grade = 'C';
-                    
-                    $rowData = array_merge(['name' => $name], $nilaiValues, $gradeValues, [
-                        'sikap' => $sikap,
-                        'kehadiran' => $kehadiran,
-                        'rata_rata' => round($rataRata, 2),
-                        'grade' => $grade
-                    ]);
-                    
-                    $clean[] = $rowData;
-                    $return[] = array_merge($rowData, ['row' => intval($s['row'] ?? 0)]);
-                }
-
-                session(['penilaian_nilai_akhir' => $clean]);
-
-                // summary
-                $total = count($clean);
-                $lulus = 0;
-                foreach ($clean as $c) { 
-                    if (($c['rata_rata'] ?? 0) >= 75) $lulus++; 
-                }
-                $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
-                $summary = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent];
-                session(['penilaian_nilai_akhir_summary' => $summary]);
-
-                return response()->json(['success' => true, 'saved' => $total, 'summary' => $summary, 'students' => $return]);
-            } catch (\Throwable $e) {
-                logger()->error('Nilai Akhir save failed: ' . $e->getMessage(), ['exception' => $e]);
-                $resp = ['success' => false, 'message' => 'Server error saat menyimpan.'];
-                if(config('app.debug')) { $resp['error'] = $e->getMessage(); }
-                return response()->json($resp, 500);
-            }
-        })->name('penilaian.nilai-akhir.save');
-
-        Route::post('/penilaian-kelas/nilai-akhir/reset', function (Request $request) {
-            try {
-                session()->forget('penilaian_nilai_akhir');
-                session()->forget('penilaian_nilai_akhir_summary');
-                return response()->json(['success' => true]);
-            } catch (\Throwable $e) {
-                logger()->error('Nilai Akhir reset failed: ' . $e->getMessage(), ['exception' => $e]);
-                return response()->json(['success' => false, 'message' => 'Server error saat reset.'], 500);
-            }
-        })->name('penilaian.nilai-akhir.reset');
+        Route::post('/penilaian-kelas/nilai-akhir/save', [PenilaianController::class, 'saveNilaiAkhir'])->name('penilaian.nilai-akhir.save');
+        Route::post('/penilaian-kelas/nilai-akhir/reset', [PenilaianController::class, 'resetNilaiAkhir'])->name('penilaian.nilai-akhir.reset');
 
 
         Route::get('/status-siswa', [PenilaianController::class, 'statusSiswa'])

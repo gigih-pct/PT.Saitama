@@ -216,7 +216,7 @@
                                 <!-- WhatsApp Popup -->
                                 <div class="relative" x-data="{ open: false }">
                                     <button @click="open = !open" @click.outside="open = false" 
-                                            class="p-2 rounded-lg text-gray-400 hover:text-[#25D366] hover:bg-green-50 transition-colors"
+                                            class="w-9 h-9 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 hover:rotate-12 transition-all shadow-lg shadow-green-500/20 active:scale-90"
                                             title="WhatsApp">
                                         <i data-lucide="message-circle" class="w-4 h-4"></i>
                                     </button>
@@ -280,7 +280,7 @@
                                 </div>
 
                                 <a href="{{ route('admin.siswa.edit', $student->id) }}" 
-                                   class="p-2 rounded-lg text-gray-400 hover:text-[#173A67] hover:bg-blue-50 transition-colors"
+                                   class="w-9 h-9 rounded-xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90"
                                    title="Edit Siswa">
                                     <i data-lucide="edit-2" class="w-4 h-4"></i>
                                 </a>
@@ -289,7 +289,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" 
-                                            class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                            class="w-9 h-9 rounded-xl bg-[#D85B63] text-white flex items-center justify-center hover:bg-red-600 hover:rotate-12 transition-all shadow-lg shadow-red-600/10 active:scale-90"
                                             title="Hapus Siswa">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>

@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\KanjiAssessment;
 use App\Models\KotobaAssessment;
+use App\Models\FmdAssessment;
+use App\Models\PresensiAssessment;
+use App\Models\FinalAssessment;
 
 class PenilaianController extends Controller
 {
@@ -247,6 +250,18 @@ class PenilaianController extends Controller
             $data['summary'] = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent];
         }
         
+        if ($type === 'fmd') {
+            $mode = $request->query('mode', 'mtk');
+            $data['mode'] = $mode;
+            
+            $assessments = FmdAssessment::whereIn('user_id', $students->pluck('id'))
+                ->where('type', $mode)
+                ->get()
+                ->keyBy('user_id');
+            
+            $data['savedScores'] = $assessments->toArray();
+        }
+
         if ($type === 'presensi') {
             $month = $request->query('month', date('n'));
             $year = $request->query('year', date('Y'));
@@ -258,18 +273,161 @@ class PenilaianController extends Controller
             $data['days'] = $days;
             $data['daysCount'] = $daysInMonth;
             
-            $sessionKey = "penilaian_presensi_{$year}_{$month}_kelas_{$selectedKelasId}";
-            $saved = session($sessionKey);
-            $data['savedScores'] = $saved ?? [];
+            $assessments = PresensiAssessment::whereIn('user_id', $students->pluck('id'))
+                ->where('month', $month)
+                ->where('year', $year)
+                ->get()
+                ->groupBy('user_id');
+
+            $formatted = [];
+            foreach ($students as $student) {
+                $userAss = $assessments->get($student->id, collect());
+                $statuses = array_fill(0, $daysInMonth, '');
+                foreach ($userAss as $ass) {
+                    if ($ass->day <= $daysInMonth) {
+                        $statuses[$ass->day - 1] = $ass->status;
+                    }
+                }
+                $formatted[$student->id] = [
+                    'name' => $student->name,
+                    'phone' => $userAss->first()->phone ?? $student->no_wa_pribadi ?? '-',
+                    'statuses' => $statuses
+                ];
+            }
             
-            $summaryKey = "penilaian_presensi_summary_{$year}_{$month}_kelas_{$selectedKelasId}";
-            $data['summary'] = session($summaryKey, ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0]);
+            $data['savedScores'] = $formatted;
             
-            $countsPerDayKey = "penilaian_presensi_counts_per_day_{$year}_{$month}_kelas_{$selectedKelasId}";
-            $data['counts_per_day'] = session($countsPerDayKey, []);
+            // Summary
+            $counts = ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0];
+            $perDay = [];
+            for ($d = 0; $d < $daysInMonth; $d++) {
+                $perDay[$d] = ['counts' => ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0], 'students' => []];
+            }
+
+            foreach ($formatted as $uId => $st) {
+                foreach ($st['statuses'] as $dayIdx => $s) {
+                    if (isset($counts[$s])) {
+                        $counts[$s]++;
+                        $perDay[$dayIdx]['counts'][$s]++;
+                    }
+                    $perDay[$dayIdx]['students'][] = ['name' => $st['name'], 'phone' => $st['phone'], 'status' => $s];
+                }
+            }
+
+            $data['summary'] = $counts;
+            $data['counts_per_day'] = $perDay;
+        }
+
+        if ($type === 'nilai-akhir') {
+            $assessments = FinalAssessment::whereIn('user_id', $students->pluck('id'))
+                ->get()
+                ->keyBy('user_id');
+            
+            $data['savedScores'] = $assessments->toArray();
+
+            // Summary
+            $total = $students->count();
+            $lulus = $assessments->filter(fn($a) => $a->rata_rata >= 75)->count();
+            $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
+            $data['summary_lolos'] = ['total' => $total, 'lulus' => $lulus, 'percent' => $percent];
+        }
+
+        if ($type === 'wawancara') {
+            $assessments = \App\Models\WawancaraAssessment::whereIn('user_id', $students->pluck('id'))
+                ->get()
+                ->keyBy('user_id');
+            
+            $data['savedScores'] = $assessments->toArray();
+
+            // Calculate summary
+            $total = $students->count();
+            $lulusCount = $assessments->filter(fn($a) => $a->percent >= 75)->count();
+            $percent = $total ? round(($lulusCount / $total) * 100, 2) : 0;
+            
+            $data['summary'] = ['total' => $total, 'lulus' => $lulusCount, 'percent' => $percent];
         }
 
         return view($viewName, $data);
+    }
+
+    public function saveWawancara(Request $request)
+    {
+        try {
+            $students = $request->input('students', []);
+            if (!is_array($students) || count($students) === 0) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada data siswa untuk disimpan.'], 422);
+            }
+
+            DB::beginTransaction();
+            foreach ($students as $s) {
+                $userId = $s['id'] ?? null;
+                if (!$userId) continue;
+
+                $program = isset($s['program']) ? intval($s['program']) : 0;
+                $umum = isset($s['umum']) ? intval($s['umum']) : 0;
+                $jepang = isset($s['jepang']) ? intval($s['jepang']) : 0;
+                $indo = isset($s['indo']) ? intval($s['indo']) : 0;
+                $note = trim($s['note'] ?? '');
+                $sum = $program + $umum + $jepang + $indo;
+                $percent = $sum ? round(($sum / 12) * 100, 2) : 0;
+
+                // Sikap fields
+                $cara_duduk = isset($s['cara_duduk']) ? intval($s['cara_duduk']) : 0;
+                $suara = isset($s['suara']) ? intval($s['suara']) : 0;
+                $fokus = isset($s['fokus']) ? intval($s['fokus']) : 0;
+                $note_sikap = trim($s['note_sikap'] ?? '');
+                $sum_sikap = $cara_duduk + $suara + $fokus;
+                $percent_sikap = $sum_sikap ? round(($sum_sikap / 9) * 100, 2) : 0;
+
+                \App\Models\WawancaraAssessment::updateOrCreate(
+                    ['user_id' => $userId],
+                    [
+                        'program' => $program,
+                        'umum' => $umum,
+                        'jepang' => $jepang,
+                        'indo' => $indo,
+                        'sum' => $sum,
+                        'percent' => $percent,
+                        'note' => $note,
+                        'cara_duduk' => $cara_duduk,
+                        'suara' => $suara,
+                        'fokus' => $fokus,
+                        'sum_sikap' => $sum_sikap,
+                        'percent_sikap' => $percent_sikap,
+                        'note_sikap' => $note_sikap,
+                        'date' => Carbon::now(),
+                    ]
+                );
+            }
+            DB::commit();
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            logger()->error('Wawancara save failed: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Server error saat menyimpan.'], 500);
+        }
+    }
+
+    public function resetWawancara(Request $request)
+    {
+        try {
+            $selectedKelasId = session('selected_kelas_id');
+            if (!$selectedKelasId) {
+                return response()->json(['success' => false, 'message' => 'Kelas tidak terdeteksi.'], 400);
+            }
+
+            $studentIds = User::where('role', 'siswa')
+                ->where('kelas_id', $selectedKelasId)
+                ->pluck('id');
+
+            \App\Models\WawancaraAssessment::whereIn('user_id', $studentIds)->delete();
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            logger()->error('Wawancara reset failed: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Server error saat reset.'], 500);
+        }
     }
 
     public function saveKanji(Request $request)
@@ -567,65 +725,38 @@ class PenilaianController extends Controller
     {
         try {
             $students = $request->input('students', []);
-            $month = $request->input('month', date('n'));
-            $year = $request->input('year', date('Y'));
+            $month = intval($request->input('month', date('n')));
+            $year = intval($request->input('year', date('Y')));
             $selectedKelasId = session('selected_kelas_id');
             
             if (!$selectedKelasId) {
                 return response()->json(['success' => false, 'message' => 'Kelas tidak terdeteksi.'], 400);
             }
 
-            $daysInMonth = Carbon::create($year, $month)->daysInMonth;
-            $allowed = ['H', 'A', 'S', 'I'];
-            $clean = [];
-
+            DB::beginTransaction();
             foreach ($students as $s) {
-                $name = trim($s['name'] ?? '');
-                if ($name === '') continue;
+                $userId = $s['id'] ?? null;
+                if (!$userId) continue;
+                
                 $phone = trim($s['phone'] ?? '');
-                $statuses = array_values($s['statuses'] ?? []);
-                $statuses = array_slice($statuses, 0, $daysInMonth);
-                $statuses = array_pad($statuses, $daysInMonth, '');
-                $statuses = array_map(function ($v) use ($allowed) {
-                    $c = strtoupper((string)($v ?? ''));
-                    return in_array($c, $allowed) ? $c : '';
-                }, $statuses);
+                $statuses = $s['statuses'] ?? [];
 
-                $clean[] = ['name' => $name, 'phone' => $phone, 'statuses' => $statuses];
-            }
+                foreach ($statuses as $dayIdx => $status) {
+                    $day = $dayIdx + 1;
+                    $status = strtoupper(trim($status));
+                    if (!in_array($status, ['H', 'A', 'S', 'I'])) $status = null;
 
-            $sessionKey = "penilaian_presensi_{$year}_{$month}_kelas_{$selectedKelasId}";
-            session([$sessionKey => $clean]);
-
-            $counts = ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0];
-            $perDay = [];
-            for ($d = 0; $d < $daysInMonth; $d++) {
-                $perDay[$d] = ['counts' => ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0], 'students' => []];
-            }
-
-            foreach ($clean as $st) {
-                foreach ($st['statuses'] as $idx => $s) {
-                    if (in_array($s, $allowed)) {
-                        $counts[$s]++;
-                        $perDay[$idx]['counts'][$s]++;
-                    }
-                    $perDay[$idx]['students'][] = ['name' => $st['name'], 'phone' => $st['phone'], 'status' => $s];
+                    PresensiAssessment::updateOrCreate(
+                        ['user_id' => $userId, 'day' => $day, 'month' => $month, 'year' => $year],
+                        ['status' => $status, 'phone' => $phone, 'date' => "{$year}-{$month}-{$day}"]
+                    );
                 }
             }
+            DB::commit();
 
-            $summaryKey = "penilaian_presensi_summary_{$year}_{$month}_kelas_{$selectedKelasId}";
-            session([$summaryKey => $counts]);
-
-            $countsPerDayKey = "penilaian_presensi_counts_per_day_{$year}_{$month}_kelas_{$selectedKelasId}";
-            session([$countsPerDayKey => $perDay]);
-
-            return response()->json([
-                'success' => true,
-                'saved' => count($clean),
-                'counts' => $counts,
-                'counts_per_day' => $perDay
-            ]);
+            return response()->json(['success' => true]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -633,21 +764,154 @@ class PenilaianController extends Controller
     public function resetPresensi(Request $request)
     {
         try {
-            $month = $request->input('month', date('n'));
-            $year = $request->input('year', date('Y'));
+            $month = intval($request->input('month', date('n')));
+            $year = intval($request->input('year', date('Y')));
             $selectedKelasId = session('selected_kelas_id');
 
             if (!$selectedKelasId) {
                 return response()->json(['success' => false, 'message' => 'Kelas tidak terdeteksi.'], 400);
             }
 
-            $sessionKey = "penilaian_presensi_{$year}_{$month}_kelas_{$selectedKelasId}";
-            $summaryKey = "penilaian_presensi_summary_{$year}_{$month}_kelas_{$selectedKelasId}";
-            $countsPerDayKey = "penilaian_presensi_counts_per_day_{$year}_{$month}_kelas_{$selectedKelasId}";
+            $studentIds = User::where('kelas_id', $selectedKelasId)->where('role', 'siswa')->pluck('id');
 
-            session()->forget($sessionKey);
-            session()->forget($summaryKey);
-            session()->forget($countsPerDayKey);
+            PresensiAssessment::whereIn('user_id', $studentIds)
+                ->where('month', $month)
+                ->where('year', $year)
+                ->delete();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function saveFmd(Request $request)
+    {
+        try {
+            $students = $request->input('students', []);
+            $mode = $request->input('mode', 'mtk');
+
+            DB::beginTransaction();
+            foreach ($students as $s) {
+                $userId = $s['id'] ?? null;
+                if (!$userId) continue;
+
+                $data = [
+                    'total_score' => 0,
+                    'date' => Carbon::now(),
+                ];
+
+                for ($w = 1; $w <= 5; $w++) {
+                    $val = $s["week{$w}_val"] ?? null;
+                    $ket = $s["week{$w}_ket"] ?? null;
+                    $score = intval($s["week{$w}_score"] ?? 0);
+                    
+                    $data["week{$w}_val"] = $val;
+                    $data["week{$w}_ket"] = $ket;
+                    $data["week{$w}_score"] = $score;
+                    $data['total_score'] += $score;
+                }
+
+                FmdAssessment::updateOrCreate(
+                    ['user_id' => $userId, 'type' => $mode],
+                    $data
+                );
+            }
+            DB::commit();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function resetFmd(Request $request)
+    {
+        try {
+            $mode = $request->input('mode', 'mtk');
+            $selectedKelasId = session('selected_kelas_id');
+
+            if (!$selectedKelasId) {
+                return response()->json(['success' => false, 'message' => 'Kelas tidak terdeteksi.'], 400);
+            }
+
+            $studentIds = User::where('kelas_id', $selectedKelasId)->where('role', 'siswa')->pluck('id');
+
+            FmdAssessment::whereIn('user_id', $studentIds)
+                ->where('type', $mode)
+                ->delete();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function saveNilaiAkhir(Request $request)
+    {
+        try {
+            $students = $request->input('students', []);
+
+            DB::beginTransaction();
+            foreach ($students as $s) {
+                $userId = $s['id'] ?? null;
+                if (!$userId) continue;
+
+                $subjects = ['hiragana', 'katakana', 'bunpou', 'kerja', 'sifat', 'benda', 'terjemah', 'dengar', 'bicara'];
+                $data = [];
+                $sum = 0;
+                $count = 0;
+
+                foreach ($subjects as $sub) {
+                    $val = isset($s[$sub]) ? intval($s[$sub]) : null;
+                    $data[$sub] = $val;
+                    if ($val !== null) {
+                        $sum += $val;
+                        $count++;
+                    }
+                }
+
+                $rataRata = $count > 0 ? $sum / $count : 0;
+                $grade = 'TU';
+                if ($rataRata >= 90) $grade = 'A';
+                elseif ($rataRata >= 85) $grade = 'B+';
+                elseif ($rataRata >= 80) $grade = 'B';
+                elseif ($rataRata >= 75) $grade = 'C+';
+                elseif ($rataRata >= 10) $grade = 'C';
+
+                $data['sikap'] = $s['sikap'] ?? null;
+                $data['kehadiran'] = isset($s['kehadiran']) ? floatval($s['kehadiran']) : 0;
+                $data['rata_rata'] = $rataRata;
+                $data['grade'] = $grade;
+                $data['date'] = Carbon::now();
+
+                FinalAssessment::updateOrCreate(
+                    ['user_id' => $userId],
+                    $data
+                );
+            }
+            DB::commit();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function resetNilaiAkhir(Request $request)
+    {
+        try {
+            $selectedKelasId = session('selected_kelas_id');
+
+            if (!$selectedKelasId) {
+                return response()->json(['success' => false, 'message' => 'Kelas tidak terdeteksi.'], 400);
+            }
+
+            $studentIds = User::where('kelas_id', $selectedKelasId)->where('role', 'siswa')->pluck('id');
+
+            FinalAssessment::whereIn('user_id', $studentIds)->delete();
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {

@@ -110,7 +110,8 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-white">
                          @forelse($users as $idx => $user)
-                            <tr class="group hover:bg-blue-50/30 transition-colors student-row">
+                            @php $saved = $savedScores[$user->id] ?? []; @endphp
+                            <tr class="group hover:bg-blue-50/30 transition-colors student-row" data-id="{{ $user->id }}">
                                 <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
@@ -127,7 +128,7 @@
                                 @foreach($weeks as $week)
                                 <td class="px-2 py-4 border-r border-gray-100 text-center">
                                     <input type="text" class="w-full text-center bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 py-1.5 val-input" 
-                                           data-week="{{ $week }}" placeholder="-">
+                                           data-week="{{ $week }}" placeholder="-" value="{{ $saved['week'.$week.'_val'] ?? '' }}">
                                 </td>
                                 <td class="px-2 py-4 border-r border-gray-100 text-center">
                                     <select class="w-full bg-gray-100 border border-gray-200 rounded-lg text-xs font-medium py-1.5 focus:ring-0 cursor-not-allowed ket-input appearance-none" data-week="{{ $week }}" disabled>
@@ -137,12 +138,12 @@
                                     </select>
                                 </td>
                                 <td class="px-2 py-4 border-r border-gray-100 text-center bg-gray-50/50">
-                                     <span class="text-xs font-black text-gray-400 score-display" data-week="{{ $week }}">0</span>
+                                     <span class="text-xs font-black text-gray-400 score-display" data-week="{{ $week }}">{{ $saved['week'.$week.'_score'] ?? 0 }}</span>
                                 </td>
                                 @endforeach
                                 
                                 <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50 sticky right-0">
-                                    <span class="total-score">0</span>
+                                    <span class="total-score">{{ $saved['total_score'] ?? 0 }}</span>
                                 </td>
                             </tr>
                         @empty
@@ -481,24 +482,49 @@
 
     // Save logic
     document.getElementById('save-fmd').addEventListener('click', async () => {
+        const payload = [];
+        document.querySelectorAll('.student-row').forEach(tr => {
+            const id = tr.dataset.id;
+            const data = { id: id };
+            for(let w=1; w<=5; w++) {
+                data['week'+w+'_val'] = tr.querySelector(`.val-input[data-week="${w}"]`).value;
+                data['week'+w+'_ket'] = tr.querySelector(`.ket-input[data-week="${w}"]`).value;
+                data['week'+w+'_score'] = tr.querySelector(`.score-display[data-week="${w}"]`).textContent;
+            }
+            payload.push(data);
+        });
+
         const btn = document.getElementById('save-fmd');
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
         btn.disabled = true;
         lucide.createIcons();
         
-        // Mock save
-        setTimeout(() => {
-            showToast('Berhasil menyimpan data FMD');
+        try {
+            const res = await fetch('{{ route('sensei.penilaian.fmd.save') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ mode: '{{ $mode }}', students: payload })
+            });
+            const data = await res.json();
+            if(data.success) {
+                showToast('Berhasil menyimpan data FMD');
+            } else {
+                showToast(data.message || 'Gagal menyimpan', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Terjadi kesalahan server', 'error');
+        } finally {
             btn.innerHTML = originalHtml;
             btn.disabled = false;
             lucide.createIcons();
-        }, 800);
+        }
     });
     
     // Reset logic
     document.getElementById('reset-fmd').addEventListener('click', async () => {
-        const confirmed = await showConfirm('Reset semua data FMD?');
+        const confirmed = await showConfirm('Reset semua data FMD ({{ strtoupper($mode) }})?');
         if(!confirmed) return;
         
         const btn = document.getElementById('reset-fmd');
@@ -507,11 +533,27 @@
         btn.disabled = true;
         lucide.createIcons();
         
-        // Mock reset
-        setTimeout(() => {
-            showToast('Berhasil reset data FMD', 'success');
-            setTimeout(() => window.location.reload(), 1000);
-        }, 800);
+        try {
+            const res = await fetch('{{ route('sensei.penilaian.fmd.reset') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ mode: '{{ $mode }}' })
+            });
+            const data = await res.json();
+            if(data.success) {
+                showToast('Berhasil reset data FMD', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast('Gagal reset', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Terjadi kesalahan', 'error');
+        } finally {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
+        }
     });
 </script>
 @endsection

@@ -17,7 +17,7 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <button class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
+                    <button class="bg-[#173A67] text-white px-5 py-2.5 rounded-xl text-xs font-black hover:bg-blue-900 hover:rotate-3 transition-all flex items-center gap-2 shadow-lg shadow-blue-900/10 uppercase tracking-widest active:scale-95">
                         <i data-lucide="download" class="w-4 h-4"></i> Export
                     </button>
                     <!-- <button class="bg-[#173A67] hover:bg-blue-900 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 shadow-lg shadow-blue-900/20">
@@ -100,7 +100,7 @@
         </div>
 
         <!-- LIST CONTENT -->
-        <div class="p-8 space-y-4 bg-[#F8FAFC]/50">
+        <div class="p-8 space-y-4 bg-[#F8FAFC]/50" x-init="$watch('searchSiswa', () => $nextTick(() => lucide.createIcons())); $watch('selectedStatus', () => $nextTick(() => lucide.createIcons())); $watch('selectedClass', () => $nextTick(() => lucide.createIcons())); $watch('perPage', () => $nextTick(() => lucide.createIcons())); lucide.createIcons();">
             <template x-for="(student, index) in filteredStudents()" :key="index">
                 <div class="bg-white border border-gray-100 rounded-[2rem] px-8 py-5 flex items-center justify-between gap-8 hover:shadow-xl hover:shadow-blue-900/5 transition-all group border-b-4 border-b-transparent hover:border-b-blue-100">
                     <!-- Student Info -->
@@ -115,12 +115,12 @@
                     </button>
                     
                     <!-- Contacts -->
-                    <div class="flex gap-3">
-                        <button @click="showContactModal = true; contactTitle = 'Kontak Siswa'; contactNumbers = student.contacts.siswa" class="bg-white border-2 border-green-100 text-green-600 text-[10px] font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2.5 hover:bg-green-500 hover:text-white hover:border-green-500 transition-all uppercase tracking-widest shadow-sm">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i> Siswa
+                    <div class="flex gap-2">
+                        <button @click="showContactModal = true; contactTitle = 'Kontak Siswa'; contactNumbers = student.contacts.siswa" class="w-9 h-9 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 hover:rotate-12 transition-all shadow-lg shadow-green-500/20 active:scale-90" title="Kontak Siswa">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i>
                         </button>
-                        <button @click="showContactModal = true; contactTitle = 'Kontak Orang Tua'; contactNumbers = student.contacts.ortu" class="bg-white border-2 border-red-100 text-[#D85B63] text-[10px] font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2.5 hover:bg-[#D85B63] hover:text-white hover:border-[#D85B63] transition-all uppercase tracking-widest shadow-sm">
-                            <i data-lucide="users" class="w-4 h-4"></i> Ortu
+                        <button @click="showContactModal = true; contactTitle = 'Kontak Orang Tua'; contactNumbers = student.contacts.ortu" class="w-9 h-9 rounded-xl bg-[#D85B63] text-white flex items-center justify-center hover:bg-red-600 hover:rotate-12 transition-all shadow-lg shadow-red-600/10 active:scale-90" title="Kontak Orang Tua">
+                            <i data-lucide="users" class="w-4 h-4"></i>
                         </button>
                     </div>
 

@@ -132,10 +132,8 @@
 
                 <!-- Edit Button -->
                  <div class="w-1/4 flex justify-end">
-                    <button class="bg-[#d95d5d] hover:bg-red-600 text-white p-2.5 rounded-full transition shadow-sm" title="Edit">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                        </svg>
+                    <button class="w-10 h-10 rounded-xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/10 active:scale-90" title="Edit">
+                        <i data-lucide="edit-3" class="w-5 h-5"></i>
                     </button>
                  </div>
             </div>

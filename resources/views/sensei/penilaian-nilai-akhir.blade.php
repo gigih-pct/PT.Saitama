@@ -120,7 +120,8 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-white">
                         @forelse($users as $idx => $user)
-                        <tr class="group hover:bg-blue-50/30 transition-colors student-row">
+                        @php $saved = $savedScores[$user->id] ?? []; @endphp
+                        <tr class="group hover:bg-blue-50/30 transition-colors student-row" data-id="{{ $user->id }}" data-row="{{ $idx }}">
                             <td class="px-4 py-3 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                 {{ $idx + 1 }}
                             </td>
@@ -137,7 +138,7 @@
                             @foreach($subjects as $subj)
                             <td class="px-1 py-2 border-r border-gray-50 text-center">
                                 <input type="number" min="0" max="100" class="w-12 text-center bg-gray-50 border border-gray-200 rounded text-xs font-bold focus:ring-1 focus:ring-blue-500 py-1 score-input" 
-                                       data-key="{{ $subj['key'] }}" data-row="{{ $idx }}" placeholder="-">
+                                       data-key="{{ $subj['key'] }}" data-row="{{ $idx }}" placeholder="-" value="{{ $saved[$subj['key']] ?? '' }}">
                             </td>
                             <td class="px-1 py-2 border-r border-gray-100 text-center bg-gray-50/30">
                                 <span class="text-[10px] font-black text-gray-400 grade-display" data-key="{{ $subj['key'] }}" data-row="{{ $idx }}">-</span>
@@ -145,19 +146,23 @@
                             @endforeach
 
                             <td class="px-1 py-2 border-r border-gray-100 text-center">
-                                <input type="text" maxlength="2" class="w-12 text-center bg-white border border-gray-200 rounded text-xs font-bold focus:ring-1 focus:ring-blue-500 py-1 uppercase" placeholder="-"
-                                value="A">
+                                <input type="text" maxlength="2" class="w-12 text-center bg-white border border-gray-200 rounded text-xs font-bold focus:ring-1 focus:ring-blue-500 py-1 uppercase sikap-input" placeholder="-"
+                                value="{{ $saved['sikap'] ?? '' }}">
                             </td>
                             
                              <td class="px-1 py-2 border-r border-gray-100 text-center">
-                                <span class="text-xs font-bold text-gray-600">100%</span>
+                                <div class="relative inline-block">
+                                    <input type="number" min="0" max="100" class="w-14 text-center bg-white border border-gray-200 rounded text-xs font-bold focus:ring-1 focus:ring-blue-500 py-1 hadir-input" 
+                                           value="{{ round(($saved['kehadiran'] ?? 1) * 100) }}">
+                                    <span class="absolute right-1 top-1.5 text-[10px] text-gray-400 font-bold pointer-events-none">%</span>
+                                </div>
                             </td>
 
                             <td class="px-4 py-3 text-center font-black text-[#173A67] bg-white group-hover:bg-blue-50/30 sticky right-16 z-10 border-l border-gray-100 shadow-[-4px_0_12px_-4px_rgba(0,0,0,0.05)]">
-                                <span class="final-avg" data-row="{{ $idx }}">-</span>
+                                <span class="final-avg" data-row="{{ $idx }}">{{ $saved['rata_rata'] ?? '-' }}</span>
                             </td>
                             <td class="px-4 py-3 text-center font-black bg-white group-hover:bg-blue-50/30 sticky right-0 z-10 border-l border-gray-100 text-white">
-                                <span class="px-2 py-1 rounded-lg bg-gray-400 text-[10px] final-grade" data-row="{{ $idx }}">-</span>
+                                <span class="px-2 py-1 rounded-lg bg-gray-400 text-[10px] final-grade" data-row="{{ $idx }}">{{ $saved['grade'] ?? '-' }}</span>
                             </td>
                         </tr>
                         @empty
@@ -172,33 +177,41 @@
         <!-- RIGHT SIDEBAR: SUMMARY TABLES -->
         <div class="col-span-12 lg:col-span-3 space-y-6">
             
-            <!-- Table Kesimpulan 1 (Grades) -->
+            <!-- Table Kesimpulan 1 (Grading Scale) -->
             <div class="bg-gray-100 rounded-[2rem] p-6 border border-gray-200 shadow-sm">
-                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest">Tabel Kesimpulan</h4>
+                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest text-center">Standar Nilai</h4>
                 <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
-                    <table class="w-full text-xs border-collapse">
+                    <table class="w-full text-[11px] border-collapse">
                         <thead>
                             <tr class="bg-gray-50 text-[#173A67] border-b border-gray-200">
-                                <th class="px-3 py-3 font-bold border-r border-gray-200 text-center uppercase tracking-wider">Keterangan</th>
-                                <th class="px-3 py-3 font-bold text-center uppercase tracking-wider">Hasil</th>
+                                <th class="px-2 py-3 font-bold border-r border-gray-200 text-center uppercase">Range Nilai</th>
+                                <th class="px-2 py-3 font-bold text-center uppercase">Grade</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 text-gray-600 font-bold">
+                        <tbody class="divide-y divide-gray-200 text-gray-700 font-bold">
                             <tr>
-                                <td class="px-3 py-2.5 text-center border-r border-gray-200">A</td>
-                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                                <td class="px-2 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">>= 90</td>
+                                <td class="px-2 py-2.5 text-center text-green-600">A</td>
                             </tr>
                             <tr>
-                                <td class="px-3 py-2.5 text-center border-r border-gray-200">B</td>
-                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                                <td class="px-2 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">>= 85</td>
+                                <td class="px-2 py-2.5 text-center text-blue-600">B+</td>
                             </tr>
                             <tr>
-                                <td class="px-3 py-2.5 text-center border-r border-gray-200">C</td>
-                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                                <td class="px-2 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">>= 80</td>
+                                <td class="px-2 py-2.5 text-center text-blue-500">B</td>
                             </tr>
                             <tr>
-                                <td class="px-3 py-2.5 text-center border-r border-gray-200">D</td>
-                                <td class="px-3 py-2.5 text-center">100% - 80%</td>
+                                <td class="px-2 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">>= 75</td>
+                                <td class="px-2 py-2.5 text-center text-yellow-600">C+</td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">>= 10</td>
+                                <td class="px-2 py-2.5 text-center text-orange-600">C</td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">< 10</td>
+                                <td class="px-2 py-2.5 text-center text-red-600">TU</td>
                             </tr>
                         </tbody>
                     </table>
@@ -353,10 +366,11 @@
         if(!score && score!==0) return '-';
         score = parseInt(score);
         if(score >= 90) return 'A';
+        if(score >= 85) return 'B+';
         if(score >= 80) return 'B';
-        if(score >= 70) return 'C';
-        if(score >= 60) return 'D';
-        return 'E';
+        if(score >= 75) return 'C+';
+        if(score >= 10) return 'C';
+        return 'TU';
     }
 
     function updateRow(rowIdx) {
@@ -377,9 +391,15 @@
                 // Update per subject grade
                 const g = getGrade(num);
                 gradeEl.textContent = g;
+
                 // Colorize
-                gradeEl.className = 'text-[10px] font-black grade-display ' + 
-                    (g==='A'?'text-green-600': g==='B'?'text-blue-600': g==='C'?'text-yellow-600': 'text-red-600');
+                let colorClass = 'text-gray-400';
+                if(g === 'A') colorClass = 'text-green-600';
+                else if(g === 'B+' || g === 'B') colorClass = 'text-blue-600';
+                else if(g === 'C+' || g === 'C') colorClass = 'text-yellow-600';
+                else if(g === 'TU') colorClass = 'text-red-600';
+                
+                gradeEl.className = 'text-[10px] font-black grade-display ' + colorClass;
             } else {
                 gradeEl.textContent = '-';
                 gradeEl.className = 'text-[10px] font-black text-gray-400 grade-display';
@@ -398,8 +418,8 @@
             
             let bgClass = 'bg-gray-400';
             if(finalG === 'A') bgClass = 'bg-green-500';
-            else if(finalG === 'B') bgClass = 'bg-blue-500';
-            else if(finalG === 'C') bgClass = 'bg-yellow-500';
+            else if(finalG === 'B+' || finalG === 'B') bgClass = 'bg-blue-500';
+            else if(finalG === 'C+' || finalG === 'C') bgClass = 'bg-yellow-500';
             else bgClass = 'bg-red-500';
             
             gradeEl.className = `px-2 py-1 rounded-lg text-[10px] final-grade ${bgClass} text-white shadow-md`;
@@ -445,6 +465,9 @@
     });
 
     // Initial calc
+    document.querySelectorAll('.student-row').forEach(tr => {
+        updateRow(tr.dataset.row);
+    });
     updateSummary();
 
     // Custom Confirm Modal
@@ -519,20 +542,48 @@
         }, 3000);
     }
 
-    // Mock Save
-    document.getElementById('save-final').addEventListener('click', () => {
+    // Save
+    document.getElementById('save-final').addEventListener('click', async () => {
+        const payload = [];
+        document.querySelectorAll('.student-row').forEach(tr => {
+            const id = tr.dataset.id;
+            const data = { id: id };
+            tr.querySelectorAll('.score-input').forEach(inp => {
+                data[inp.dataset.key] = inp.value;
+            });
+            data.sikap = tr.querySelector('.sikap-input').value;
+            // Kehadiran taken from editable input
+            const hadirVal = tr.querySelector('.hadir-input').value || 0;
+            data.kehadiran = parseFloat(hadirVal) / 100;
+            payload.push(data);
+        });
+
         const btn = document.getElementById('save-final');
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
         btn.disabled = true;
         lucide.createIcons();
         
-        setTimeout(() => {
-            showToast('Berhasil menyimpan nilai akhir');
+        try {
+            const res = await fetch('{{ route('sensei.penilaian.nilai-akhir.save') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ students: payload })
+            });
+            const data = await res.json();
+            if(data.success) {
+                showToast('Berhasil menyimpan nilai akhir');
+            } else {
+                showToast(data.message || 'Gagal menyimpan', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Terjadi kesalahan server', 'error');
+        } finally {
             btn.innerHTML = originalHtml;
             btn.disabled = false;
             lucide.createIcons();
-        }, 1000);
+        }
     });
     
     // Reset
@@ -546,10 +597,26 @@
         btn.disabled = true;
         lucide.createIcons();
         
-        setTimeout(() => {
-            showToast('Berhasil reset nilai akhir', 'success');
-            setTimeout(() => window.location.reload(), 1000);
-        }, 1000);
+        try {
+            const res = await fetch('{{ route('sensei.penilaian.nilai-akhir.reset') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            });
+            const data = await res.json();
+            if(data.success) {
+                showToast('Berhasil reset nilai akhir', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast('Gagal reset', 'error');
+            }
+        } catch(e) {
+            console.error(e);
+            showToast('Terjadi kesalahan', 'error');
+        } finally {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
+        }
     });
 </script>
 @endsection

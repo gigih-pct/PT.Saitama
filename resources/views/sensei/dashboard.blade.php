@@ -51,7 +51,7 @@
                         </div>
                         <div>
                             <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Total Kelas</span>
-                            <p class="text-4xl font-black text-[#173A67] mt-1">5</p>
+                            <p class="text-4xl font-black text-[#173A67] mt-1">{{ $total_kelas }}</p>
                         </div>
                     </div>
 
@@ -65,7 +65,7 @@
                         </div>
                         <div>
                             <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Total Siswa</span>
-                            <p class="text-4xl font-black text-[#173A67] mt-1">120</p>
+                            <p class="text-4xl font-black text-[#173A67] mt-1">{{ $total_siswa }}</p>
                         </div>
                     </div>
                 </div>
@@ -129,10 +129,10 @@
                     <div class="relative w-32 h-32 flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90">
                             <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="10" fill="transparent" class="text-gray-100" />
-                            <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" stroke-dasharray="364.4" stroke-dashoffset="{{ 364.4 * (1 - 0.75) }}" class="text-[#173A67] transition-all duration-1000" stroke-linecap="round" />
+                            <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" stroke-dasharray="364.4" stroke-dashoffset="{{ 364.4 * (1 - $kehadiran/100) }}" class="text-[#173A67] transition-all duration-1000" stroke-linecap="round" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-3xl font-black text-[#173A67]">75%</span>
+                            <span class="text-3xl font-black text-[#173A67]">{{ $kehadiran }}%</span>
                             <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Hadir</span>
                         </div>
                     </div>
@@ -143,11 +143,11 @@
                     <h4 class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Rata-rata Nilai</h4>
                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
                         <span class="text-xs font-bold text-[#173A67]">Bahasa</span>
-                        <span class="text-xs font-black bg-blue-100 text-blue-700 px-2 py-1 rounded-lg">8.7</span>
+                        <span class="text-xs font-black bg-blue-100 text-blue-700 px-2 py-1 rounded-lg">{{ $avg_bahasa }}</span>
                     </div>
                      <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl">
                         <span class="text-xs font-bold text-[#173A67]">Sikap</span>
-                        <span class="text-xs font-black bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg">A</span>
+                        <span class="text-xs font-black bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg">{{ $avg_sikap }}</span>
                     </div>
                 </div>
             </div>
@@ -182,11 +182,11 @@
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Minggu 2','Minggu 4','Minggu 6','Minggu 8','Minggu 10','Minggu 12','Minggu 14','Minggu 16'],
+                    labels: {!! json_encode($chart_data['labels']) !!},
                     datasets: [
                         { 
                             label: 'Bahasa', 
-                            data: [30,28,75,55,60,70,65,85], 
+                            data: {!! json_encode($chart_data['bahasa']) !!}, 
                             borderColor: '#173A67',
                             backgroundColor: 'rgba(23, 58, 103, 0.1)',
                             borderWidth: 3,
@@ -199,7 +199,7 @@
                         },
                         { 
                             label: 'Fisik & Mental', 
-                            data: [95,45,50,75,35,20,15,35], 
+                            data: {!! json_encode($chart_data['fmd']) !!}, 
                             borderColor: '#D85B63',
                             backgroundColor: 'rgba(216, 91, 99, 0.1)',
                             borderWidth: 3,
