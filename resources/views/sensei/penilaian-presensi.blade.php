@@ -140,11 +140,11 @@
                                     }
                                     $savedStatuses = array_pad($savedStatuses, $daysCount, '');
 @endphp
-                                <tr class="group hover:bg-blue-50/30 transition-colors student-row" data-id="{{ $user->id }}">
-                                    <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                <tr class="group transition-colors student-row" data-id="{{ $user->id }}">
+                                    <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                         {{ $idx + 1 }}
                                     </td>
-                                    <td class="px-6 py-5 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                                    <td class="px-6 py-5 sticky left-16 bg-white z-10 border-r border-gray-100">
                                         <div class="flex items-center gap-3">
                                             <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                                 {{ substr($user->name, 0, 1) }}
@@ -153,14 +153,14 @@
                                                    value="{{ $user->name }}" readonly title="{{ $user->name }}">
                                         </div>
                                     </td>
-                                    <td class="px-4 py-5 sticky left-[280px] bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                    <td class="px-4 py-5 sticky left-[280px] bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
                                         <input type="text" class="bg-transparent border-none p-0 text-xs font-medium text-gray-500 w-full focus:ring-0 phone-input" 
                                                value="{{ $savedPhone }}">
                                     </td>
                                     
                                     @foreach($days as $dayIdx => $day)
                                     <td class="p-2 border-r border-gray-100 text-center relative group/cell min-w-[50px]">
-                                        <button class="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 focus:outline-none attendance-btn mx-auto shadow-sm"
+                                        <button class="w-10 h-10 rounded-xl flex items-center justify-center transition-all focus:outline-none attendance-btn mx-auto shadow-sm"
                                                 data-status="{{ $savedStatuses[$dayIdx] ?? '' }}"
                                                 data-day="{{ $dayIdx }}">
                                             <!-- icon rendered by js -->
@@ -406,7 +406,7 @@
     function renderIcon(btn, status) {
         status = (status || '').toUpperCase();
         btn.dataset.status = status;
-        let html = '<span class="w-8 h-8 rounded-xl bg-gray-100/50 border border-gray-200 block transition-all hover:bg-gray-200"></span>'; // default clearer empty state
+        let html = '<span class="w-8 h-8 rounded-xl bg-gray-100/50 border border-gray-200 block transition-all"></span>'; // default clearer empty state
         
         if(status === 'H') html = '<span class="w-full h-full rounded-xl bg-green-500 shadow-md shadow-green-200 flex items-center justify-center text-white scale-110 transition-transform"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
         else if(status === 'A') html = '<span class="w-full h-full rounded-xl bg-red-500 shadow-md shadow-red-200 flex items-center justify-center text-white font-black text-sm scale-110 transition-transform">A</span>';
@@ -710,8 +710,6 @@
              modal.classList.add('hidden');
              modal.classList.remove('flex');
         });
-        });
-
         // Month/Year Selector Change
         const updatePeriod = () => {
             const m = document.getElementById('month-select').value;

@@ -55,6 +55,6 @@ class KaryawanAuthController extends Controller
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('karyawan.login');
+        return redirect()->route('login.portal');
     }
 }

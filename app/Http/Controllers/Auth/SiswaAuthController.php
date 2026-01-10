@@ -85,6 +85,6 @@ class SiswaAuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('siswa.login');
+        return redirect()->route('login.portal');
     }
 }

@@ -17,8 +17,8 @@ Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    // Redirect users to the main login page after logout
-    return redirect()->route('login');
+    // Redirect users to the portal page after logout
+    return redirect()->route('login.portal');
 })->name('logout');
 
 // CAPTCHA Reload Route

@@ -70,6 +70,6 @@ class OrangtuaAuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('orangtua.login');
+        return redirect()->route('login.portal');
     }
 }

@@ -59,6 +59,6 @@ class KeuanganAuthController extends Controller
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('keuangan.login');
+        return redirect()->route('login.portal');
     }
 }

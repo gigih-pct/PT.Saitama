@@ -754,7 +754,45 @@ class PenilaianController extends Controller
             }
             DB::commit();
 
-            return response()->json(['success' => true]);
+            // Recalculate summary for the response
+            $allStudents = User::where('role', 'siswa')->where('kelas_id', $selectedKelasId)->get();
+            $assessments = PresensiAssessment::whereIn('user_id', $allStudents->pluck('id'))
+                ->where('month', $month)
+                ->where('year', $year)
+                ->get()
+                ->groupBy('user_id');
+
+            $daysInMonth = Carbon::create($year, $month)->daysInMonth;
+            $counts = ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0];
+            $perDay = [];
+            for ($d = 0; $d < $daysInMonth; $d++) {
+                $perDay[$d] = ['counts' => ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0], 'students' => []];
+            }
+
+            foreach ($allStudents as $student) {
+                $userAss = $assessments->get($student->id, collect());
+                foreach ($userAss as $ass) {
+                    if ($ass->day <= $daysInMonth && $ass->status) {
+                        $s = $ass->status;
+                        if (isset($counts[$s])) {
+                            $counts[$s]++;
+                            $perDay[$ass->day - 1]['counts'][$s]++;
+                        }
+                        $perDay[$ass->day - 1]['students'][] = [
+                            'name' => $student->name,
+                            'phone' => $ass->phone ?? $student->no_wa_pribadi ?? '-',
+                            'status' => $s
+                        ];
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'counts' => $counts,
+                'counts_per_day' => $perDay,
+                'saved' => $allStudents->count()
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);

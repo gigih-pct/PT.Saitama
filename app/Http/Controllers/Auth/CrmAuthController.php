@@ -59,6 +59,6 @@ class CrmAuthController extends Controller
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('crm.login');
+        return redirect()->route('login.portal');
     }
 }
