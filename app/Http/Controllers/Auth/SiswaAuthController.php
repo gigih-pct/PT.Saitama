@@ -44,7 +44,7 @@ class SiswaAuthController extends Controller
 
         $user = User::create($userData);
 
-        Auth::login($user);
+        Auth::guard('siswa')->login($user);
 
         // Redirect to a landing or dashboard depending on status
         if ($user->role === 'siswa' && $user->status !== 'approved') {
@@ -66,8 +66,8 @@ class SiswaAuthController extends Controller
 
         unset($credentials['captcha']);
 
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
+        if (Auth::guard('siswa')->attempt($credentials, $remember)) {
+            $user = Auth::guard('siswa')->user();
             
             if ($user->role === 'siswa' && $user->status !== 'approved') {
                 return redirect()->route('siswa.waiting_approval');
@@ -82,9 +82,8 @@ class SiswaAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('siswa')->logout();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }

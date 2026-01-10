@@ -45,6 +45,36 @@ return [
             'driver' => 'session',
             'provider' => 'admins',
         ],
+
+        'crm' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+
+        'keuangan' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+
+        'karyawan' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+
+        'siswa' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+
+        'sensei' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+
+        'orangtua' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*

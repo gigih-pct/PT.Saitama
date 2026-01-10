@@ -29,7 +29,7 @@ class KeuanganAuthController extends Controller
             'role' => 'Keuangan',
         ]);
 
-        Auth::guard('admin')->login($admin);
+        Auth::guard('keuangan')->login($admin);
 
         return redirect()->route('keuangan.dashboard');
     }
@@ -46,9 +46,16 @@ class KeuanganAuthController extends Controller
 
         unset($credentials['captcha']);
 
-        if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            return redirect()->route('keuangan.dashboard');
+        if (Auth::guard('keuangan')->attempt($credentials, $remember)) {
+            $user = Auth::guard('keuangan')->user();
+            
+            if ($user->role === 'Keuangan') {
+                $request->session()->regenerate();
+                return redirect()->route('keuangan.dashboard');
+            } else {
+                Auth::guard('keuangan')->logout();
+                return back()->withErrors(['email' => 'Anda tidak memiliki akses sebagai Keuangan.'])->withInput();
+            }
         }
 
         return back()->withErrors(['email' => 'Email atau password salah'])->withInput();
@@ -56,9 +63,8 @@ class KeuanganAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('keuangan')->logout();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }

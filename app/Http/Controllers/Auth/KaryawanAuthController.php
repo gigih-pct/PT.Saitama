@@ -28,7 +28,7 @@ class KaryawanAuthController extends Controller
             'role' => 'karyawan',
         ]);
 
-        Auth::guard('admin')->login($admin);
+        Auth::guard('karyawan')->login($admin);
 
         return redirect('/');
     }
@@ -42,9 +42,16 @@ class KaryawanAuthController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            return redirect()->intended('/');
+        if (Auth::guard('karyawan')->attempt($credentials, $remember)) {
+            $user = Auth::guard('karyawan')->user();
+            
+            if ($user->role === 'karyawan') {
+                $request->session()->regenerate();
+                return redirect()->intended('/');
+            } else {
+                Auth::guard('karyawan')->logout();
+                return back()->withErrors(['email' => 'Anda tidak memiliki akses sebagai karyawan'])->withInput();
+            }
         }
 
         return back()->withErrors(['email' => 'Email atau password salah'])->withInput();
@@ -52,9 +59,8 @@ class KaryawanAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('karyawan')->logout();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }

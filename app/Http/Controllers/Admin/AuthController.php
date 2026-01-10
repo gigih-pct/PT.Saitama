@@ -29,9 +29,18 @@ class AuthController extends Controller
 
         unset($credentials['captcha']);
 
-        if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+        $remember = $request->boolean('remember'); // Define $remember
+
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
+            $user = Auth::guard('admin')->user();
+
+            if ($user->role === 'admin') {
+                $request->session()->regenerate();
+                return redirect()->intended(route('admin.dashboard'));
+            }
+            // If user is not admin, log them out and redirect back
+            Auth::guard('admin')->logout();
+            return back()->withErrors(['email' => 'You do not have admin privileges.'])->onlyInput('email');
         }
 
         return back()->withErrors(['email' => 'Credentials not valid'])->onlyInput('email');
@@ -60,8 +69,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }

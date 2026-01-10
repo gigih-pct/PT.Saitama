@@ -16,8 +16,8 @@ class EnsureStudentApproved
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check()) {
-            $user = Auth::user();
+        if (Auth::guard('siswa')->check()) {
+            $user = Auth::guard('siswa')->user();
             
             // If they are a student and not approved, they should only see the waiting-approval page
             if ($user->role === 'siswa' && $user->status !== 'approved') {

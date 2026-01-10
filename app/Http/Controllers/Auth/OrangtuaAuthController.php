@@ -40,7 +40,7 @@ class OrangtuaAuthController extends Controller
 
         $user = User::create($userData);
 
-        Auth::login($user);
+        Auth::guard('orangtua')->login($user);
 
         return redirect('/');
     }
@@ -57,9 +57,16 @@ class OrangtuaAuthController extends Controller
 
         unset($credentials['captcha']);
 
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            return redirect()->route('orangtua.dashboard');
+        if (Auth::guard('orangtua')->attempt($credentials, $remember)) {
+            $user = Auth::guard('orangtua')->user();
+            
+            if ($user->role === 'orangtua') {
+                $request->session()->regenerate();
+                return redirect()->route('orangtua.dashboard');
+            } else {
+                Auth::guard('orangtua')->logout();
+                return back()->withErrors(['email' => 'Anda tidak memiliki akses sebagai orangtua.'])->withInput();
+            }
         }
 
         return back()->withErrors(['email' => 'Email atau password salah'])->withInput();
@@ -67,9 +74,8 @@ class OrangtuaAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('orangtua')->logout();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }

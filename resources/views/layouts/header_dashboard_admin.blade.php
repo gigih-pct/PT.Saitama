@@ -45,6 +45,22 @@
                 <span>Data Siswa</span>
             </a>
 
+            <a href="{{ route('admin.pengajuansiswa') }}" 
+                class="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.pengajuansiswa') ? 'bg-[#173A67] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50' }}">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    <span>Pengajuan Siswa</span>
+                </div>
+                @php
+                    $pendingCount = \App\Models\User::where('role', 'siswa')->where('status', 'pending')->count();
+                @endphp
+                @if($pendingCount > 0)
+                    <span class="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                        {{ $pendingCount }}
+                    </span>
+                @endif
+            </a>
+
             <a href="{{ route('admin.kelas.index') }}" 
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.kelas.*') ? 'bg-[#173A67] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50' }}">
                 <i data-lucide="school" class="w-5 h-5"></i>

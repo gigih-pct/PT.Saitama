@@ -51,24 +51,31 @@
                         <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Total Siswa</span>
                         <div class="flex items-baseline gap-2 mt-1">
                             <p class="text-4xl font-black text-[#173A67]">{{ $stats['total_siswa'] }}</p>
-                            <span class="text-[10px] text-emerald-500 font-bold">+12%</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Stat 2: Total Kelas -->
-                <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group relative overflow-hidden">
-                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
-                        <i data-lucide="school" class="w-24 h-24 text-orange-600"></i>
+                <!-- Stat 2: Pendaftar Baru -->
+                <a href="{{ route('admin.pengajuansiswa') }}" class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-orange-100 flex flex-col justify-between hover:shadow-lg transition group relative overflow-hidden ring-2 ring-orange-500/10 hover:ring-orange-500/30">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <i data-lucide="user-plus" class="w-24 h-24 text-orange-600"></i>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4 border border-orange-100">
-                        <i data-lucide="building-2" class="w-6 h-6"></i>
+                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4 border border-orange-200">
+                        <i data-lucide="user-plus" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Total Kelas</span>
-                        <p class="text-4xl font-black text-[#173A67] mt-1">{{ $stats['total_kelas'] }}</p>
+                        <span class="text-[10px] text-orange-600 font-extrabold uppercase tracking-[0.2em]">Pendaftar Baru</span>
+                        <div class="flex items-center justify-between mt-1">
+                            <p class="text-4xl font-black text-[#173A67]">{{ $stats['siswa_pending'] }}</p>
+                            @if($stats['siswa_pending'] > 0)
+                                <span class="flex h-3 w-3 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                                </span>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Stat 3: Berkas Pendaftaran -->
                 <div class="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition group relative overflow-hidden">
@@ -76,12 +83,9 @@
                         <i data-lucide="file-warning" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Pending Daftar</span>
+                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Berkas Daftar</span>
                         <div class="flex items-center justify-between mt-1">
                             <p class="text-4xl font-black text-[#173A67]">{{ $stats['berkas_pendaftaran'] }}</p>
-                            <div class="flex gap-1">
-                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -92,7 +96,7 @@
                         <i data-lucide="clipboard-list" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Pending Seleksi</span>
+                        <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-[0.2em]">Berkas Seleksi</span>
                         <p class="text-4xl font-black text-[#173A67] mt-1">{{ $stats['berkas_seleksi'] }}</p>
                     </div>
                 </div>

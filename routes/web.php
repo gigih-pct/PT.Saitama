@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Auth;
 // Generic logout route for any authenticated user/guard
 Route::post('/logout', function (Request $request) {
     Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    // Redirect users to the portal page after logout
+    // Do not invalidate session to allow concurrent logins
     return redirect()->route('login.portal');
 })->name('logout');
 
@@ -32,7 +30,7 @@ use App\Http\Controllers\Sensei\EvaluasiController;
 
 // For now require only authentication; the `role` middleware isn't registered
 // which causes a container error when resolving `role`. Add role checks later.
-Route::middleware(['auth'])
+Route::middleware(['auth:sensei'])
     ->prefix('sensei')
     ->name('sensei.')
     ->group(function () {
@@ -98,7 +96,7 @@ Route::middleware(['auth'])
         Route::post('/students/{id}/update-batch', [PenilaianController::class, 'updateStudentBatch'])->name('students.update-batch');
     });
     
-    Route::middleware(['auth'])
+    Route::middleware(['auth:sensei'])
         ->prefix('sensei')
         ->name('sensei.')
         ->group(function () {
@@ -176,7 +174,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
 
     // CRM protected routes
     use App\Http\Controllers\CRM\CRMController;
-    Route::middleware(['auth:admin', 'role:CRM'])->prefix('crm')->name('crm.')->group(function () {
+    Route::middleware(['auth:crm', 'role:CRM'])->prefix('crm')->name('crm.')->group(function () {
         Route::get('/dashboard', [CRMController::class, 'dashboard'])->name('dashboard');
         Route::get('/kesiswaan', [CRMController::class, 'kesiswaan'])->name('kesiswaan');
         Route::get('/pengajuan-siswa', [CRMController::class, 'pengajuansiswa'])->name('pengajuansiswa');
@@ -238,7 +236,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     });
 
     // Student protected routes
-    Route::middleware(['auth', 'student.approved'])->prefix('siswa')->name('siswa.')->group(function () {
+    Route::middleware(['auth:siswa', 'student.approved'])->prefix('siswa')->name('siswa.')->group(function () {
         Route::get('/dashboard', fn () => view('siswa.dashboard'))->name('dashboard');
         Route::get('/waiting-approval', fn () => view('siswa.waiting_approval'))->name('waiting_approval');
         Route::get('/pembelajaran', fn () => view('siswa.pembelajaran'))->name('pembelajaran');
@@ -252,7 +250,7 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     });
 
     // Orang Tua protected routes
-    Route::middleware(['auth'])->prefix('orangtua')->name('orangtua.')->group(function () {
+    Route::middleware(['auth:orangtua'])->prefix('orangtua')->name('orangtua.')->group(function () {
         Route::get('/dashboard', fn () => view('orangtua.dashboard'))->name('dashboard');
         Route::get('/berkas', fn () => view('orangtua.pemberkasan'))->name('berkas');
         Route::get('/pembayaran', fn () => view('orangtua.pembayaran'))->name('pembayaran');
@@ -267,12 +265,12 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
     Route::post('/keuangan/logout', [KeuanganAuthController::class, 'logout'])->name('keuangan.logout');
 
     // Keuangan protected routes
-    Route::middleware(['auth:admin', 'role:Keuangan'])->prefix('keuangan')->name('keuangan.')->group(function () {
+    Route::middleware(['auth:keuangan', 'role:Keuangan'])->prefix('keuangan')->name('keuangan.')->group(function () {
         Route::get('/dashboard', fn () => view('keuangan.dashboard'))->name('dashboard');
         Route::get('/pembayaran', fn () => view('keuangan.pembayaran'))->name('pembayaran');
     });
 
     // 'role' middleware not registered yet; require auth only for now.
-    Route::middleware(['auth'])
+    Route::middleware(['auth:sensei'])
     ->get('/sensei/pengajaran', fn () => view('sensei.pengajaran'))
     ->name('sensei.pengajaran');

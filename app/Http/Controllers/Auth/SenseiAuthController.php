@@ -42,7 +42,7 @@ class SenseiAuthController extends Controller
 
         $user = User::create($userData);
 
-        Auth::login($user);
+        Auth::guard('sensei')->login($user);
 
         return redirect()->route('sensei.index');
     }
@@ -60,9 +60,16 @@ class SenseiAuthController extends Controller
         unset($credentials['captcha']);
 
         try {
-            if (Auth::attempt($credentials, $remember)) {
-                $request->session()->regenerate();
-                return redirect()->intended(route('sensei.index'));
+            if (Auth::guard('sensei')->attempt($credentials, $remember)) {
+                $user = Auth::guard('sensei')->user();
+                
+                if ($user->role === 'sensei') {
+                    $request->session()->regenerate();
+                    return redirect()->intended(route('sensei.index'));
+                }
+                // If the user is authenticated but their role is not 'sensei',
+                // log them out from this guard and proceed to the error message.
+                Auth::guard('sensei')->logout();
             }
         } catch (\RuntimeException $e) {
             Log::warning('Unsupported password hash format for user login attempt', [
@@ -78,9 +85,8 @@ class SenseiAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('sensei')->logout();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }

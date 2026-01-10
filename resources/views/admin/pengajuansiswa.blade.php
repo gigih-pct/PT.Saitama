@@ -59,7 +59,7 @@
                             Setujui
                         </button>
                     </form>
-                    <form action="{{ route('admin.siswa.reject', $sub->id) }}" method="POST">
+                    <form action="{{ route('admin.siswa.destroy', $sub->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full bg-[#D85B63]/10 text-[#D85B63] py-3 rounded-2xl text-xs font-extrabold hover:bg-[#D85B63] hover:text-white transition-all active:scale-95">

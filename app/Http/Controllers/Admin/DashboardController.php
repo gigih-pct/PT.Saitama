@@ -16,6 +16,7 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_siswa' => User::where('role', 'siswa')->count(),
+            'siswa_pending' => User::where('role', 'siswa')->where('status', 'pending')->count(),
             'total_kelas' => Kelas::count(),
             'berkas_pending' => Berkas::where('status', 'pending')->count(),
             'berkas_pendaftaran' => Berkas::where('jenis_berkas', 'pendaftaran')->where('status', 'pending')->count(),

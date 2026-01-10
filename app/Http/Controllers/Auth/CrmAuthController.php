@@ -29,7 +29,7 @@ class CrmAuthController extends Controller
             'role' => 'CRM',
         ]);
 
-        Auth::guard('admin')->login($admin);
+        Auth::guard('crm')->login($admin);
 
         return redirect()->route('crm.dashboard');
     }
@@ -46,9 +46,16 @@ class CrmAuthController extends Controller
 
         unset($credentials['captcha']);
 
-        if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-            return redirect()->route('crm.dashboard');
+        if (Auth::guard('crm')->attempt($credentials, $remember)) {
+            $user = Auth::guard('crm')->user();
+            
+            if ($user->role === 'CRM') {
+                $request->session()->regenerate();
+                return redirect()->route('crm.dashboard');
+            } else {
+                Auth::guard('crm')->logout(); // Logout if role is not CRM
+                return back()->withErrors(['email' => 'Anda tidak memiliki akses CRM'])->withInput();
+            }
         }
 
         return back()->withErrors(['email' => 'Email atau password salah'])->withInput();
@@ -56,9 +63,8 @@ class CrmAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('crm')->logout();
+        // Do not invalidate session to allow concurrent logins
         return redirect()->route('login.portal');
     }
 }
