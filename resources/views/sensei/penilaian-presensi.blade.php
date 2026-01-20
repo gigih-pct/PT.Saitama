@@ -103,13 +103,13 @@
             <!-- Table Container -->
             <div class="presensi-wrapper">
                 <div class="bg-white border-2 border-gray-100 rounded-[2rem] flex-1 shadow-sm relative z-0 pb-6">
-                    <div class="max-h-[600px] presensi-scroll">
+                    <div class="max-h-[600px] presensi-scroll pb-6">
                     <table class="border-collapse w-max text-left">
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
                                 <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky left-0 bg-[#173A67] z-30 w-16 border-r border-blue-800">No</th>
-                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 min-w-[200px] border-r border-blue-800">Nama Siswa</th>
-                                <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-[280px] bg-[#173A67] z-30 min-w-[140px] border-r border-blue-800 shadow-xl">No. Telp</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 min-w-[220px] border-r border-blue-800 shadow-xl">Nama Siswa</th>
+                                <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-[284px] bg-[#173A67] z-30 min-w-[140px] border-r border-blue-800 shadow-xl">No. Telp</th>
                                 @foreach($days as $day)
                                 <th class="px-1 py-2 font-bold text-xs text-center w-10 border-r border-blue-800/30">
                                     <div class="flex flex-col items-center gap-1">
@@ -141,10 +141,10 @@
                                     $savedStatuses = array_pad($savedStatuses, $daysCount, '');
 @endphp
                                 <tr class="group transition-colors student-row" data-id="{{ $user->id }}">
-                                    <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
+                                    <td class="px-4 py-3 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                         {{ $idx + 1 }}
                                     </td>
-                                    <td class="px-6 py-5 sticky left-16 bg-white z-10 border-r border-gray-100">
+                                    <td class="px-6 py-3 sticky left-16 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
                                         <div class="flex items-center gap-3">
                                             <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                                 {{ substr($user->name, 0, 1) }}
@@ -153,7 +153,7 @@
                                                    value="{{ $user->name }}" readonly title="{{ $user->name }}">
                                         </div>
                                     </td>
-                                    <td class="px-4 py-5 sticky left-[280px] bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                    <td class="px-4 py-3 sticky left-[284px] bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
                                         <input type="text" class="bg-transparent border-none p-0 text-xs font-medium text-gray-500 w-full focus:ring-0 phone-input" 
                                                value="{{ $savedPhone }}">
                                     </td>
@@ -226,14 +226,36 @@
                 </div>
             </div>
             
-            <!-- Legend -->
-            <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
-                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest">Keterangan Icon</h4>
-                <div class="space-y-3">
-                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px]">✓</span> <span class="text-xs font-bold text-gray-500">Hadir (H)</span></div>
-                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-[10px]">A</span> <span class="text-xs font-bold text-gray-500">Alfa (A)</span></div>
-                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white text-[10px]">S</span> <span class="text-xs font-bold text-gray-500">Sakit (S)</span></div>
-                    <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px]">I</span> <span class="text-xs font-bold text-gray-500">Izin (I)</span></div>
+            <!-- Legend (Themed like Akhir summary) -->
+            <div class="bg-gray-100 rounded-[2rem] p-6 border border-gray-200 shadow-sm">
+                <h4 class="font-bold text-[#173A67] mb-4 text-sm uppercase tracking-widest text-center">Keterangan Icon</h4>
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
+                    <table class="w-full text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-[#173A67] border-b border-gray-200">
+                                <th class="px-3 py-3 font-bold border-r border-gray-200 text-center uppercase tracking-wider">Status</th>
+                                <th class="px-3 py-3 font-bold text-center uppercase tracking-wider">Icon</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-gray-700 font-bold">
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">Hadir (H)</td>
+                                <td class="px-3 py-2.5 text-center"><span class="w-6 h-6 rounded-full bg-green-500 inline-flex items-center justify-center text-white text-[10px] mx-auto">✓</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">Alfa (A)</td>
+                                <td class="px-3 py-2.5 text-center"><span class="w-6 h-6 rounded-full bg-red-500 inline-flex items-center justify-center text-white text-[10px] mx-auto">A</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">Sakit (S)</td>
+                                <td class="px-3 py-2.5 text-center"><span class="w-6 h-6 rounded-full bg-yellow-400 inline-flex items-center justify-center text-white text-[10px] mx-auto">S</span></td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2.5 text-center border-r border-gray-200 bg-gray-50/30">Izin (I)</td>
+                                <td class="px-3 py-2.5 text-center"><span class="w-6 h-6 rounded-full bg-blue-500 inline-flex items-center justify-center text-white text-[10px] mx-auto">I</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -302,24 +324,56 @@
     #day-popover { min-width: 220px; } 
 }
 
-/* Custom scrollbar styling - Forced Visibility */
-.presensi-scroll {
-    overflow: auto;
-    scrollbar-width: auto;
-    scrollbar-color: #cbd5e1 #f1f5f9;
+/* AGGRESSIVE FORCE: Persistent Scrollbar Visibility (Verified for macOS/Chrome/Safari) */
+.presensi-scroll { 
+    max-height: 600px;
+    width: 100%;
+    overflow-x: scroll !important; 
+    overflow-y: auto !important; 
+    display: block !important;
+    scrollbar-gutter: stable; 
+    -webkit-overflow-scrolling: touch;
+    background: #ffffff;
+    padding-bottom: 24px !important; /* Spacing for the persistent scrollbar */
 }
+
+/* Chrome, Safari, Edge - This combination forces visibility on most macOS systems */
 .presensi-scroll::-webkit-scrollbar { 
-    height: 16px; width: 16px; 
-    -webkit-appearance: none; display: block;
+    height: 20px !important; 
+    width: 20px !important; 
+    display: block !important;
+    -webkit-appearance: none !important;
 }
+
 .presensi-scroll::-webkit-scrollbar-track { 
-    background-color: #f1f5f9; border-radius: 8px; 
+    background: #e2e8f0 !important; /* Darker track for better contrast */
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    display: block !important;
 }
+
 .presensi-scroll::-webkit-scrollbar-thumb { 
-    background-color: #94a3b8; border-radius: 8px; border: 4px solid #f1f5f9; 
+    background-color: #0f172a !important; /* Ultra-dark (Slate-900) for highest visibility */
+    border-radius: 4px !important;
+    border: 2px solid #e2e8f0 !important;
+    min-height: 50px !important;
+    display: block !important;
 }
+
 .presensi-scroll::-webkit-scrollbar-thumb:hover { 
-    background-color: #64748b; 
+    background-color: #000000 !important; 
+}
+
+.presensi-scroll::-webkit-scrollbar-corner {
+    background-color: #e2e8f0 !important;
+    display: block !important;
+}
+
+/* Prevent auto-hiding on macOS */
+.presensi-scroll::-webkit-scrollbar-thumb:window-inactive,
+.presensi-scroll::-webkit-scrollbar-track:window-inactive {
+    background: #cbd5e1 !important;
+    display: block !important;
 }
 
 .presensi-badge { 

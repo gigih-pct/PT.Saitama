@@ -123,8 +123,24 @@ Route::get('/sensei/test', [\App\Http\Controllers\Sensei\DashboardController::cl
 // Preview of Penilaian Kelas without auth for development (remove in production)
 Route::get('/sensei/penilaian-kelas-preview', fn () => view('sensei.penilaian-kanji'))
     ->name('sensei.penilaian.preview');
-Route::get('/sensei/penilaian-presensi-preview', fn () => view('sensei.penilaian-presensi', ['type' => 'presensi']))
-    ->name('sensei.penilaian.presensi.preview');
+Route::get('/sensei/penilaian-presensi-preview', function () {
+    $kelases = \App\Models\Kelas::orderBy('nama_kelas')->get();
+    $selectedKelasId = $kelases->first()->id ?? null;
+    $students = \App\Models\User::where('role', 'siswa')->when($selectedKelasId, fn($q) => $q->where('kelas_id', $selectedKelasId))->get();
+    return view('sensei.penilaian-presensi', [
+        'type' => 'presensi',
+        'students' => $students,
+        'kelases' => $kelases,
+        'selectedKelasId' => $selectedKelasId,
+        'savedScores' => [],
+        'summary' => ['H' => 0, 'A' => 0, 'S' => 0, 'I' => 0],
+        'month' => date('n'),
+        'year' => date('Y'),
+        'monthNames' => [1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'],
+        'days' => range(1, 30),
+        'daysCount' => 30
+    ]);
+})->name('sensei.penilaian.presensi.preview');
 Route::get('/sensei/penilaian-bunpou-preview', fn () => view('sensei.penilaian-bunpou', ['type' => 'bunpou']))
     ->name('sensei.penilaian.bunpou.preview');
 Route::get('/sensei/penilaian-kotoba-preview', fn () => view('sensei.penilaian-kotoba', ['type' => 'kotoba']))
@@ -270,7 +286,12 @@ Route::get('/sensei/evaluasi/siswa-preview', fn () => view('sensei.evaluasi.deta
         Route::get('/pembayaran', fn () => view('keuangan.pembayaran'))->name('pembayaran');
     });
 
-    // 'role' middleware not registered yet; require auth only for now.
+    use App\Http\Controllers\Sensei\MaterialController;
     Route::middleware(['auth:sensei'])
-    ->get('/sensei/pengajaran', fn () => view('sensei.pengajaran'))
-    ->name('sensei.pengajaran');
+    ->prefix('sensei')
+    ->name('sensei.')
+    ->group(function () {
+        Route::get('/pengajaran', [MaterialController::class, 'index'])->name('pengajaran');
+        Route::post('/material/store', [MaterialController::class, 'store'])->name('material.store');
+        Route::get('/material/download/{material}', [MaterialController::class, 'download'])->name('material.download');
+    });

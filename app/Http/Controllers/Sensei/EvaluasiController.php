@@ -50,9 +50,11 @@ class EvaluasiController extends Controller
             $presensiScore = round(($hCount / $presensiAssessments->count()) * 100);
         }
 
-        // 2. Fetch FMD - Use total score from MTK as representative
-        $fmdAssessment = \App\Models\FmdAssessment::where('user_id', $id)->where('type', 'mtk')->first();
-        $fmdScore = $fmdAssessment ? round(($fmdAssessment->total_score / 5) * 100) : 0; // Mock % based on 5 weeks
+        // 2. Fetch FMD - Fetch all types for the student
+        $fmdTableAssessments = \App\Models\FmdAssessment::where('user_id', $id)->get()->keyBy('type');
+        
+        $fmdMtk = $fmdTableAssessments->get('mtk');
+        $fmdScore = $fmdMtk ? round(($fmdMtk->total_score / 5) * 100) : 0; // Mock % based on 5 weeks
 
         // 3. Wawancara - Fetch from DB
         $wawancaraAssessment = \App\Models\WawancaraAssessment::where('user_id', $id)->first();
@@ -69,6 +71,7 @@ class EvaluasiController extends Controller
             'bunpouAssessment',
             'presensiScore',
             'fmdScore',
+            'fmdTableAssessments',
             'wawancaraScore',
             'wawancaraAssessment',
             'nilaiAkhirScore'
