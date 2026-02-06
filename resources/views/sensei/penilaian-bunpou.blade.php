@@ -64,6 +64,25 @@
         </div>
     </div>
 
+    <!-- DATE SELECTION SECTION -->
+    <div class="mb-6 z-10 relative">
+        <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#173A67] border border-gray-100">
+                    <i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight mb-0.5">Tanggal Penilaian</p>
+                    <input type="date" id="assessment-date" 
+                           class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] focus:ring-0 cursor-pointer h-5 leading-none"
+                           value="{{ $selectedDate }}">
+                </div>
+            </div>
+            <div class="h-8 w-px bg-gray-200 mx-2"></div>
+            <p class="text-xs font-bold text-gray-400 italic">Data penilaian akan berpindah sesuai tanggal yang Anda pilih</p>
+        </div>
+    </div>
+
     <div class="grid grid-cols-12 gap-8 flex-1">
         <!-- LEFT: TABLE -->
         <div class="col-span-12 lg:col-span-9 flex flex-col gap-6">
@@ -97,7 +116,6 @@
                                 @else
                                     <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-32 uppercase tracking-widest">Nilai</th>
                                 @endif
-                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-40">Tanggal</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-white">
@@ -136,11 +154,6 @@
                                                    value="{{ $saved['score'] ?? '' }}" placeholder="0" data-user-id="{{ $user->id }}">
                                         </td>
                                     @endif
-                                    <td class="px-6 py-4 text-center">
-                                         <input type="date" 
-                                                class="w-full text-center bg-transparent border-none text-xs font-bold text-gray-400 focus:ring-0 date-input"
-                                                value="{{ $saved['at'] ?? '' }}" data-user-id="{{ $user->id }}">
-                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -280,8 +293,9 @@
     function getPayload() {
         const payload = [];
         document.querySelectorAll('tr.group').forEach((tr) => {
-             const userId = tr.querySelector('.date-input').dataset.userId;
-             const date = tr.querySelector('.date-input').value;
+             const scoreInput = tr.querySelector('.score-input');
+             const ujianInput = tr.querySelector('.ujian-input');
+             const userId = (scoreInput || ujianInput).dataset.userId;
              
              if(userId) {
                  @if($evaParam === 'final')
@@ -290,15 +304,13 @@
                     payload.push({
                         user_id: userId,
                         ujian: ujian,
-                        nilai: nilai,
-                        at: date
+                        nilai: nilai
                     });
                  @else
                     const score = tr.querySelector('.score-input').value;
                     payload.push({
                         user_id: userId,
-                        score: score,
-                        at: date
+                        score: score
                     });
                  @endif
              }
@@ -407,7 +419,8 @@
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CONFIG.csrf },
                 body: JSON.stringify({ 
                     students: payload,
-                    eva: "{{ $evaParam }}"
+                    eva: "{{ $evaParam }}",
+                    date: document.getElementById('assessment-date').value
                 })
             });
             const data = await res.json();
@@ -436,8 +449,6 @@
                 updateStyle(this);
              });
         });
-
-        document.querySelectorAll('.date-input').forEach(i => i.addEventListener('input', () => {}));
 
         document.getElementById('btn-save').addEventListener('click', saveData);
 
@@ -478,6 +489,13 @@
                 btn.disabled = false;
                 lucide.createIcons();
             }
+        });
+
+        // Date change handler
+        document.getElementById('assessment-date').addEventListener('change', function() {
+            const url = new URL(window.location.href);
+            url.searchParams.set('date', this.value);
+            window.location.href = url.toString();
         });
     });
 </script>

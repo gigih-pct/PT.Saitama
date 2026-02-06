@@ -123,7 +123,7 @@
                                placeholder="Masukkan kode captcha">
                     </div>
                     <div class="flex items-center gap-2">
-                         <span class="captcha-img">{!! captcha_img('flat') !!}</span>
+                         <span class="captcha-img"><img src="{{ url('captcha/flat?' . time() . rand(1000,9999)) }}"></span>
                          <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
                             <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
                          </button>

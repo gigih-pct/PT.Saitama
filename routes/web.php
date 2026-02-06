@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Sensei\PenilaianController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 Route::get('/', function () {
     return redirect()->route('login.portal');
@@ -19,10 +20,11 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('login.portal');
 })->name('logout');
 
-// CAPTCHA Reload Route
-// CAPTCHA Reload Route
-Route::get('/refresh-captcha', function () {
-    return response()->json(['captcha' => captcha_img('flat')]);
+// CAPTCHA Reload Route  
+Route::middleware('web')->get('/refresh-captcha', function () {
+    $captchaUrl = url('captcha/flat?' . time() . rand(1000,9999));
+    $captchaHtml = '<img src="' . $captchaUrl . '">';
+    return response()->json(['captcha' => $captchaHtml]);
 })->name('captcha.reload');
 
 use App\Http\Controllers\Sensei\DashboardController;

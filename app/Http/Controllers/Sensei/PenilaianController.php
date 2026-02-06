@@ -192,6 +192,7 @@ class PenilaianController extends Controller
             
             $saved = [];
             $lulus = 0;
+            $foundDate = null;
             
             if ($isFinal) {
                 $fieldUjian = "final_ujian";
@@ -204,6 +205,8 @@ class PenilaianController extends Controller
                         $vUjian = $assessment->{$fieldUjian};
                         $vNilai = $assessment->{$fieldNilai};
                         $vAt = $assessment->{$fieldAt};
+                        
+                        if ($vAt && !$foundDate) $foundDate = $vAt;
 
                         $saved[$student->id] = [
                             'ujian' => $vUjian,
@@ -228,6 +231,8 @@ class PenilaianController extends Controller
                         $scoreValue = $assessment->{$scoreField};
                         $dateValue = $assessment->{$atField};
                         
+                        if ($dateValue && !$foundDate) $foundDate = $dateValue;
+
                         $saved[$student->id] = [
                             'score' => $scoreValue,
                             'at' => $dateValue,
@@ -243,7 +248,8 @@ class PenilaianController extends Controller
             }
             
             $data['savedScores'] = $saved;
-            $data['evaIndex'] = $evaIndex; // might be null for final
+            $data['evaIndex'] = $evaIndex;
+            $data['selectedDate'] = $request->query('date', $foundDate ?? date('Y-m-d'));
             
             $total = $students->count();
             $percent = $total ? round(($lulus / $total) * 100, 2) : 0;
@@ -333,7 +339,11 @@ class PenilaianController extends Controller
         }
 
         if ($type === 'wawancara') {
+            $selectedDate = $request->query('date', date('Y-m-d'));
+            $data['selectedDate'] = $selectedDate;
+
             $assessments = \App\Models\WawancaraAssessment::whereIn('user_id', $students->pluck('id'))
+                ->where('date', $selectedDate)
                 ->get()
                 ->keyBy('user_id');
             
@@ -354,6 +364,8 @@ class PenilaianController extends Controller
     {
         try {
             $students = $request->input('students', []);
+            $selectedDate = $request->input('date', date('Y-m-d'));
+            
             if (!is_array($students) || count($students) === 0) {
                 return response()->json(['success' => false, 'message' => 'Tidak ada data siswa untuk disimpan.'], 422);
             }
@@ -380,7 +392,10 @@ class PenilaianController extends Controller
                 $percent_sikap = $sum_sikap ? round(($sum_sikap / 9) * 100, 2) : 0;
 
                 \App\Models\WawancaraAssessment::updateOrCreate(
-                    ['user_id' => $userId],
+                    [
+                        'user_id' => $userId,
+                        'date' => $selectedDate,
+                    ],
                     [
                         'program' => $program,
                         'umum' => $umum,
@@ -395,7 +410,6 @@ class PenilaianController extends Controller
                         'sum_sikap' => $sum_sikap,
                         'percent_sikap' => $percent_sikap,
                         'note_sikap' => $note_sikap,
-                        'date' => Carbon::now(),
                     ]
                 );
             }
@@ -413,6 +427,8 @@ class PenilaianController extends Controller
     {
         try {
             $selectedKelasId = session('selected_kelas_id');
+            $selectedDate = $request->input('date');
+
             if (!$selectedKelasId) {
                 return response()->json(['success' => false, 'message' => 'Kelas tidak terdeteksi.'], 400);
             }
@@ -421,7 +437,13 @@ class PenilaianController extends Controller
                 ->where('kelas_id', $selectedKelasId)
                 ->pluck('id');
 
-            \App\Models\WawancaraAssessment::whereIn('user_id', $studentIds)->delete();
+            $query = \App\Models\WawancaraAssessment::whereIn('user_id', $studentIds);
+            
+            if ($selectedDate) {
+                $query->where('date', $selectedDate);
+            }
+
+            $query->delete();
 
             return response()->json(['success' => true]);
         } catch (\Throwable $e) {
@@ -621,6 +643,7 @@ class PenilaianController extends Controller
         try {
             $payload = $request->input('students', []);
             $evaParam = $request->input('eva', '1');
+            $selectedDate = $request->input('date');
             $isFinal = ($evaParam === 'final');
 
             $lulus = 0;
@@ -634,7 +657,7 @@ class PenilaianController extends Controller
                 if ($isFinal) {
                     $scoreUjian = isset($s['ujian']) ? floatval($s['ujian']) : null;
                     $scoreNilai = isset($s['nilai']) ? floatval($s['nilai']) : null;
-                    $at = $s['at'] ?? null;
+                    $at = $selectedDate ?? ($s['at'] ?? null);
 
                     if ($scoreUjian !== null) $scoreUjian = max(0, min(100, $scoreUjian));
                     if ($scoreNilai !== null) $scoreNilai = max(0, min(100, $scoreNilai));
@@ -659,7 +682,7 @@ class PenilaianController extends Controller
                     $atField = "eval{$evaIndex}_at";
 
                     $score = isset($s['score']) ? floatval($s['score']) : null;
-                    $at = $s['at'] ?? null;
+                    $at = $selectedDate ?? ($s['at'] ?? null);
 
                     if ($score !== null) $score = max(0, min(100, $score));
 

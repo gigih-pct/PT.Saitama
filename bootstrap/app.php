@@ -11,6 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Ensure web middleware group includes session
+        $middleware->web(append: [
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
+        
         $middleware->alias([
             'student.approved' => \App\Http\Middleware\EnsureStudentApproved::class,
             'role' => \App\Http\Middleware\CheckRole::class,

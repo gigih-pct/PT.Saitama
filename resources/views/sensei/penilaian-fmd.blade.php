@@ -131,10 +131,10 @@
                                            data-week="{{ $week }}" placeholder="-" value="{{ $saved['week'.$week.'_val'] ?? '' }}">
                                 </td>
                                 <td class="px-2 py-4 border-r border-gray-100 text-center">
-                                    <select class="w-full bg-gray-100 border border-gray-200 rounded-lg text-xs font-medium py-1.5 focus:ring-0 cursor-not-allowed ket-input appearance-none" data-week="{{ $week }}" disabled>
+                                    <select class="w-full bg-gray-100 border border-gray-200 rounded-lg text-[10px] font-extrabold py-1.5 focus:ring-0 cursor-not-allowed ket-input appearance-none" data-week="{{ $week }}" disabled>
                                         <option value="TH">TH</option>
-                                        <option value="L">L</option>
-                                        <option value="TL">TL</option>
+                                        <option value="LULUS">LULUS</option>
+                                        <option value="TIDAK LULUS">TIDAK LULUS</option>
                                     </select>
                                 </td>
                                 <td class="px-2 py-4 border-r border-gray-100 text-center bg-gray-50/50">
@@ -368,9 +368,9 @@
             const num = parseFloat(val.replace(',', '.'));
             if (!isNaN(num)) {
                 if (num >= 37) {
-                    ketSelect.value = 'L';
+                    ketSelect.value = 'LULUS';
                 } else {
-                    ketSelect.value = 'TL';
+                    ketSelect.value = 'TIDAK LULUS';
                 }
             } else {
                 // Determine behavior for non-numeric other than "-"
@@ -384,10 +384,10 @@
         }
         
         // Update Score Display based on Ket
-        // =IF(kolommtk="L","1","0")
+        // =IF(kolommtk="LULUS","1","0")
         const scoreDisplay = row.querySelector(`.score-display[data-week="${week}"]`);
         if (scoreDisplay) {
-            scoreDisplay.textContent = (ketSelect.value === 'L') ? '1' : '0';
+            scoreDisplay.textContent = (ketSelect.value === 'LULUS') ? '1' : '0';
         }
     }
 

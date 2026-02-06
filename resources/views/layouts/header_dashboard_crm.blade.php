@@ -15,7 +15,7 @@
 <body class="bg-gray-50">
 
     <!-- HEADER -->
-    <header class="fixed top-0 left-0 w-full h-16 bg-[#173A67] flex items-center justify-between px-6 z-50 shadow-sm text-white">
+    <header class="fixed top-0 left-0 w-full h-16 bg-[#173A67] flex items-center justify-between px-6 z-[1000] shadow-sm text-white">
         <!-- Logo -->
         <div class="flex items-center gap-3">
             <img src="{{ asset('images/logo-saitama.png') }}" class="h-8 w-auto" alt="Logo">

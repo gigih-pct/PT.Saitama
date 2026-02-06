@@ -29,8 +29,8 @@ class FmdAssessmentSeeder extends Seeder
                 for ($w = 1; $w <= 5; $w++) {
                     // Random value (e.g., number of pushups or score)
                     $val = rand(20, 50);
-                    $ket = ($val >= 37) ? 'L' : 'TL';
-                    $score = ($ket === 'L') ? 1 : 0;
+                    $ket = ($val >= 37) ? 'LULUS' : 'TIDAK LULUS';
+                    $score = ($ket === 'LULUS') ? 1 : 0;
 
                     $data["week{$w}_val"] = $val;
                     $data["week{$w}_ket"] = $ket;

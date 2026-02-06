@@ -57,7 +57,7 @@ class EvaluasiController extends Controller
         $fmdScore = $fmdMtk ? round(($fmdMtk->total_score / 5) * 100) : 0; // Mock % based on 5 weeks
 
         // 3. Wawancara - Fetch from DB
-        $wawancaraAssessment = \App\Models\WawancaraAssessment::where('user_id', $id)->first();
+        $wawancaraAssessment = \App\Models\WawancaraAssessment::where('user_id', $id)->latest('date')->first();
         $wawancaraScore = $wawancaraAssessment->percent ?? 0;
 
         // 4. Nilai Akhir - Use FinalAssessment table

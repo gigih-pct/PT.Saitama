@@ -51,10 +51,9 @@
         </div>
     </div>
 
-    <!-- Profile Detail Modal -->
     <div x-show="showProfileModal" 
          x-cloak
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#173A67]/60 backdrop-blur-md"
+         class="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#173A67]/60 backdrop-blur-md"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
@@ -116,7 +115,7 @@
     <!-- Logout Confirmation Modal -->
     <div x-show="showLogoutModal" 
          x-cloak
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#173A67]/60 backdrop-blur-sm"
+         class="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#173A67]/60 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
@@ -132,14 +131,14 @@
                 <!-- Ya Button (Logout Form) -->
                 <form :action="logoutRoute" method="POST" class="flex-1">
                     @csrf
-                    <button type="submit" class="w-full bg-[#173A67] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-900 transition shadow-xl shadow-blue-100">
-                        Ya, Logout
+                    <button type="submit" class="w-full bg-[#0095DA] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition shadow-xl shadow-blue-100">
+                        Ya
                     </button>
                 </form>
                 
                 <!-- Tidak Button -->
-                <button @click="showLogoutModal = false" class="flex-1 bg-gray-50 text-gray-400 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition w-28">
-                    Batal
+                <button @click="showLogoutModal = false" class="flex-1 bg-[#D31F1F] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition">
+                    Tidak
                 </button>
             </div>
         </div>

@@ -65,6 +65,25 @@
         </div>
     </div>
 
+    <!-- DATE SELECTION SECTION -->
+    <div class="mb-6 z-10 relative">
+        <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100 flex items-center gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#173A67] border border-gray-100">
+                    <i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight mb-0.5">Tanggal Penilaian</p>
+                    <input type="date" id="assessment-date" 
+                           class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] focus:ring-0 cursor-pointer h-5 leading-none"
+                           value="{{ $selectedDate }}">
+                </div>
+            </div>
+            <div class="h-8 w-px bg-gray-200 mx-2"></div>
+            <p class="text-xs font-bold text-gray-400 italic">Data penilaian akan berpindah sesuai tanggal yang Anda pilih</p>
+        </div>
+    </div>
+
     <!-- MAIN GRID -->
     <div class="grid grid-cols-12 gap-8 flex-1">
         
@@ -575,7 +594,10 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ students })
+                body: JSON.stringify({ 
+                    students,
+                    date: document.getElementById('assessment-date').value
+                })
             });
             const res = await response.json();
             if (res.success) {
@@ -610,7 +632,10 @@
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
+                },
+                body: JSON.stringify({ 
+                    date: document.getElementById('assessment-date').value
+                })
             });
             const res = await response.json();
             if (res.success) {
@@ -626,6 +651,13 @@
             btn.disabled = false;
             lucide.createIcons();
         }
+    });
+
+    // Date change handler
+    document.getElementById('assessment-date').addEventListener('change', function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('date', this.value);
+        window.location.href = url.toString();
     });
 
 </script>
