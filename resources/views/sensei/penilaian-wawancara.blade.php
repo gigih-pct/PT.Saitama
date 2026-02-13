@@ -108,11 +108,11 @@
             <!-- TABLE MATERI -->
             <div id="content-materi" class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden flex-1 shadow-sm relative z-0 {{ $activeTab === 'materi' ? '' : 'hidden' }}">
                 <div class="wawancara-scroll overflow-auto max-h-[600px]">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-max min-w-full text-left border-collapse">
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30">No</th>
-                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest w-[250px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Program</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Umum</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Jepang</th>
@@ -132,13 +132,15 @@
                                 <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
                                             {{ substr($user->name, 0, 1) }}
                                         </div>
-                                        <input type="text" class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input" 
-                                               value="{{ $user->name }}" readonly>
+                                        <span class="text-sm font-bold text-[#173A67] whitespace-nowrap" title="{{ $user->name }}">
+                                            {{ $user->name }}
+                                        </span>
+                                        <input type="hidden" class="name-input" value="{{ $user->name }}">
                                     </div>
                                 </td>
                                 @php
@@ -186,11 +188,11 @@
             <!-- TABLE SIKAP -->
             <div id="content-sikap" class="bg-white border-2 border-gray-100 rounded-[2rem] overflow-hidden flex-1 shadow-sm relative z-0 {{ $activeTab === 'sikap' ? '' : 'hidden' }}">
                 <div class="wawancara-scroll overflow-auto max-h-[600px]">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-max min-w-full text-left border-collapse">
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30">No</th>
-                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest w-[250px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Cara Duduk</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Suara</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Fokus</th>
@@ -209,13 +211,15 @@
                                 <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
                                             {{ substr($user->name, 0, 1) }}
                                         </div>
-                                        <input type="text" class="bg-transparent border-none p-0 text-sm font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input" 
-                                               value="{{ $user->name }}" readonly>
+                                        <span class="text-sm font-bold text-[#173A67] whitespace-nowrap" title="{{ $user->name }}">
+                                            {{ $user->name }}
+                                        </span>
+                                        <input type="hidden" class="name-input" value="{{ $user->name }}">
                                     </div>
                                 </td>
                                 @php

@@ -10,23 +10,20 @@
         
         <!-- Enhanced Header Section -->
         <div class="bg-white px-10 py-7">
-            <div class="flex items-center justify-between mb-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <div>
                     <h1 class="text-[#1a1a1a] font-bold text-xl mb-0.5">Daftar Siswa</h1>
                     <p class="text-gray-400 text-[11px] font-medium uppercase tracking-wide">Manajemen Data Siswa & Kelas</p>
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <button class="bg-[#173A67] text-white px-5 py-2.5 rounded-xl text-xs font-black hover:bg-blue-900 hover:rotate-3 transition-all flex items-center gap-2 shadow-lg shadow-blue-900/10 uppercase tracking-widest active:scale-95">
+                    <button class="flex-1 sm:flex-none justify-center bg-[#173A67] text-white px-5 py-2.5 rounded-xl text-xs font-black hover:bg-blue-900 hover:rotate-3 transition-all flex items-center gap-2 shadow-lg shadow-blue-900/10 uppercase tracking-widest active:scale-95">
                         <i data-lucide="download" class="w-4 h-4"></i> Export
                     </button>
-                    <!-- <button class="bg-[#173A67] hover:bg-blue-900 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 shadow-lg shadow-blue-900/20">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Tambah Siswa
-                    </button> -->
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3">
                 <!-- Search Bar -->
                 <div class="relative flex-1">
                     <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -34,49 +31,51 @@
                 </div>
                 
                 <!-- Filter Dropdowns -->
-                <div class="relative min-w-[140px]">
-                    <select x-model="selectedStatus" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
-                        <option value="">Semua Status</option>
-                        <option value="Jepang">Jepang</option>
-                        <option value="seleksi">Seleksi</option>
-                        <option value="mau seleksi">Mau Seleksi</option>
-                        <option value="ulang kelas">Ulang Kelas</option>
-                        <option value="BLK">BLK</option>
-                        <option value="proses belajar">Proses Belajar</option>
-                        <option value="TG">TG</option>
-                        <option value="kerja">Kerja</option>
-                        <option value="keluar">Keluar</option>
-                        <option value="cuti">Cuti</option>
-                    </select>
-                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
-                </div>
-                
-                <div class="relative min-w-[140px]">
-                    <select x-model="selectedClass" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
-                        <option value="">Semua Kelas</option>
-                        <option value="A1">Kelas A1</option>
-                        <option value="A2">Kelas A2</option>
-                        <option value="A3">Kelas A3</option>
-                        <option value="B1">Kelas B1</option>
-                        <option value="B2">Kelas B2</option>
-                        <option value="B3">Kelas B3</option>
-                    </select>
-                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
-                </div>
-                
-                <div class="relative min-w-[100px]">
-                    <select x-model="perPage" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
-                        <option value="20">20 Item</option>
-                        <option value="50">50 Item</option>
-                        <option value="100">100 Item</option>
-                    </select>
-                    <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+                    <div class="relative flex-1 sm:min-w-[140px]">
+                        <select x-model="selectedStatus" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                            <option value="">Status</option>
+                            <option value="Jepang">Jepang</option>
+                            <option value="seleksi">Seleksi</option>
+                            <option value="mau seleksi">Mau Seleksi</option>
+                            <option value="ulang kelas">Ulang Kelas</option>
+                            <option value="BLK">BLK</option>
+                            <option value="proses belajar">Proses Belajar</option>
+                            <option value="TG">TG</option>
+                            <option value="kerja">Kerja</option>
+                            <option value="keluar">Keluar</option>
+                            <option value="cuti">Cuti</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                    </div>
+                    
+                    <div class="relative flex-1 sm:min-w-[140px]">
+                        <select x-model="selectedClass" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                            <option value="">Kelas</option>
+                            <option value="A1">Kelas A1</option>
+                            <option value="A2">Kelas A2</option>
+                            <option value="A3">Kelas A3</option>
+                            <option value="B1">Kelas B1</option>
+                            <option value="B2">Kelas B2</option>
+                            <option value="B3">Kelas B3</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                    </div>
+                    
+                    <div class="relative flex-none min-w-[100px]">
+                        <select x-model="perPage" class="w-full bg-[#F8FAFC] border-none rounded-2xl px-4 py-3 text-sm font-bold text-[#173A67] focus:ring-2 focus:ring-[#173A67]/20 appearance-none cursor-pointer">
+                            <option value="20">20 Item</option>
+                            <option value="50">50 Item</option>
+                            <option value="100">100 Item</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173A67] pointer-events-none opacity-50"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- TABLE HEADER -->
-        <div class="px-8 py-4 bg-gray-50 border-b border-gray-100">
+        <div class="px-8 py-4 bg-gray-50 border-b border-gray-100 hidden lg:block">
             <div class="flex items-center justify-between gap-8">
                 <div class="w-60 shrink-0">
                     <span class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Siswa</span>
@@ -99,44 +98,64 @@
             </div>
         </div>
 
-        <!-- LIST CONTENT -->
-        <div class="p-8 space-y-4 bg-[#F8FAFC]/50" x-init="$watch('searchSiswa', () => $nextTick(() => lucide.createIcons())); $watch('selectedStatus', () => $nextTick(() => lucide.createIcons())); $watch('selectedClass', () => $nextTick(() => lucide.createIcons())); $watch('perPage', () => $nextTick(() => lucide.createIcons())); lucide.createIcons();">
+        <div class="p-4 sm:p-8 space-y-4 bg-[#F8FAFC]/50" x-init="$watch('searchSiswa', () => $nextTick(() => lucide.createIcons())); $watch('selectedStatus', () => $nextTick(() => lucide.createIcons())); $watch('selectedClass', () => $nextTick(() => lucide.createIcons())); $watch('perPage', () => $nextTick(() => lucide.createIcons())); lucide.createIcons();">
             <template x-for="(student, index) in filteredStudents()" :key="index">
-                <div class="bg-white border border-gray-100 rounded-[2rem] px-8 py-5 flex items-center justify-between gap-8 hover:shadow-xl hover:shadow-blue-900/5 transition-all group border-b-4 border-b-transparent hover:border-b-blue-100">
+                <div class="bg-white border border-gray-100 rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:px-8 sm:py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-8 hover:shadow-xl hover:shadow-blue-900/5 transition-all group border-b-4 border-b-transparent hover:border-b-blue-100 relative">
                     <!-- Student Info -->
-                    <div class="flex items-center gap-5 w-60 shrink-0">
+                    <div class="flex items-center gap-5 lg:w-60 shrink-0">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#173A67] flex items-center justify-center text-sm font-extrabold shadow-sm group-hover:scale-110 transition-transform" x-text="student.name.charAt(0)"></div>
-                        <div class="font-extrabold text-[#173A67] text-base truncate" x-text="student.name"></div>
+                        <div class="font-extrabold text-[#173A67] text-base truncate flex-1" x-text="student.name"></div>
+                        
+                        <!-- Mobile View Detail Link (Top Right) -->
+                        <a :href="'/sensei/evaluasi/siswa/' + student.id" class="lg:hidden w-10 h-10 rounded-xl bg-[#173A67] text-white flex items-center justify-center active:scale-95 shadow-lg shadow-blue-900/10">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </a>
                     </div>
                     
-                    <!-- Batch -->
-                    <button @click="openBatchModal(student)" class="bg-gray-50 px-5 py-2.5 rounded-2xl font-extrabold text-[11px] text-gray-400 hover:bg-blue-50 hover:text-[#173A67] transition-all uppercase tracking-widest border border-transparent hover:border-blue-100">
-                        <span x-text="student.angkatan"></span>
-                    </button>
-                    
-                    <!-- Contacts -->
-                    <div class="flex gap-2">
-                        <button @click="showContactModal = true; contactTitle = 'Kontak Siswa'; contactNumbers = student.contacts.siswa" class="w-9 h-9 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 hover:rotate-12 transition-all shadow-lg shadow-green-500/20 active:scale-90" title="Kontak Siswa">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i>
-                        </button>
-                        <button @click="showContactModal = true; contactTitle = 'Kontak Orang Tua'; contactNumbers = student.contacts.ortu" class="w-9 h-9 rounded-xl bg-[#D85B63] text-white flex items-center justify-center hover:bg-red-600 hover:rotate-12 transition-all shadow-lg shadow-red-600/10 active:scale-90" title="Kontak Orang Tua">
-                            <i data-lucide="users" class="w-4 h-4"></i>
-                        </button>
-                    </div>
+                    <div class="grid grid-cols-2 lg:flex lg:flex-row lg:items-center gap-4 lg:gap-8 flex-1">
+                        <!-- Batch -->
+                        <div class="flex flex-col gap-1.5 lg:w-32 lg:shrink-0">
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest lg:hidden">Angkatan</span>
+                            <button @click="openBatchModal(student)" class="bg-gray-50 px-5 py-2.5 rounded-2xl font-extrabold text-[11px] text-gray-400 hover:bg-blue-50 hover:text-[#173A67] transition-all uppercase tracking-widest border border-transparent hover:border-blue-100 w-full lg:w-auto text-center">
+                                <span x-text="student.angkatan"></span>
+                            </button>
+                        </div>
+                        
+                        <!-- Contacts -->
+                        <div class="flex flex-col gap-1.5 lg:flex-row lg:items-center">
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest lg:hidden">Kontak</span>
+                            <div class="flex gap-2">
+                                <button @click="showContactModal = true; contactTitle = 'Kontak Siswa'; contactNumbers = student.contacts.siswa" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 hover:rotate-12 transition-all shadow-lg shadow-green-500/20 active:scale-90" title="Kontak Siswa">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                </button>
+                                <button @click="showContactModal = true; contactTitle = 'Kontak Orang Tua'; contactNumbers = student.contacts.ortu" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#D85B63] text-white flex items-center justify-center hover:bg-red-600 hover:rotate-12 transition-all shadow-lg shadow-red-600/10 active:scale-90" title="Kontak Orang Tua">
+                                    <i data-lucide="users" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
 
-                    <!-- Follow Up -->
-                    <div class="flex items-center gap-3 bg-gray-50 px-5 py-2.5 rounded-2xl text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] border border-transparent group-hover:border-blue-100 group-hover:bg-blue-50/50 transition-all">
-                        <span class="opacity-40">FU 1:</span>
-                        <span class="text-[#173A67]" x-text="student.fuDate"></span>
-                        <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
-                    </div>
+                        <!-- Follow Up -->
+                        <div class="flex flex-col gap-1.5 lg:w-40 lg:shrink-0 lg:flex-none">
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest lg:hidden">Follow Up</span>
+                            <div class="flex items-center gap-3 bg-gray-50 px-5 py-2.5 rounded-2xl text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] border border-transparent group-hover:border-blue-100 group-hover:bg-blue-50/50 transition-all">
+                                <span class="opacity-40">FU 1:</span>
+                                <span class="text-[#173A67]" x-text="student.fuDate"></span>
+                                <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
+                            </div>
+                        </div>
 
-                    <!-- Statuses -->
-                        <button @click="openFUModal(student)" :class="student.status1Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none shadow-sm border border-transparent'" x-text="student.status1"></button>
-                        <button @click="openStatusModal(student)" :class="student.status2Color + ' text-[10px] font-extrabold px-6 py-2.5 rounded-2xl w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.status2"></button>
+                        <!-- Statuses -->
+                        <div class="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:w-64 lg:shrink-0 lg:flex-none gap-2">
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest lg:hidden">Status</span>
+                            <div class="flex gap-2 w-full lg:w-auto">
+                                <button @click="openFUModal(student)" :class="student.status1Color + ' text-[9px] sm:text-[10px] font-extrabold px-3 sm:px-6 py-2.5 rounded-2xl flex-1 lg:w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none shadow-sm border border-transparent'" x-text="student.status1"></button>
+                                <button @click="openStatusModal(student)" :class="student.status2Color + ' text-[9px] sm:text-[10px] font-extrabold px-3 sm:px-6 py-2.5 rounded-2xl flex-1 lg:w-32 hover:translate-y-[-2px] hover:shadow-md transition-all uppercase tracking-widest leading-none border border-transparent'" x-text="student.status2"></button>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <!-- Detail Action -->
-                    <a :href="'/sensei/evaluasi/siswa/' + student.id" class="w-12 h-12 rounded-2xl bg-[#173A67] text-white flex items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
+                    <!-- Desktop Detail Action -->
+                    <a :href="'/sensei/evaluasi/siswa/' + student.id" class="hidden lg:flex w-12 h-12 rounded-2xl bg-[#173A67] text-white items-center justify-center hover:bg-blue-900 hover:rotate-12 transition-all shadow-lg shadow-blue-900/10 active:scale-90">
                         <i data-lucide="eye" class="w-6 h-6"></i>
                     </a>
                 </div>
@@ -145,24 +164,24 @@
     </div>
 
     <!-- PAGINATION -->
-    <div class="flex items-center justify-between mt-10">
-        <div class="flex items-center gap-4">
-            <button class="bg-white border border-gray-100 hover:bg-gray-50 text-[#173A67] px-8 py-3 text-xs font-extrabold rounded-2xl transition-all shadow-sm active:scale-95 flex items-center gap-2.5 uppercase tracking-widest">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Prev
+    <div class="flex flex-col lg:flex-row items-center justify-between mt-10 gap-6">
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <button class="bg-white border border-gray-100 hover:bg-gray-50 text-[#173A67] px-6 sm:px-8 py-3 text-xs font-extrabold rounded-2xl transition-all shadow-sm active:scale-95 flex items-center gap-2.5 uppercase tracking-widest">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> <span class="hidden sm:inline">Prev</span>
             </button>
             <div class="flex gap-2">
-                <span class="bg-[#173A67] text-white w-12 h-12 flex items-center justify-center rounded-2xl text-xs font-extrabold shadow-xl shadow-blue-900/10">1</span>
-                <span class="bg-white border border-gray-100 text-gray-400 w-12 h-12 flex items-center justify-center rounded-2xl text-xs font-bold hover:bg-gray-50 cursor-pointer transition-all uppercase">2</span>
-                <span class="bg-white border border-gray-100 text-gray-400 w-12 h-12 flex items-center justify-center rounded-2xl text-xs font-bold hover:bg-gray-50 cursor-pointer transition-all uppercase">3</span>
-                <span class="w-12 h-12 flex items-center justify-center text-gray-300 font-bold uppercase tracking-widest">...</span>
-                <span class="bg-white border border-gray-100 text-gray-400 w-12 h-12 flex items-center justify-center rounded-2xl text-xs font-bold hover:bg-gray-50 cursor-pointer transition-all uppercase">68</span>
+                <span class="bg-[#173A67] text-white w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl text-xs font-extrabold shadow-xl shadow-blue-900/10">1</span>
+                <span class="bg-white border border-gray-100 text-gray-400 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl text-xs font-bold hover:bg-gray-50 cursor-pointer transition-all uppercase">2</span>
+                <span class="hidden sm:flex bg-white border border-gray-100 text-gray-400 w-12 h-12 items-center justify-center rounded-2xl text-xs font-bold hover:bg-gray-50 cursor-pointer transition-all uppercase">3</span>
+                <span class="w-8 sm:w-12 h-10 sm:h-12 flex items-center justify-center text-gray-300 font-bold uppercase tracking-widest">...</span>
+                <span class="bg-white border border-gray-100 text-gray-400 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl text-xs font-bold hover:bg-gray-50 cursor-pointer transition-all uppercase">68</span>
             </div>
-            <button class="bg-white border border-gray-100 hover:bg-gray-50 text-[#173A67] px-8 py-3 text-xs font-extrabold rounded-2xl transition-all shadow-sm active:scale-95 flex items-center gap-2.5 uppercase tracking-widest">
-                Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            <button class="bg-white border border-gray-100 hover:bg-gray-50 text-[#173A67] px-6 sm:px-8 py-3 text-xs font-extrabold rounded-2xl transition-all shadow-sm active:scale-95 flex items-center gap-2.5 uppercase tracking-widest">
+                <span class="hidden sm:inline">Next</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </button>
         </div>
-        <div class="bg-blue-50 text-[#173A67] px-8 py-3 rounded-2xl text-[11px] font-extrabold uppercase tracking-[0.2em] border border-blue-100 shadow-sm">
-            50 Siswa / Halaman
+        <div class="bg-blue-50 text-[#173A67] px-8 py-3 rounded-2xl text-[11px] font-extrabold uppercase tracking-[0.2em] border border-blue-100 shadow-sm text-center">
+            <span x-text="perPage"></span> Siswa / Halaman
         </div>
     </div>
 

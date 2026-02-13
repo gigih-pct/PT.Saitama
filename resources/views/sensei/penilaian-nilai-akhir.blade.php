@@ -98,7 +98,7 @@
                     <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                         <tr>
                             <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30 border-r border-blue-800">No</th>
-                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest min-w-[250px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest w-[250px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
                             
                             @foreach($subjects as $subj)
                             <th colspan="2" class="px-2 py-3 font-bold text-[10px] text-center uppercase tracking-wider border-r border-blue-800 bg-[#1e4b85]">
@@ -108,8 +108,8 @@
                             
                             <th rowspan="2" class="px-2 py-2 font-bold text-[10px] text-center w-16 border-r border-blue-800 uppercase bg-[#173A67]">Sikap</th>
                             <th rowspan="2" class="px-2 py-2 font-bold text-[10px] text-center w-16 border-r border-blue-800 uppercase bg-[#173A67]">Hadir</th>
-                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky right-16 bg-[#173A67] z-30 border-l border-blue-800 shadow-xl">Rata-Rata</th>
-                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky right-0 bg-[#173A67] z-30 border-l border-blue-800">Grade</th>
+                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky right-20 bg-[#173A67] z-30 border-l border-blue-800 shadow-xl">Rata-Rata</th>
+                            <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky right-0 bg-[#173A67] z-30 border-l border-blue-800 w-20">Grade</th>
                         </tr>
                         <tr>
                             @foreach($subjects as $subj)
@@ -125,13 +125,15 @@
                             <td class="px-4 py-3 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
                                 {{ $idx + 1 }}
                             </td>
-                            <td class="px-6 py-3 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] min-w-[250px]">
+                            <td class="px-6 py-3 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
                                 <div class="flex items-center gap-3">
                                     <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                         {{ substr($user->name, 0, 1) }}
                                     </div>
-                                    <input type="text" class="bg-transparent border-none p-0 text-xs font-bold text-[#173A67] w-full focus:ring-0 cursor-default name-input truncate" 
-                                           value="{{ $user->name }}" readonly>
+                                    <span class="text-xs font-bold text-[#173A67] whitespace-nowrap" title="{{ $user->name }}">
+                                        {{ $user->name }}
+                                    </span>
+                                    <input type="hidden" class="name-input" value="{{ $user->name }}">
                                 </div>
                             </td>
 
@@ -158,10 +160,10 @@
                                 </div>
                             </td>
 
-                            <td class="px-4 py-3 text-center font-black text-[#173A67] bg-white group-hover:bg-blue-50/30 sticky right-16 z-10 border-l border-gray-100 shadow-[-4px_0_12px_-4px_rgba(0,0,0,0.05)]">
+                            <td class="px-4 py-3 text-center font-black text-[#173A67] bg-white group-hover:bg-blue-50/30 sticky right-20 z-10 border-l border-gray-100 shadow-[-4px_0_12px_-4px_rgba(0,0,0,0.05)]">
                                 <span class="final-avg" data-row="{{ $idx }}">{{ $saved['rata_rata'] ?? '-' }}</span>
                             </td>
-                            <td class="px-4 py-3 text-center font-black bg-white group-hover:bg-blue-50/30 sticky right-0 z-10 border-l border-gray-100 text-white">
+                            <td class="px-4 py-3 text-center font-black bg-white group-hover:bg-blue-50/30 sticky right-0 z-10 border-l border-gray-100 text-white w-20">
                                 <span class="px-2 py-1 rounded-lg bg-gray-400 text-[10px] final-grade" data-row="{{ $idx }}">{{ $saved['grade'] ?? '-' }}</span>
                             </td>
                         </tr>

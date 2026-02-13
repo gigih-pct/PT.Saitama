@@ -18,8 +18,8 @@
 }" class="flex items-center gap-4 relative">
     
     <!-- User Profile Trigger -->
-    <div class="flex items-center gap-3 cursor-pointer group" @click="showProfileDropdown = !showProfileDropdown">
-        <span class="font-medium text-sm text-white group-hover:text-blue-200 transition-colors" x-text="userName"></span>
+    <div class="flex items-center gap-2 sm:gap-3 cursor-pointer group" @click="showProfileDropdown = !showProfileDropdown">
+        <span class="hidden sm:block font-medium text-sm text-white group-hover:text-blue-200 transition-colors" x-text="userName"></span>
         <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold text-white group-hover:bg-white/30 transition-all border border-white/10 shadow-sm" x-text="userInitial"></div>
     </div>
 

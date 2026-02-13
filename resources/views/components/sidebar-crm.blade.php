@@ -1,5 +1,8 @@
+<!-- Mobile Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden transition-opacity"></div>
+
 <!-- Elegant & Simple Sidebar for CRM -->
-<aside class="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] bg-white border-r border-gray-200 z-40 flex flex-col">
+<aside class="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] bg-white border-r border-gray-200 z-40 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
     
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-6 space-y-1">
