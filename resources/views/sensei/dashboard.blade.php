@@ -152,6 +152,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- CHART SECTION (Row 2) -->
@@ -170,7 +171,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 @push('scripts')

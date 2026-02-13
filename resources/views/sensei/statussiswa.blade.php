@@ -187,11 +187,11 @@
 
     <!-- WHATSAPP CONTACT MODAL -->
     <div x-show="showContactModal" 
-         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
-        <div class="bg-white rounded-[2.5rem] p-10 w-[480px] shadow-2xl transform transition-all border border-gray-100"
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-10 w-full max-w-[480px] shadow-2xl transform transition-all border border-gray-100"
              @click.away="showContactModal = false">
             <div class="text-center relative">
                 <button @click="showContactModal = false" class="absolute -top-4 -right-4 text-gray-400 hover:text-[#173A67] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -218,11 +218,11 @@
 
     <!-- CLASS SELECTION MODAL -->
     <div x-show="showClassModal" 
-         class="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+         class="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
-        <div class="bg-white rounded-[2.5rem] p-10 w-[420px] shadow-2xl transform transition-all border border-gray-100"
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-10 w-full max-w-[420px] shadow-2xl transform transition-all border border-gray-100"
              @click.away="showClassModal = false">
             <div class="flex flex-col items-center gap-8 relative text-center">
                 <button @click="showClassModal = false" class="absolute -top-4 -right-4 text-gray-400 hover:text-[#173A67] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -253,11 +253,11 @@
 
     <!-- BATCH SELECTION MODAL -->
     <div x-show="showBatchModal" 
-         class="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+         class="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
-        <div class="bg-white rounded-[2.5rem] p-10 w-[420px] shadow-2xl transform transition-all border border-gray-100"
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-10 w-full max-w-[420px] shadow-2xl transform transition-all border border-gray-100"
              @click.away="showBatchModal = false">
             <div class="flex flex-col items-center gap-8 relative text-center">
                 <button @click="showBatchModal = false" class="absolute -top-4 -right-4 text-gray-400 hover:text-[#173A67] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -288,11 +288,11 @@
 
     <!-- STUDENT STATUS MODAL -->
     <div x-show="showStatusModal" 
-         class="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+         class="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
-        <div class="bg-white rounded-[2.5rem] p-10 w-[450px] shadow-2xl transform transition-all border border-gray-100"
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-10 w-full max-w-[450px] shadow-2xl transform transition-all border border-gray-100"
              @click.away="showStatusModal = false">
             <div class="flex flex-col items-center gap-8 relative">
                 <button @click="showStatusModal = false" class="absolute -top-4 -right-4 text-gray-400 hover:text-[#173A67] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -315,11 +315,11 @@
 
     <!-- FOLLOW UP STATUS MODAL -->
     <div x-show="showFUModal" 
-         class="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+         class="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100">
-        <div class="bg-white rounded-[2.5rem] p-10 w-[450px] shadow-2xl transform transition-all border border-gray-100"
+        <div class="bg-white rounded-[2.5rem] p-6 sm:p-10 w-full max-w-[450px] shadow-2xl transform transition-all border border-gray-100"
              @click.away="showFUModal = false">
             <div class="flex flex-col items-center gap-8 relative">
                 <button @click="showFUModal = false" class="absolute -top-4 -right-4 text-gray-400 hover:text-[#173A67] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
