@@ -97,7 +97,7 @@
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
                                 <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest w-16 text-center">No</th>
-                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest">Nama Siswa</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest min-w-[250px]">Nama Siswa</th>
                                 <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-32">Benar</th>
                                 <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-32">Nilai</th>
                                 <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center w-40">Tanggal</th>
@@ -114,7 +114,7 @@
                                     <td class="px-6 py-4 text-center font-bold text-gray-400 text-xs">
                                         {{ $idx + 1 }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 min-w-[250px]">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
                                                 {{ substr($user->name, 0, 1) }}

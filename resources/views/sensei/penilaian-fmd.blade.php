@@ -92,7 +92,7 @@
                     <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                         <tr>
                             <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky left-0 bg-[#173A67] z-30 w-16 border-r border-blue-800">No</th>
-                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 min-w-[200px] border-r border-blue-800 shadow-xl">Nama Siswa</th>
+                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 min-w-[250px] border-r border-blue-800 shadow-xl">Nama Siswa</th>
                             @foreach($weeks as $week)
                             <th colspan="3" class="px-4 py-2 font-bold text-[10px] text-center uppercase tracking-wider border-r border-blue-800 bg-[#1e4b85]">
                                 Minggu {{ $week }}
@@ -115,7 +115,7 @@
                                 <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-5 sticky left-16 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                <td class="px-6 py-5 sticky left-16 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] min-w-[250px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                             {{ substr($user->name, 0, 1) }}
