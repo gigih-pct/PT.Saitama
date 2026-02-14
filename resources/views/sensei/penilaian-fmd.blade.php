@@ -92,13 +92,13 @@
                     <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                         <tr>
                             <th rowspan="2" class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky left-0 bg-[#173A67] z-30 w-16 border-r border-blue-800">No</th>
-                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 w-[250px] border-r border-blue-800 shadow-xl">Nama Siswa</th>
+                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest min-w-[200px] border-r border-blue-800 shadow-xl">Nama Siswa</th>
                             @foreach($weeks as $week)
                             <th colspan="3" class="px-4 py-2 font-bold text-[10px] text-center uppercase tracking-wider border-r border-blue-800 bg-[#1e4b85]">
                                 Minggu {{ $week }}
                             </th>
                             @endforeach
-                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center bg-[#173A67] border-l border-blue-800 sticky right-0 z-30">Total</th>
+                            <th rowspan="2" class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest text-center bg-[#173A67] border-l border-blue-800">Total</th>
                         </tr>
                         <tr>
                             @foreach($weeks as $week)
@@ -111,11 +111,11 @@
                     <tbody class="divide-y divide-gray-100 bg-white">
                          @forelse($users as $idx => $user)
                             @php $saved = $savedScores[$user->id] ?? []; @endphp
-                            <tr class="group hover:bg-blue-50/30 transition-colors student-row" data-id="{{ $user->id }}">
+                            <tr class="group student-row" data-id="{{ $user->id }}">
                                 <td class="px-4 py-5 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-5 sticky left-16 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
+                                <td class="px-6 py-5 bg-white border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] min-w-[200px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                             {{ substr($user->name, 0, 1) }}
@@ -144,7 +144,7 @@
                                 </td>
                                 @endforeach
                                 
-                                <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50 sticky right-0">
+                                <td class="px-4 py-4 text-center font-black text-blue-600 bg-blue-50">
                                     <span class="total-score">{{ $saved['total_score'] ?? 0 }}</span>
                                 </td>
                             </tr>

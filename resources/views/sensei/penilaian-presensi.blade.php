@@ -108,8 +108,8 @@
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
                                 <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest text-center sticky left-0 bg-[#173A67] z-30 w-16 border-r border-blue-800">No</th>
-                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-16 bg-[#173A67] z-30 w-[250px] border-r border-blue-800 shadow-xl">Nama Siswa</th>
-                                <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest sticky left-[314px] bg-[#173A67] z-30 min-w-[140px] border-r border-blue-800 shadow-xl">No. Telp</th>
+                                <th class="px-6 py-4 font-extrabold text-xs uppercase tracking-widest min-w-[200px] bg-[#173A67] border-r border-blue-800 shadow-xl">Nama Siswa</th>
+                                <th class="px-4 py-4 font-extrabold text-xs uppercase tracking-widest bg-[#173A67] z-30 min-w-[140px] border-r border-blue-800 shadow-xl">No. Telp</th>
                                 @foreach($days as $day)
                                 <th class="px-1 py-2 font-bold text-xs text-center w-10 border-r border-blue-800/30">
                                     <div class="flex flex-col items-center gap-1">
@@ -144,7 +144,7 @@
                                     <td class="px-4 py-3 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                         {{ $idx + 1 }}
                                     </td>
-                                    <td class="px-6 py-3 sticky left-16 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
+                                    <td class="px-6 py-3 bg-white border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] min-w-[200px]">
                                         <div class="flex items-center gap-3">
                                             <div class="w-6 h-6 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-[10px]">
                                                 {{ substr($user->name, 0, 1) }}
@@ -155,7 +155,7 @@
                                             <input type="hidden" class="name-input" value="{{ $user->name }}" data-id="{{ $user->id }}">
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 sticky left-[314px] bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
+                                    <td class="px-4 py-3 bg-white z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)]">
                                         <input type="text" class="bg-transparent border-none p-0 text-xs font-medium text-gray-500 w-full focus:ring-0 phone-input" 
                                                value="{{ $savedPhone }}">
                                     </td>
@@ -462,7 +462,7 @@
     function renderIcon(btn, status) {
         status = (status || '').toUpperCase();
         btn.dataset.status = status;
-        let html = '<span class="w-8 h-8 rounded-xl bg-gray-100/50 border border-gray-200 block transition-all"></span>'; // default clearer empty state
+        let html = '<span class="w-8 h-8 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300 block transition-all"></span>'; // default clearer empty state
         
         if(status === 'H') html = '<span class="w-full h-full rounded-xl bg-green-500 shadow-md shadow-green-200 flex items-center justify-center text-white scale-110 transition-transform"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
         else if(status === 'A') html = '<span class="w-full h-full rounded-xl bg-red-500 shadow-md shadow-red-200 flex items-center justify-center text-white font-black text-sm scale-110 transition-transform">A</span>';

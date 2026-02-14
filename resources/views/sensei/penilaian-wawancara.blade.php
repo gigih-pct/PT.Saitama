@@ -111,8 +111,8 @@
                     <table class="w-max min-w-full text-left border-collapse">
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
-                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30">No</th>
-                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest w-[250px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30 border-r border-blue-800">No</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px] bg-[#173A67] shadow-xl border-r border-blue-800">Nama Siswa</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Program</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Umum</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Jepang</th>
@@ -128,11 +128,11 @@
                             @php
                                 $saved = $savedScores[$user->id] ?? null;
                             @endphp
-                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-materi" data-id="{{ $user->id }}">
-                                <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                            <tr class="group student-row-materi" data-id="{{ $user->id }}">
+                                <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
+                                <td class="px-6 py-4 bg-white border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] min-w-[200px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
                                             {{ substr($user->name, 0, 1) }}
@@ -191,8 +191,8 @@
                     <table class="w-max min-w-full text-left border-collapse">
                         <thead class="bg-[#173A67] text-white sticky top-0 z-20">
                             <tr>
-                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30">No</th>
-                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest w-[250px] sticky left-16 bg-[#173A67] z-30 shadow-xl border-r border-blue-800">Nama Siswa</th>
+                                <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center w-16 sticky left-0 bg-[#173A67] z-30 border-r border-blue-800">No</th>
+                                <th class="px-6 py-5 font-extrabold text-xs uppercase tracking-widest min-w-[200px] bg-[#173A67] shadow-xl border-r border-blue-800">Nama Siswa</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Cara Duduk</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Suara</th>
                                 <th class="px-4 py-5 font-extrabold text-xs uppercase tracking-widest text-center">Fokus</th>
@@ -207,11 +207,11 @@
                             @php
                                 $saved = $savedScores[$user->id] ?? null;
                             @endphp
-                            <tr class="group hover:bg-blue-50/30 transition-colors student-row-sikap" data-id="{{ $user->id }}">
-                                <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100">
+                            <tr class="group student-row-sikap" data-id="{{ $user->id }}">
+                                <td class="px-4 py-4 text-center font-bold text-gray-400 text-xs sticky left-0 bg-white z-10 border-r border-gray-100">
                                     {{ $idx + 1 }}
                                 </td>
-                                <td class="px-6 py-4 sticky left-16 bg-white group-hover:bg-blue-50/30 z-10 border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] w-[250px]">
+                                <td class="px-6 py-4 bg-white border-r border-gray-100 shadow-[4px_0_24px_-10px_rgba(0,0,0,0.1)] min-w-[200px]">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 text-[#173A67] flex items-center justify-center font-bold text-xs">
                                             {{ substr($user->name, 0, 1) }}
