@@ -136,10 +136,10 @@
                 <img src="{{ asset('images/logo-saitama.png') }}" class="w-12 h-12 brightness-0 invert opacity-90" alt="Logo">
             </div>
             <h1 class="text-5xl md:text-7xl font-extrabold tracking-tighter title-gradient mb-6">
-                SAITAMA PORTAL
+                SAITAMA PORTAL (TERBARU)
             </h1>
             <p class="text-slate-400 text-lg md:text-xl font-medium max-w-xl mx-auto leading-relaxed">
-                Pilih akses portal Anda untuk mengelola sistem pendidikan mandiri yang terintegrasi.
+                Pilih akses portal Anda untuk mengelola sistem pendidikan mandiri yang terintegrasi (Versi 2.0).
             </p>
         </header>
 
