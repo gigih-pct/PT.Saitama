@@ -114,21 +114,8 @@
             </div>
 
             <div class="space-y-2">
-                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Kode Keamanan</label>
-                <div class="flex gap-3">
-                    <div class="relative group flex-1">
-                        <i data-lucide="shield-alert" class="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#173A67] transition-colors"></i>
-                        <input name="captcha" type="text" required
-                               class="w-full bg-white border border-gray-100 rounded-2xl pl-13 pr-5 py-4.5 text-sm font-bold text-[#173A67] focus:ring-4 focus:ring-[#173A67]/5 focus:border-[#173A67]/20 transition-all placeholder:text-gray-300 shadow-sm"
-                               placeholder="Masukkan kode captcha">
-                    </div>
-                    <div class="flex items-center gap-2">
-                         <span class="captcha-img"><img src="{{ url('captcha/flat?' . time() . rand(1000,9999)) }}"></span>
-                         <button type="button" class="btn-reload bg-gray-100 p-3 rounded-xl hover:bg-gray-200 transition-colors" title="Reload Captcha" data-captcha-url="{{ route('captcha.reload') }}">
-                            <i data-lucide="refresh-cw" class="w-4 h-4 text-gray-600"></i>
-                         </button>
-                    </div>
-                </div>
+                <label class="text-[11px] font-extrabold text-[#173A67]/40 uppercase tracking-widest ml-1">Verifikasi Keamanan</label>
+                <div class="cf-turnstile" data-sitekey="{{ config('turnstile.site_key') }}" data-theme="light"></div>
             </div>
 
             <div class="flex items-center gap-3 px-1">
@@ -153,47 +140,7 @@
 <script>
     lucide.createIcons();
 </script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        const reloadBtn = document.querySelector('.btn-reload');
-        const captchaImg = document.querySelector('.captcha-img');
 
-        if (reloadBtn && captchaImg) {
-            reloadBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                // Visual feedback
-                reloadBtn.classList.add('opacity-50', 'pointer-events-none');
-                const originalContent = reloadBtn.innerHTML;
-                
-                // Get URL from data attribute
-                const url = this.getAttribute('data-captcha-url');
-                
-                // Add timestamp to prevent caching
-                const freshUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 't=' + new Date().getTime();
-
-                fetch(freshUrl, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(response => {
-                        if (!response.ok) throw new Error('HTTP Error ' + response.status + ': ' + response.statusText);
-                        return response.json();
-                    })
-                    .then(data => {
-                        captchaImg.innerHTML = data.captcha;
-                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
-                    })
-                    .catch(error => {
-                        console.error('Error reloading captcha:', error);
-                        alert('Gagal: ' + error.message);
-                        reloadBtn.classList.remove('opacity-50', 'pointer-events-none');
-                    });
-            });
-        }
-    });
-</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>

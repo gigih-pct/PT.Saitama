@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TurnstileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,10 +18,16 @@ class KeuanganAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admins,email',
             'password' => 'required|string|min:6|confirmed',
-            'captcha' => 'required|captcha',
+            'cf-turnstile-response' => 'required',
         ];
 
         $data = $request->validate($rules);
+
+        // Verify Turnstile
+        $turnstile = new TurnstileService();
+        if (!$turnstile->verify($request->input('cf-turnstile-response'), $request->ip())) {
+            return back()->withErrors(['captcha' => 'Verifikasi keamanan gagal. Silakan coba lagi.'])->withInput();
+        }
 
         $admin = \App\Models\Admin::create([
             'name' => $data['name'],
@@ -36,15 +43,20 @@ class KeuanganAuthController extends Controller
 
     public function loginPost(Request $request)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
-            'captcha' => 'required|captcha',
+            'cf-turnstile-response' => 'required',
         ]);
 
-        $remember = $request->boolean('remember');
+        // Verify Turnstile
+        $turnstile = new TurnstileService();
+        if (!$turnstile->verify($request->input('cf-turnstile-response'), $request->ip())) {
+            return back()->withErrors(['captcha' => 'Verifikasi keamanan gagal. Silakan coba lagi.'])->withInput();
+        }
 
-        unset($credentials['captcha']);
+        $credentials = $request->only(['email', 'password']);
+        $remember = $request->boolean('remember');
 
         if (Auth::guard('keuangan')->attempt($credentials, $remember)) {
             $user = Auth::guard('keuangan')->user();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TurnstileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -13,18 +14,23 @@ class KaryawanAuthController extends Controller
 {
     public function registerStore(Request $request)
     {
-        $rules = [
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admins,email',
             'password' => 'required|string|min:6|confirmed',
-        ];
+            'cf-turnstile-response' => 'required',
+        ]);
 
-        $data = $request->validate($rules);
+        // Verify Turnstile
+        $turnstile = new TurnstileService();
+        if (!$turnstile->verify($request->input('cf-turnstile-response'), $request->ip())) {
+            return back()->withErrors(['captcha' => 'Verifikasi keamanan gagal. Silakan coba lagi.'])->withInput();
+        }
 
         $admin = \App\Models\Admin::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
             'role' => 'karyawan',
         ]);
 
@@ -35,11 +41,19 @@ class KaryawanAuthController extends Controller
 
     public function loginPost(Request $request)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'cf-turnstile-response' => 'required',
         ]);
 
+        // Verify Turnstile
+        $turnstile = new TurnstileService();
+        if (!$turnstile->verify($request->input('cf-turnstile-response'), $request->ip())) {
+            return back()->withErrors(['captcha' => 'Verifikasi keamanan gagal. Silakan coba lagi.'])->withInput();
+        }
+
+        $credentials = $request->only(['email', 'password']);
         $remember = $request->boolean('remember');
 
         if (Auth::guard('karyawan')->attempt($credentials, $remember)) {
