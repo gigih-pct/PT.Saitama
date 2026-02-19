@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/sewudala/public_html
+    - export DEPLOYPATH=/home/they9636/public_html/thedarkandbright.space
     - /bin/cp -R * $DEPLOYPATH
